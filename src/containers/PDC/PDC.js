@@ -182,6 +182,7 @@ const PDC = () => {
   const handleChangeComponent = () => {
     setShowPDCCustomQRGenerator(!showPDCCustomQRGenerator);
   };
+  
   return (
     <div>
       {/* PDC Table */}
