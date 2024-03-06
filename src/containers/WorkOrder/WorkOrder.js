@@ -188,6 +188,10 @@ const WorkOrder = () => {
       "_blank"
     );
   };
+  // To prevent submission when search query
+  const handleFormSubmit = (event) => {
+    event.preventDefault();
+  };
 
   return (
     <div>
@@ -200,7 +204,7 @@ const WorkOrder = () => {
           </p>
           <div className="flex items-center">
             {/* Search Function */}
-            <form className="p-1 flex-grow">
+            <form className="p-1 flex-grow" onSubmit={handleFormSubmit}>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <svg

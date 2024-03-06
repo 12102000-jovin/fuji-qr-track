@@ -5,6 +5,7 @@ import moment from "moment-timezone";
 const PanelComponentForm = (panelId) => {
   const [switchValue, setSwitchValue] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [successfulMessage, setSuccessfulMessage] = useState("");
 
   const AllocatePanel_API =
     "http://localhost:3001/Allocate/AllocatePanelComponent";
@@ -26,10 +27,16 @@ const PanelComponentForm = (panelId) => {
 
       //Handle the response
       console.log(response.data);
+
+      // Clear error message if successful
+      setErrorMessage("");
+      setSuccessfulMessage("Component Allocated to Panel successfully");
     } catch (error) {
       if (error.response) {
+        setSuccessfulMessage("");
         setErrorMessage(error.response.data.message || "Internal Server Error");
       } else {
+        setSuccessfulMessage("");
         setErrorMessage("Error making the request");
       }
     }
@@ -41,6 +48,16 @@ const PanelComponentForm = (panelId) => {
         <div className="flex justify-start text-3xl font-black ">
           Panel Components
         </div>
+        {errorMessage && (
+          <span className="p-1 pl-2 pr-2 bg-red-500 text-xs rounded-full text-white font-bold mt-2">
+            {errorMessage}
+          </span>
+        )}
+        {successfulMessage && (
+          <span className="p-1 pl-2 pr-2 bg-green-500 text-xs rounded-full text-white font-bold mt-2">
+            {successfulMessage}
+          </span>
+        )}
         <div className="flex justify-start">
           <label
             htmlFor="component1"

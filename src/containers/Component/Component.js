@@ -85,6 +85,13 @@ const Component = () => {
     event.preventDefault();
   };
 
+  const handleComponentDashboard = (componentSerialNumber) => {
+    window.open(
+      `http://localhost:3000/Dashboard/Component/${componentSerialNumber}`,
+      "_blank"
+    );
+  };
+
   return (
     <div>
       <div className="flex justify-center bg-background border-none">
@@ -214,7 +221,14 @@ const Component = () => {
                           size="small"
                           style={{ color: "smokewhite" }}
                         >
-                          <LaunchIcon fontSize="small" />
+                          <LaunchIcon
+                            fontSize="small"
+                            onClick={() =>
+                              handleComponentDashboard(
+                                row.componentSerialNumber
+                              )
+                            }
+                          />
                         </IconButton>
                       </TableCell>
                     </TableRow>

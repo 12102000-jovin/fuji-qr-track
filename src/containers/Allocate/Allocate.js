@@ -97,6 +97,8 @@ const Allocate = () => {
       event.preventDefault();
       // Focus on the scan button when "]" key is pressed      // Reset PDC
       resetPDCRef.current.focus();
+      setSuccessfulMessage("");
+      setErrorMessage("");
     }
   };
 
@@ -115,8 +117,10 @@ const Allocate = () => {
     } catch (error) {
       // Handle error and set error message
       if (error.response) {
+        setSuccessfulMessage("");
         setErrorMessage(error.response.data.message || "Internal Server Error");
       } else {
+        setSuccessfulMessage("");
         setErrorMessage("Error making the request");
       }
     }

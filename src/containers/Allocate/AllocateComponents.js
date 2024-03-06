@@ -16,19 +16,29 @@ const AllocateComponents = () => {
 
   const handleSubAssemblyKeyDown = (event) => {
     if (event.key === "Enter") {
-      try {
-        const parsedInput = JSON.parse(inputSubAssemblyValue);
-        if (parsedInput.panelId && /^PANEL\d{6}$/.test(parsedInput.panelId)) {
-          setInputSubAssemblyValue(parsedInput.panelId);
-          setShowPanelForm(true);
-          setShowPDCForm(false);
-        } else if (parsedInput.pdcId && /^PDC\d{6}$/.test(parsedInput.pdcId)) {
-          setInputSubAssemblyValue(parsedInput.pdcId);
-          setShowPanelForm(false);
-          setShowPDCForm(true);
+      const isPanelPattern = /^PANEL\d{6}$/.test(inputSubAssemblyValue);
+      if (isPanelPattern) {
+        setInputSubAssemblyValue(inputSubAssemblyValue);
+        setShowPanelForm(true);
+        setShowPDCForm(false);
+      } else {
+        try {
+          const parsedInput = JSON.parse(inputSubAssemblyValue);
+          if (parsedInput.panelId && /^PANEL\d{6}$/.test(parsedInput.panelId)) {
+            setInputSubAssemblyValue(parsedInput.panelId);
+            setShowPanelForm(true);
+            setShowPDCForm(false);
+          } else if (
+            parsedInput.pdcId &&
+            /^PDC\d{6}$/.test(parsedInput.pdcId)
+          ) {
+            setInputSubAssemblyValue(parsedInput.pdcId);
+            setShowPanelForm(false);
+            setShowPDCForm(true);
+          }
+        } catch (error) {
+          console.log(false);
         }
-      } catch (error) {
-        console.log(false);
       }
     }
   };

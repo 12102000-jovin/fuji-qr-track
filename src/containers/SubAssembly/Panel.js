@@ -179,13 +179,18 @@ const SubAssembly = () => {
     window.open(`http://localhost:3000/Dashboard/Panel/${panelId}`, "_blank");
   };
 
+  // To prevent submission when search query
+  const handleFormSubmit = (event) => {
+    event.preventDefault();
+  };
+
   return (
     <div>
       <div className="flex justify-center bg-background border-none">
         <div className="w-3/4 p-6 shadow-lg bg-white rounded-md my-5">
           <p className="text-4xl text-signature font-black mb-5 mt-3">Panel</p>
           <div className="flex items-center">
-            <form className="p-1 flex-grow">
+            <form className="p-1 flex-grow" onSubmit={handleFormSubmit}>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <svg
@@ -228,6 +233,7 @@ const SubAssembly = () => {
               </select>
             </form>
           </div>
+          <hr className="h-px m-1 my-2 bg-gray-200 border-0 dark:bg-gray-700" />
           {selectedRowsCount && (
             <p className="p-3 m-1 bg-black text-white font-black rounded-xl">
               {" "}

@@ -70,8 +70,8 @@ const Dashboard = () => {
                       <span className="text-xl font-black m-3">
                         {dashboardData.component.componentType}
                       </span>
-                      <div className="flex justify-between">
-                        <span className="m-3">
+                      <div className="flex justify-between items-center">
+                        <span className="m-3 bg-green-500 text-white rounded-full pl-2 pr-2">
                           {dashboardData.component.componentSerialNumber}
                           <br />
                         </span>

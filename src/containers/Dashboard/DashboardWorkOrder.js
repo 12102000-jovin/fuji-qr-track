@@ -39,7 +39,7 @@ const Dashboard = () => {
           </p>
           <div className="p-5 bg-black rounded-md">
             <div className="grid grid-cols-2 gap-x-4 text-white">
-              <div className="flex flex-col items-start">
+              <div className="flex flex-col items-start p-2">
                 <p className="text-3xl font-bold mb-1 ">WorkOrder</p>
                 {dashboardType === "WorkOrder" ? (
                   <p className="font-semibold">{workOrderId}</p>
