@@ -84,7 +84,7 @@ const Dashboard = () => {
                             </button>
                           </div>
                           <div className="text-gray-500">
-                            {moment(panel.allocatedDate).format("DD MMM YYYY")}
+                            {moment(panel.allocatedDate).format("DD MMMM YYYY")}
                           </div>
                         </div>
                       ))
@@ -102,78 +102,9 @@ const Dashboard = () => {
               </div>
               <div className="text-start mt-4 p-2">
                 <div className="w-fit p-5 pl-10 pr-10 bg-white rounded-md ">
-                  <p className="text-black font-black text-2xl mb-2">Example</p>
-
-                  {dashboardType === "PDC" ? (
-                    dashboardData &&
-                    dashboardData.panels &&
-                    dashboardData.panels.length > 0 ? (
-                      dashboardData.panels.map((panel) => (
-                        <div
-                          key={panel._id}
-                          className="flex justify-start items-center space-x-4"
-                        >
-                          <div className="font-normal">
-                            <button
-                              onClick={() => window.open(panel.link, "_blank")}
-                              className="text-blue-500 hover:underline focus:outline-none"
-                            >
-                              {panel.panelId}
-                            </button>
-                          </div>
-                          <div className="text-gray-500">
-                            {moment(panel.allocatedDate).format("DD MMM YYYY")}
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <span className="bg-red-500 text-white p-1 pl-2 pr-2 font-black rounded-full text-xs inline-block">
-                        No panels found
-                      </span>
-                    )
-                  ) : (
-                    <span className="text-white p-1 rounded-full text-xs inline-block ">
-                      none
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="text-start mt-4 p-2">
-                <div className="w-fit p-5 pl-10 pr-10 bg-white rounded-md ">
-                  <p className="text-black font-black text-2xl mb-2">Example</p>
-
-                  {dashboardType === "PDC" ? (
-                    dashboardData &&
-                    dashboardData.panels &&
-                    dashboardData.panels.length > 0 ? (
-                      dashboardData.panels.map((panel) => (
-                        <div
-                          key={panel._id}
-                          className="flex justify-start items-center space-x-4"
-                        >
-                          <div className="font-normal">
-                            <button
-                              onClick={() => window.open(panel.link, "_blank")}
-                              className="text-blue-500 hover:underline focus:outline-none"
-                            >
-                              {panel.panelId}
-                            </button>
-                          </div>
-                          <div className="text-gray-500">
-                            {moment(panel.allocatedDate).format("DD MMM YYYY")}
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <span className="bg-red-500 text-white p-1 pl-2 pr-2 font-black rounded-full text-xs inline-block">
-                        No panels found
-                      </span>
-                    )
-                  ) : (
-                    <span className="text-white p-1 rounded-full text-xs inline-block ">
-                      none
-                    </span>
-                  )}
+                  <p className="text-black font-black text-2xl mb-2">
+                    Other Sub-Assembly...
+                  </p>
                 </div>
               </div>
             </div>

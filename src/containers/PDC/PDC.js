@@ -68,30 +68,26 @@ const PDC = () => {
 
     const words = searchQueryWithoutSpaces.split(/\s+/);
 
-    const filteredData = PDCData.filter(
-      (row) => {
-        const pdcIdWithoutSpaces = row.pdcId.replace(/\s/g, "").toLowerCase();
-        const generatedDateWithoutSpaces = moment(row.generatedDate)
-          .tz("Australia/Sydney")
-          .format("DD MMMM YYYY")
-          .replace(/\s/g, "")
-          .toLowerCase();
+    const filteredData = PDCData.filter((row) => {
+      const pdcIdWithoutSpaces = row.pdcId.replace(/\s/g, "").toLowerCase();
+      const generatedDateWithoutSpaces = moment(row.generatedDate)
+        .tz("Australia/Sydney")
+        .format("DD MMMM YYYY")
+        .replace(/\s/g, "")
+        .toLowerCase();
 
-        const matchPdcId = words.every((word) =>
-          pdcIdWithoutSpaces.includes(word)
-        );
+      const matchPdcId = words.every((word) =>
+        pdcIdWithoutSpaces.includes(word)
+      );
+      const matchGeneratedDate = words.every((word) =>
+        generatedDateWithoutSpaces.includes(word)
+      );
 
-        const matchGeneratedDate = words.every((word) =>
-          generatedDateWithoutSpaces.includes(word)
-        );
-
-        return matchPdcId || matchGeneratedDate;
-      },
-      [PDCData, searchQuery]
-    );
+      return matchPdcId || matchGeneratedDate;
+    });
 
     setFilteredPDCs(filteredData);
-  });
+  }, [PDCData, searchQuery]);
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
@@ -182,7 +178,11 @@ const PDC = () => {
   const handleChangeComponent = () => {
     setShowPDCCustomQRGenerator(!showPDCCustomQRGenerator);
   };
-  
+
+  const handlePDCDashboard = (pdcId) => {
+    window.open(`http://localhost:3000/Dashboard/PDC/${pdcId}`, "_blank");
+  };
+
   return (
     <div>
       {/* PDC Table */}
@@ -247,7 +247,7 @@ const PDC = () => {
               <Table className="border-collapse w-full">
                 <TableHead className="bg-signature m-4">
                   <TableCell
-                    align="centerr"
+                    align="center"
                     style={{
                       width: "10%",
                       color: "white",
@@ -351,7 +351,10 @@ const PDC = () => {
                           size="small"
                           style={{ color: "smokewhite" }}
                         >
-                          <LaunchIcon fontSize="small" />
+                          <LaunchIcon
+                            fontSize="small"
+                            onClick={() => handlePDCDashboard(row.pdcId)}
+                          />
                         </IconButton>
                       </TableCell>
                     </TableRow>

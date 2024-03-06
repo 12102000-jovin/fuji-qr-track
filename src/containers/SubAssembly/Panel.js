@@ -7,10 +7,13 @@ import QrCodeIcon from "@mui/icons-material/QrCode";
 import LaunchIcon from "@mui/icons-material/Launch";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
+import QueueIcon from "@mui/icons-material/AddToPhotos";
 import logo from "../../Images/FE-logo.png";
 import ReactQRCode from "qrcode.react";
 import html2canvas from "html2canvas";
 import SubAssemblyQRGenerator from "../../components/SubAssemblyQRGenerator/SubAssemblyQRGenerator";
+import SubAssemblyCustomQRGenerator from "../../components/SubAssemblyQRGenerator/SubAssemblyCustomQRGenerator";
+
 import {
   Table,
   TableBody,
@@ -40,6 +43,9 @@ const SubAssembly = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredPanels, setFilteredPanels] = useState([]);
 
+  const [showPanelCustomQRGenerator, setShowPanelCustomQRGenerator] =
+    useState(false);
+
   // Ref
   const captureRef = useRef(null);
 
@@ -58,32 +64,27 @@ const SubAssembly = () => {
 
     const words = searchQueryWithoutSpaces.split(/\s+/);
 
-    const filteredData = panelData.filter(
-      (row) => {
-        const panelIdWithoutSpaces = row.panelId
-          .replace(/\s/g, "")
-          .toLowerCase();
-        const generatedDateWithoutSpaces = moment(row.generatedDate)
-          .tz("Australia/Sydney")
-          .format("DD MMMM YYYY")
-          .replace(/\s/g, "")
-          .toLowerCase();
+    const filteredData = panelData.filter((row) => {
+      const panelIdWithoutSpaces = row.panelId.replace(/\s/g, "").toLowerCase();
+      const generatedDateWithoutSpaces = moment(row.generatedDate)
+        .tz("Australia/Sydney")
+        .format("DD MMMM YYYY")
+        .replace(/\s/g, "")
+        .toLowerCase();
 
-        const matchPanelId = words.every((word) =>
-          panelIdWithoutSpaces.includes(word)
-        );
+      const matchPanelId = words.every((word) =>
+        panelIdWithoutSpaces.includes(word)
+      );
 
-        const matchGeneratedDate = words.every((word) =>
-          generatedDateWithoutSpaces.includes(word)
-        );
+      const matchGeneratedDate = words.every((word) =>
+        generatedDateWithoutSpaces.includes(word)
+      );
 
-        return matchPanelId || matchGeneratedDate;
-      },
-      [panelData, searchQuery]
-    );
+      return matchPanelId || matchGeneratedDate;
+    });
 
     setFilteredPanels(filteredData);
-  });
+  }, [panelData, searchQuery]);
 
   const fetchPanelData = () => {
     axios
@@ -98,6 +99,7 @@ const SubAssembly = () => {
 
   const handleAddPanelModal = () => {
     setOpenPanelModal(true);
+    setShowPanelCustomQRGenerator(false);
   };
 
   const handleAddPanelCloseModal = () => {
@@ -169,6 +171,14 @@ const SubAssembly = () => {
     );
   };
 
+  const handleChangeComponent = () => {
+    setShowPanelCustomQRGenerator(!showPanelCustomQRGenerator);
+  };
+
+  const handlePanelDashboard = (panelId) => {
+    window.open(`http://localhost:3000/Dashboard/Panel/${panelId}`, "_blank");
+  };
+
   return (
     <div>
       <div className="flex justify-center bg-background border-none">
@@ -197,7 +207,7 @@ const SubAssembly = () => {
                   type="search"
                   id="default-search"
                   className="block h-12 p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 w-1/3"
-                  placeholder="Search PDC"
+                  placeholder="Search Panel"
                   required
                   onChange={handleSearchChange}
                   value={searchQuery}
@@ -285,61 +295,74 @@ const SubAssembly = () => {
                   </TableCell>
                 </TableHead>
                 <TableBody>
-                  {filteredPanels.map((row) => (
-                    <TableRow key={row.id} className="hover:bg-gray-100">
-                      <TableCell align="center">
-                        <Checkbox
-                          type="checkbox"
-                          checked={selectedRows.includes(row._id)}
-                          onChange={() => handleSelectRow(row._id)}
-                        />
-                      </TableCell>
-                      <TableCell
-                        align="center"
-                        style={{
-                          fontWeight: "bold",
-                        }}
-                      >
-                        {row.panelId}
-                      </TableCell>
-                      <TableCell align="center">
-                        {moment(row.generatedDate)
-                          .tz("Australia/Sydney")
-                          .format("DD MMMM YYYY")}
-                      </TableCell>
-                      <TableCell align="center">
-                        <IconButton
-                          aria-label="delete"
-                          size="small"
-                          style={{ color: "red" }}
+                  {" "}
+                  {filteredPanels
+                    .sort((a, b) => b.panelId.localeCompare(a.panelId))
+                    .map((row) => (
+                      <TableRow key={row.id} className="hover:bg-gray-100">
+                        <TableCell align="center">
+                          <Checkbox
+                            type="checkbox"
+                            checked={selectedRows.includes(row._id)}
+                            onChange={() => handleSelectRow(row._id)}
+                          />
+                        </TableCell>
+                        <TableCell
+                          align="center"
+                          style={{
+                            fontWeight: "bold",
+                          }}
                         >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          aria-label="icon"
-                          size="small"
-                          style={{ color: "black" }}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          aria-label="QR"
-                          size="small"
-                          style={{ color: "navy" }}
-                          onClick={() => showQRCodes(row)}
-                        >
-                          <QrCodeIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          aria-label="links"
-                          size="small"
-                          style={{ color: "smokewhite" }}
-                        >
-                          <LaunchIcon fontSize="small" />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                          {row.panelId}
+                        </TableCell>
+                        <TableCell align="center">
+                          {moment(row.generatedDate)
+                            .tz("Australia/Sydney")
+                            .format("DD MMMM YYYY")}
+                        </TableCell>
+                        <TableCell align="center">
+                          <IconButton
+                            aria-label="delete"
+                            size="small"
+                            style={{ color: "red" }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            aria-label="icon"
+                            size="small"
+                            style={{ color: "black" }}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            aria-label="QR"
+                            size="small"
+                            style={{ color: "navy" }}
+                            onClick={() => showQRCodes(row)}
+                          >
+                            <QrCodeIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            aria-label="links"
+                            size="small"
+                            style={{ color: "smokewhite" }}
+                          >
+                            <LaunchIcon
+                              fontSize="small"
+                              onClick={() => handlePanelDashboard(row.panelId)}
+                            />
+                          </IconButton>
+                          <IconButton
+                            aria-label="links"
+                            size="small"
+                            style={{ color: "smokewhite" }}
+                          >
+                            <QueueIcon fontSize="small" />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
               {/* QR Code Modal */}
@@ -432,7 +455,13 @@ const SubAssembly = () => {
         }}
       >
         <DialogContent className="bg-blue-900">
-          <div className="flex justify-end">
+          <div className="flex justify-between items-center">
+            <button
+              className="text-xs text-white font-bold bg-blue-400 p-1 pl-2 pr-2 rounded-md hover:bg-secondary hover:text-white"
+              onClick={handleChangeComponent}
+            >
+              {showPanelCustomQRGenerator === true ? "Increment" : "Customise"}
+            </button>
             <button
               className="bg-red-600 hover:bg-red-500 text-white font-semibold py-1 pl-2 pr-2 rounded generate-button"
               onClick={handleAddPanelCloseModal}
@@ -440,7 +469,11 @@ const SubAssembly = () => {
               <CloseIcon style={{ fontSize: "small" }} />
             </button>
           </div>
-          <SubAssemblyQRGenerator />
+          {showPanelCustomQRGenerator ? (
+            <SubAssemblyCustomQRGenerator />
+          ) : (
+            <SubAssemblyQRGenerator />
+          )}
         </DialogContent>
       </Dialog>
     </div>

@@ -19,6 +19,12 @@ const PanelSchema = new mongoose.Schema(
     allocatedDate: {
       type: String,
     },
+    components: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ComponentModel",
+      },
+    ],
   },
   {
     collection: "panel",

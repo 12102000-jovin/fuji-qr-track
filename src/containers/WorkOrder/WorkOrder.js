@@ -182,6 +182,13 @@ const WorkOrder = () => {
     setShowWorkOrderCustomQRGenerator(!showWorkOrderCustomQRGenerator);
   };
 
+  const handleWorkOrderDashboard = (workOrderId) => {
+    window.open(
+      `http://localhost:3000/Dashboard/WorkOrder/${workOrderId}`,
+      "_blank"
+    );
+  };
+
   return (
     <div>
       {/* WorkOrder Table */}
@@ -192,6 +199,7 @@ const WorkOrder = () => {
             WorkOrder{" "}
           </p>
           <div className="flex items-center">
+            {/* Search Function */}
             <form className="p-1 flex-grow">
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -222,10 +230,7 @@ const WorkOrder = () => {
               </div>
             </form>
             <form className="max-w-sm mx-auto mr-1">
-              <select
-                id="countries"
-                className="bg-gray-50 h-12 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              >
+              <select className="bg-gray-50 h-12 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                 <option value="10" defaultValue>
                   {" "}
                   10
@@ -250,7 +255,7 @@ const WorkOrder = () => {
               <Table className="border-collapse w-full">
                 <TableHead className="bg-signature m-4">
                   <TableCell
-                    align="centerr"
+                    align="center"
                     style={{
                       width: "10%",
                       color: "white",
@@ -354,7 +359,12 @@ const WorkOrder = () => {
                           size="small"
                           style={{ color: "smokewhite" }}
                         >
-                          <LaunchIcon fontSize="small" />
+                          <LaunchIcon
+                            fontSize="small"
+                            onClick={() =>
+                              handleWorkOrderDashboard(row.workOrderId)
+                            }
+                          />
                         </IconButton>
                       </TableCell>
                     </TableRow>

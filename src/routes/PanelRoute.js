@@ -7,6 +7,14 @@ const { PanelModel } = require("../models/SubAssemblyModel");
 router.post("/Panel/generateSubAssembly", async (req, res) => {
   const Panels = req.body.Panels;
 
+  const existingPanels = await PanelModel.find({
+    panelId: { $in: Panels.map((panel) => panel.panelId) },
+  });
+
+  if (existingPanels.length > 0) {
+    return res.status(409).json("Duplicate Panel found");
+  }
+
   // Create an array of Panels documents
   const panelDocuments = Panels.map((panel) => ({
     ...panel,

@@ -1,26 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import "animate.css";
 import moment from "moment";
 
 const Dashboard = () => {
-  const { panelId } = useParams();
+  const { componentSerialNumber } = useParams();
   const [dashboardData, setDashboardData] = useState([]);
-  const [dashboardType, setDashboardType] = useState("");
 
-  const fetchDashboardPanelData_API = `http://localhost:3001/Dashboard/${panelId}/showPanelDashboard`;
+  const fetchDashboardComponentData_API = `http://localhost:3001/Dashboard/${componentSerialNumber}/showComponentDashboard`;
 
   useEffect(() => {
-    if (panelId) {
-      fetchDashboardPanelData();
-      setDashboardType("Panel");
+    if (componentSerialNumber) {
+      fetchDashboardComponentData();
     }
   }, []);
 
-  const fetchDashboardPanelData = () => {
+  const fetchDashboardComponentData = () => {
     axios
-      .get(`${fetchDashboardPanelData_API}`)
+      .get(`${fetchDashboardComponentData_API}`)
       .then((response) => {
         setDashboardData(response.data);
         console.log(response.data);
@@ -41,59 +38,53 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 text-white">
               <div className="flex flex-col items-start p-2">
                 <p className="text-3xl font-bold mb-1">WorkOrder</p>
-                {dashboardType === "Panel" && (
+                {dashboardData && (
                   <p className="font-semibold">{dashboardData.workOrderId}</p>
                 )}
               </div>
               <div className="flex flex-col items-start p-2">
                 <p className="text-3xl font-bold mb-1">PDC</p>
-                {dashboardType === "Panel" && (
-                  <p className="font-semibold text-white rounded-full inline-block">
-                    {dashboardData.pdcId}
-                  </p>
+                {dashboardData && (
+                  <p className="font-semibold">{dashboardData.pdcId}</p>
                 )}
               </div>
               <div className="flex flex-col items-start p-2">
-                <p className="text-3xl font-bold mb-1">Panel</p>
-                {dashboardType === "Panel" && (
-                  <p className="font-semibold text-white rounded-full inline-block">
-                    {panelId}
-                  </p>
+                <p className="text-3xl font-bold mb-1">
+                  {dashboardData.subAssemblyType}
+                </p>
+                {dashboardData && (
+                  <p className="font-semibold">{dashboardData.panelId}</p>
                 )}
               </div>
             </div>
           </div>
-
-          <div className="w-full flex flex-col justify-start p-5 bg-signature mt-2 rounded-md">
-            <div className="text-2xl text-start font-black text-white">
-              Components
-            </div>
-            <div className="text-start mt-4">
-              {dashboardData.componentData &&
-                dashboardData.componentData.map((component, index) => (
-                  <div
-                    key={index}
-                    className="p-5 pl-10 pr-10 bg-white rounded-md m-3"
-                  >
+          <div>
+            <div className="w-full flex flex-col justify-start p-5 bg-signature mt-2 rounded-md">
+              <div className="text-2xl text-start font-black text-white">
+                Component
+              </div>
+              <div className="text-start mt-4">
+                {dashboardData.component && (
+                  <div className="p-5 pl-10 pr-10 bg-white rounded-md m-3">
                     <p className="text-black mb-5">
                       <span className="text-xl font-black m-3">
-                        {component.componentType}
-                        <br />
+                        {dashboardData.component.componentType}
                       </span>
                       <div className="flex justify-between">
                         <span className="m-3">
-                          {component.componentSerialNumber}
+                          {dashboardData.component.componentSerialNumber}
                           <br />
                         </span>
                         <span className="m-3">
-                          {moment(component.allocatedDate).format(
-                            "DD MMMM YYYY"
+                          {moment(dashboardData.component.allocatedDate).format(
+                            "DD MMM YYYY"
                           )}
                         </span>
                       </div>
                     </p>
                   </div>
-                ))}
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -101,4 +92,5 @@ const Dashboard = () => {
     </div>
   );
 };
+
 export default Dashboard;

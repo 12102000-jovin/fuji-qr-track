@@ -26,6 +26,8 @@ import {
   Queue as QueueIcon,
   DynamicForm as DynamicFormIcon,
 } from "@mui/icons-material";
+import { BiSolidComponent } from "react-icons/bi";
+
 import logo from "../../Images/FE-logo.png";
 import Home from "../Home";
 import PDCQRGenerator from "../PDCQRGenerator/PDCQRGenerator";
@@ -36,9 +38,13 @@ import Allocate from "../../containers/Allocate/Allocate";
 import WorkOrder from "../../containers/WorkOrder/WorkOrder";
 import WorkOrderGenerator from "../WorkOrderQRGenerator/WorkOrderQRGenerator";
 import WorkOrderCustomGenerator from "../WorkOrderQRGenerator/WorkOrderCustomQRGenerator";
+import SubAssemblyCustomQRGenerator from "../SubAssemblyQRGenerator/SubAssemblyCustomQRGenerator";
 import DashboardWorkOrder from "../../containers/Dashboard/DashboardWorkOrder";
 import DashboardPDC from "../../containers/Dashboard/DashboardPDC";
 import DashboardPanel from "../../containers/Dashboard/DashboardPanel";
+import DashboardComponent from "../../containers/Dashboard/DashboardComponent";
+import AllocateComponents from "../../containers/Allocate/AllocateComponents";
+import Components from "../../containers/Component/Component";
 
 const drawerWidth = 240;
 
@@ -344,9 +350,35 @@ const NavBar = () => {
               </ListItem>
 
               <ListItem disablePadding sx={{ display: "block" }}>
+                <ListItemButton component={Link} to="/Components">
+                  {open ? (
+                    <ListItemText primary="Components" />
+                  ) : (
+                    <ListItemIcon>
+                      <BiSolidComponent style={{ fontSize: "1.5rem" }} />
+                    </ListItemIcon>
+                    // <ListItemText primary="Allocate" />
+                  )}
+                </ListItemButton>
+              </ListItem>
+
+              <ListItem disablePadding sx={{ display: "block" }}>
                 <ListItemButton component={Link} to="/Allocate">
                   {open ? (
                     <ListItemText primary="Allocate" />
+                  ) : (
+                    <ListItemIcon>
+                      <QueueIcon />
+                    </ListItemIcon>
+                    // <ListItemText primary="Allocate" />
+                  )}
+                </ListItemButton>
+              </ListItem>
+
+              <ListItem disablePadding sx={{ display: "block" }}>
+                <ListItemButton component={Link} to="/AllocateComponents">
+                  {open ? (
+                    <ListItemText primary="Allocate Components" />
                   ) : (
                     <ListItemIcon>
                       <QueueIcon />
@@ -421,6 +453,10 @@ const NavBar = () => {
                 path="/Dashboard/PANEL/:panelId"
                 element={<DashboardPanel />}
               />
+              <Route
+                path="/Dashboard/Component/:componentSerialNumber"
+                element={<DashboardComponent />}
+              />
               {/* <Route
                 path="/WorkOrderQRGenerator"
                 element={<WorkOrderGenerator />}
@@ -429,7 +465,16 @@ const NavBar = () => {
                 path="/WorkOrderCustomQRGenerator"
                 element={<WorkOrderCustomGenerator />}
               /> */}
+              <Route
+                path="/SubAssemblyCustomQRGenerator"
+                element={<SubAssemblyCustomQRGenerator />}
+              />
               <Route path="/WorkOrder" element={<WorkOrder />} />
+              <Route
+                path="/AllocateComponents"
+                element={<AllocateComponents />}
+              />
+              <Route path="/Components" element={<Components />} />
             </Routes>
           </Box>
         </Box>

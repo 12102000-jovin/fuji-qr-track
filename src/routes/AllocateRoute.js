@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const PDCModel = require("../models/PDCModel");
 const { PanelModel } = require("../models/SubAssemblyModel");
+const ComponentModel = require("../models/ComponentModel");
 
 router.post("/AllocateSubAssembly", async (req, res) => {
   try {
@@ -42,6 +43,57 @@ router.post("/AllocateSubAssembly", async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.post("/AllocatePanelComponent", async (req, res) => {
+  try {
+    const { componentSerialNumber, componentType, panelId, allocatedDate } =
+      req.body;
+
+    console.log(panelId);
+    console.log(componentSerialNumber);
+
+    const existingComponents = await ComponentModel.find({
+      componentSerialNumber: { $in: componentSerialNumber },
+    });
+
+    if (existingComponents.length > 0) {
+      return res.json({ message: "Existing component" });
+    } else {
+      // If there are no existing components, proceed to insert new components
+      const components = await ComponentModel.insertMany([
+        {
+          componentSerialNumber: componentSerialNumber,
+          componentType: componentType,
+          allocatedDate: new Date(),
+        },
+      ]);
+
+      // Check if Panel with panelId exists
+      const panel = await PanelModel.findOne({ panelId: panelId });
+
+      if (!panel) {
+        return res.status(404).json({ message: "Panel not found" });
+      }
+      // else {
+      //   return res.json({ message: "Panel found" });
+      // }
+
+      components.forEach((component) => {
+        panel.components.push(component._id);
+      });
+
+      await panel.save();
+
+      return res
+        .status(200)
+        .json({ message: "Panel allocated to PDC successfully" });
+    }
+  } catch (error) {
+    console.error("Error in allocation:", error);
+    // Handle the error and send an appropriate response
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 

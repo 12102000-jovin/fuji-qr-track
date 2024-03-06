@@ -56,4 +56,7 @@ app.use("/Allocate", allocateRoute);
 const dashboardRoute = require("./src/routes/DashboardRoute");
 app.use("/Dashboard", dashboardRoute);
 
+const componentRoute = require("./src/routes/ComponentRoute");
+app.use("/Component", componentRoute);
+
 module.exports = app;

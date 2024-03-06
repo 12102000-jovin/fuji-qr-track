@@ -4,7 +4,6 @@ import axios from "axios";
 import moment from "moment-timezone";
 
 const Allocate = () => {
-  const [scanPDCText, setScanPDCText] = useState(false);
   const [inputPDCValue, setInputPDCValue] = useState("");
   const [showSubAssemblyInput, setShowSubAssemblyInput] = useState(false);
   const [wrongPDCQRError, setWrongPDCQRError] = useState(false);
@@ -36,7 +35,6 @@ const Allocate = () => {
         setInputPDCValue(inputPDCValue);
         setShowSubAssemblyInput(true);
         setWrongPDCQRError(false);
-        setScanPDCText(false);
         setInputPanelValue("");
         setWrongPanelQRError(false);
       } else {
@@ -46,7 +44,6 @@ const Allocate = () => {
             setInputPDCValue(parsedInput.pdcId);
             setShowSubAssemblyInput(true);
             setWrongPDCQRError(false);
-            setScanPDCText(false);
             setInputPanelValue("");
             setWrongPanelQRError(false);
           } else {
@@ -68,7 +65,6 @@ const Allocate = () => {
         setInputPanelValue(inputPanelValue);
         setShowSubAssemblyInput(true);
         setWrongPanelQRError(false);
-        // setScanPanelText(false);
       } else {
         try {
           const parsedInput = JSON.parse(inputPanelValue);
@@ -76,7 +72,6 @@ const Allocate = () => {
             setInputPanelValue(parsedInput.panelId);
             setShowSubAssemblyInput(true);
             setWrongPanelQRError(false);
-            // setScanPanelText(false);
           } else {
             // setShowSubAssemblyInput(false);
             setWrongPanelQRError(true);
@@ -116,7 +111,7 @@ const Allocate = () => {
 
       // Clear error message if successful
       setErrorMessage("");
-      setSuccessfulMessage("Allocated to PDC successfully");
+      setSuccessfulMessage("Sub-Assembly Allocated to PDC successfully");
     } catch (error) {
       // Handle error and set error message
       if (error.response) {
@@ -133,7 +128,7 @@ const Allocate = () => {
         <div className="w-3/4 p-6 shadow-lg bg-white text-black rounded-md mt-5 mb-10">
           <div className="text-4xl text-center font-black text-signature">
             {" "}
-            Allocate PDC{" "}
+            Allocate Sub-Assembly{" "}
           </div>
           <div className="flex justify-center">
             {errorMessage && (
@@ -147,16 +142,7 @@ const Allocate = () => {
               </span>
             )}
           </div>
-          {scanPDCText && (
-            <div className="flex justify-center">
-              <p className="p-3 font-black bg-black text-white rounded-md mt-5">
-                {" "}
-                Scan PDC QR
-              </p>
-            </div>
-          )}
-
-          <div className="mt-5">
+          <div className="mt-10">
             <label
               htmlFor="PDC"
               className="block text-base mb-2 flex justify-start font-bold text-xl"

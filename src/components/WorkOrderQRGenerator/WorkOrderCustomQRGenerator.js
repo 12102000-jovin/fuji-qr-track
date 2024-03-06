@@ -116,8 +116,6 @@ const WorkOrderCustomQRGenerator = () => {
     }
 
     const WorkOrders = Array.from({ length: numQR }, (_, index) => {
-      console.log("Latest WorkOrder:", startNum);
-
       const newWorkOrderId = formatWorkOrderId(Number(startNum) + index);
       return {
         link: `${linkFormat}${applicationPortNumber}/Dashboard/WorkOrder/WorkOrder${newWorkOrderId}`,
