@@ -13,12 +13,17 @@ const SubAssemblyQRGenerator = () => {
   const [startNum, setStartNum] = useState("0");
 
   const [qrCode, setQRcode] = useState([]);
-  const [expectedPanelRange, setExpectedPanelRange] = useState("");
   const [imageData, setImageData] = useState([]);
   const [qrGeneratedStatus, setQRGeneratedStatus] = useState(false);
-  const [duplicateError, setDuplicateError] = useState(false);
+  const [duplicateError, setDuplicateError] = useState("");
   const [emptyInputError, setEmptyInputError] = useState(false);
+
+  const [expectedPanelRange, setExpectedPanelRange] = useState("");
   const [showExpectedPanelRange, setShowExpectedPanelRange] = useState(true);
+
+  const [expectedLoadbankRange, setExpectedLoadbankRange] = useState("");
+  const [showExpectedLoadbankRange, setShowExpectedLoadbankRange] =
+    useState(true);
 
   const [selectedSubAssemblyType, setSelectedSubAssemblyType] = useState("");
 
@@ -29,6 +34,8 @@ const SubAssemblyQRGenerator = () => {
     "http://localhost:3001/SubAssembly/Panel/generateSubAssembly";
   const generateLoadbank_API =
     "http://localhost:3001/SubAssembly/Loadbank/generateSubAssembly";
+
+  // ======================================= P A N E L =======================================
 
   useEffect(() => {
     if (numQR === "1") {
@@ -50,24 +57,39 @@ const SubAssemblyQRGenerator = () => {
     setShowExpectedPanelRange(true);
   }, [numQR]);
 
-  useEffect(() => {
-    // Get the current URL
-    const currentUrl = window.location.href;
-
-    // Check if the URL contains "Panel"
-    if (currentUrl.includes("Panel")) {
-      // Set the selected value of the dropdown to "Panel"
-      setSelectedSubAssemblyType("Panel");
-    }
-  }, []);
-
   const formatId = (number) => {
     return number.toString().padStart(6, "0");
   };
 
-  const extractPanelId = (panelString) => {
-    return panelString.replace("PANEL", "");
-  };
+  // ==================================== L O A D B A N K =======================================
+
+  useEffect(() => {
+    setShowExpectedLoadbankRange(true);
+  }, [numQR]);
+
+  useEffect(() => {
+    if (numQR === "1") {
+      setExpectedLoadbankRange(
+        `Expected Output: LB${formatId(Number(startNum))}`
+      );
+    } else if (numQR > 1 && numQR !== "1") {
+      setExpectedLoadbankRange(
+        ` Expected Output: LB${formatId(Number(startNum))} - LB${formatId(
+          Number(startNum) + Number(numQR) - 1
+        )}`
+      );
+    } else {
+      setExpectedLoadbankRange("");
+    }
+  }, [numQR, startNum]);
+
+  // ==================================== S U B M I T =======================================
+
+  useEffect(() => {
+    setQRGeneratedStatus(false);
+    setEmptyInputError(false);
+    setDuplicateError("");
+  }, [selectedSubAssemblyType]);
 
   const handleSubmit = async (e) => {
     console.log(numQR);
@@ -79,14 +101,14 @@ const SubAssemblyQRGenerator = () => {
 
     if (numQR === "0" || numQR === "") {
       setQRGeneratedStatus(false);
-      setDuplicateError(false);
+      setDuplicateError("");
       setEmptyInputError(true);
       return;
     }
 
     if (startNum === "0" || startNum === "") {
       setQRGeneratedStatus(false);
-      setDuplicateError(false);
+      setDuplicateError("");
       setEmptyInputError(true);
       return;
     }
@@ -118,19 +140,17 @@ const SubAssemblyQRGenerator = () => {
         setQRGeneratedStatus(true);
         setShowExpectedPanelRange(false);
         setEmptyInputError(false);
-        setDuplicateError(false);
+        setDuplicateError("");
       } catch (error) {
         console.error("Error generating Panel:", error.message);
-        setDuplicateError(
-          error.response ? error.response.data : "An error occurred."
-        );
+        setDuplicateError("Duplicate Panel Found");
         setEmptyInputError(false);
       }
     } else if (selectedSubAssemblyType === "Loadbank") {
       const Loadbanks = Array.from({ length: numQR }, (_, index) => {
-        const newLoadbankId = formatId(Number(1) + index);
+        const newLoadbankId = formatId(Number(startNum) + index);
         return {
-          link: `${linkFormat}${applicationPortNumber}/LB${newLoadbankId}`,
+          link: `${linkFormat}${applicationPortNumber}/Dashboard/Loadbank/LB${newLoadbankId}`,
           generatedDate: moment()
             .tz("Australia/Sydney")
             .format("YYYY-MM-DD HH:mm:ss"),
@@ -142,10 +162,21 @@ const SubAssemblyQRGenerator = () => {
         const response = await axios.post(generateLoadbank_API, { Loadbanks });
         console.log(response.data);
 
-        setShowExpectedPanelRange(false);
+        setQRcode(() => {
+          const newQRCodes = response.data.map((qrcode, index) => ({
+            ...qrcode,
+            loadbankId: `LB${formatId(Number(startNum) + index)}`,
+          }));
+          return newQRCodes;
+        });
+
+        setQRGeneratedStatus(true);
+        setShowExpectedLoadbankRange(false);
         setEmptyInputError(false);
       } catch (error) {
-        console.error("Error generating Panel:", error.message);
+        console.error("Error generating Loadbank:", error.message);
+        setDuplicateError("Duplicate Loadbank Found");
+        setEmptyInputError(false);
       }
     } else {
       console.log("Unvalid Type");
@@ -170,14 +201,16 @@ const SubAssemblyQRGenerator = () => {
     const zip = new JSZip();
 
     const promises = qrCode.map(async (code) => {
-      const qrCodeElement = document.getElementById(`qrcode-${code.panelId}`);
+      const id =
+        selectedSubAssemblyType === "Panel" ? code.panelId : code.loadbankId;
+      const qrCodeElement = document.getElementById(`qrcode-${id}`);
       const qrCodeCanvas = await html2canvas(qrCodeElement, {
         width: 512,
         height: 565,
       });
 
       return {
-        name: `${code.panelId}.png`,
+        name: `${id}.png`,
         data: qrCodeCanvas
           .toDataURL("image/png")
           .replace(/^data:image\/(png|jpg);base64,/, ""),
@@ -194,13 +227,27 @@ const SubAssemblyQRGenerator = () => {
       const a = document.createElement("a");
       const url = URL.createObjectURL(content);
       a.href = url;
-      a.download = `PANEL`;
+      a.download = selectedSubAssemblyType === "Panel" ? "PANEL" : "LOADBANK";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     });
   };
+
+  useEffect(() => {
+    // Get the current URL
+    const currentUrl = window.location.href;
+
+    // Check if the URL contains "Panel"
+    if (currentUrl.includes("Panel")) {
+      // Set the selected value of the dropdown to "Panel"
+      setSelectedSubAssemblyType("Panel");
+    } else if (currentUrl.includes("Loadbank")) {
+      // Set the selected value of the dropdown to "Loadbank"
+      setSelectedSubAssemblyType("Loadbank");
+    }
+  }, []);
 
   return (
     <div>
@@ -233,6 +280,7 @@ const SubAssemblyQRGenerator = () => {
             </label>
             <select
               id="subAssemblyTypeDropdown"
+              value={selectedSubAssemblyType}
               onChange={(e) => setSelectedSubAssemblyType(e.target.value)}
               className="mt-1 block w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring focus:border-blue-300 sm:text-sm text-black"
             >
@@ -276,13 +324,25 @@ const SubAssemblyQRGenerator = () => {
                   />
                 </div>
 
-                {showExpectedPanelRange && expectedPanelRange && (
-                  <div className="flex jsutify-start">
-                    <p className="mt-2 font-black p-1 text-white bg-secondary text-xs rounded-full pl-2 pr-2">
-                      {expectedPanelRange}
-                    </p>
-                  </div>
-                )}
+                {selectedSubAssemblyType === "Panel" &&
+                  showExpectedPanelRange &&
+                  expectedPanelRange && (
+                    <div className="flex jsutify-start">
+                      <p className="mt-2 font-black p-1 text-white bg-secondary text-xs rounded-full pl-2 pr-2">
+                        {expectedPanelRange}
+                      </p>
+                    </div>
+                  )}
+
+                {selectedSubAssemblyType === "Loadbank" &&
+                  showExpectedLoadbankRange &&
+                  expectedLoadbankRange && (
+                    <div className="flex jsutify-start">
+                      <p className="mt-2 font-black p-1 text-white bg-secondary text-xs rounded-full pl-2 pr-2">
+                        {expectedLoadbankRange}
+                      </p>
+                    </div>
+                  )}
               </div>
             )}
 
@@ -313,51 +373,101 @@ const SubAssemblyQRGenerator = () => {
             </div>
           </div>
 
-          <div className="flex justify-center flex-wrap mt-5 rounded-xl">
-            {qrCode.map((code, index) => (
-              <div
-                key={index}
-                className="p-5 shadow-xl rounded-lg m-5 bg-white"
-                style={{
-                  color: "#043f9d",
-                  fontFamily: "Avenir, sans-serif",
-                  fontSize: "20px",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                }}
-              >
-                <div id={`qrcode-${code.panelId}`}>
-                  <ReactQRCode
-                    value={JSON.stringify({
-                      link: code.link,
-                      panelId: code.panelId,
-                    })}
-                    size={512}
-                    imageSettings={{
-                      src: logo,
-                      excavate: true,
-                      width: 60,
-                      height: 35,
-                    }}
+          {selectedSubAssemblyType === "Panel" && (
+            <div className="flex justify-center flex-wrap mt-5 rounded-xl">
+              {qrCode.map((code, index) => (
+                <div
+                  key={index}
+                  className="p-5 shadow-xl rounded-lg m-5 bg-white"
+                  style={{
+                    color: "#043f9d",
+                    fontFamily: "Avenir, sans-serif",
+                    fontSize: "20px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                  }}
+                >
+                  <div id={`qrcode-${code.panelId}`}>
+                    <ReactQRCode
+                      value={JSON.stringify({
+                        link: code.link,
+                        panelId: code.panelId,
+                      })}
+                      size={512}
+                      imageSettings={{
+                        src: logo,
+                        excavate: true,
+                        width: 60,
+                        height: 35,
+                      }}
+                    />
+                    <div className="mb-5">Panel ID: {code.panelId}</div>
+                  </div>
+                  <img
+                    src={imageData[code.panelId]}
+                    alt={`Converted ${code.panelId}`}
+                    style={{ display: "none", margin: "10px auto" }}
                   />
-                  <div className="mb-5">Panel ID: {code.panelId}</div>
+                  <div className="mt-5 flex items-center justify-center">
+                    <button
+                      className="bg-signature hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded "
+                      onClick={() => handleDownload(code.panelId)}
+                    >
+                      Download
+                    </button>
+                  </div>
                 </div>
-                <img
-                  src={imageData[code.panelId]}
-                  alt={`Converted ${code.panelId}`}
-                  style={{ display: "none", margin: "10px auto" }}
-                />
-                <div className="mt-5 flex items-center justify-center">
-                  <button
-                    className="bg-signature hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded "
-                    onClick={() => handleDownload(code.panelId)}
-                  >
-                    Download
-                  </button>
+              ))}
+            </div>
+          )}
+
+          {selectedSubAssemblyType === "Loadbank" && (
+            <div className="flex justify-center flex-wrap mt-5 rounded-xl">
+              {qrCode.map((code, index) => (
+                <div
+                  key={index}
+                  className="p-5 shadow-xl rounded-lg m-5 bg-white"
+                  style={{
+                    color: "#043f9d",
+                    fontFamily: "Avenir, sans-serif",
+                    fontSize: "20px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                  }}
+                >
+                  <div id={`qrcode-${code.loadbankId}`}>
+                    <ReactQRCode
+                      value={JSON.stringify({
+                        link: code.link,
+                        loadbankId: code.loadbankId,
+                      })}
+                      size={512}
+                      imageSettings={{
+                        src: logo,
+                        excavate: true,
+                        width: 60,
+                        height: 35,
+                      }}
+                    />
+                    <div className="mb-5">Loadbank ID: {code.loadbankId}</div>
+                  </div>
+                  <img
+                    src={imageData[code.loadbankId]}
+                    alt={`Converted ${code.loadbankId}`}
+                    style={{ display: "none", margin: "10px auto" }}
+                  />
+                  <div className="mt-5 flex items-center justify-center">
+                    <button
+                      className="bg-signature hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded "
+                      onClick={() => handleDownload(code.loadbankId)}
+                    >
+                      Download
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

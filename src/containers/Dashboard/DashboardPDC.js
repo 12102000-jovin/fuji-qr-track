@@ -61,11 +61,12 @@ const Dashboard = () => {
             <div className="text-2xl text-start font-black text-white">
               Sub-Assembly
             </div>
-            <div className="flex justify-center flex-wrap">
-              <div className="text-start mt-4 p-2">
-                <div className="w-fit p-5 pl-10 pr-10 bg-white rounded-md ">
-                  <p className="text-black font-black text-2xl mb-2">Panel</p>
 
+            <div className="flex justify-center flex-wrap">
+              {/* ======================= P A N E L ======================= */}
+              <div className="text-start mt-4 p-2 w-full md:w-1/2">
+                <div className="w-full p-5 pl-10 pr-10 bg-white rounded-md ">
+                  <p className="text-black font-black text-2xl mb-2">Panel</p>
                   {dashboardType === "PDC" ? (
                     dashboardData &&
                     dashboardData.panels &&
@@ -100,8 +101,54 @@ const Dashboard = () => {
                   )}
                 </div>
               </div>
-              <div className="text-start mt-4 p-2">
-                <div className="w-fit p-5 pl-10 pr-10 bg-white rounded-md ">
+              {/* ======================= L O A D B A N K======================= */}
+              <div className="text-start mt-4 p-2 w-full md:w-1/2">
+                <div className="w-full p-5 pl-10 pr-10 bg-white rounded-md ">
+                  <p className="text-black font-black text-2xl mb-2">
+                    Loadbank
+                  </p>
+                  {dashboardType === "PDC" ? (
+                    dashboardData &&
+                    dashboardData.loadbanks &&
+                    dashboardData.loadbanks.length > 0 ? (
+                      dashboardData.loadbanks.map((loadbank) => (
+                        <div
+                          key={loadbank._id}
+                          className="flex justify-start items-center space-x-4"
+                        >
+                          <div className="font-normal">
+                            <button
+                              onClick={() =>
+                                window.open(loadbank.link, "_blank")
+                              }
+                              className="text-blue-500 hover:underline focus:outline-none"
+                            >
+                              {loadbank.loadbankId}
+                            </button>
+                          </div>
+                          <div className="text-gray-500">
+                            {moment(loadbank.allocatedDate).format(
+                              "DD MMMM YYYY"
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <span className="bg-red-500 text-white p-1 pl-2 pr-2 font-black rounded-full text-xs inline-block">
+                        No loadbanks found
+                      </span>
+                    )
+                  ) : (
+                    <span className="text-white p-1 rounded-full text-xs inline-block ">
+                      none
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Other Sub-Assembly Section */}
+              <div className="text-start mt-4 p-2 w-full md:w-1/2">
+                <div className="w-full p-5 pl-10 pr-10 bg-white rounded-md ">
                   <p className="text-black font-black text-2xl mb-2">
                     Other Sub-Assembly...
                   </p>

@@ -29,134 +29,113 @@ import {
   Checkbox,
 } from "@mui/material";
 
-const Panel = () => {
-  const [panelData, setPanelData] = useState([]);
-  const [openAddPanelModal, setOpenPanelModal] = useState(false);
+const LoadBank = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+
   const [qrCodeData, setQrCodeData] = useState(null);
-  const [modalPanelID, setModalPanelID] = useState(null);
   const [openQRModal, setOpenQRModal] = useState(false);
 
+  const [modalLoadbankID, setModalLoadbankID] = useState(null);
+
   const [selectedRows, setSelectedRows] = useState([]);
-  const [selectAll, setSelectAll] = useState(false);
   const [selectedRowsCount, setSelectedRowsCount] = useState("");
+  const [selectAll, setSelectAll] = useState(false);
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filteredPanels, setFilteredPanels] = useState([]);
+  const [loadbankData, setLoadbankData] = useState([]);
 
-  const [showPanelCustomQRGenerator, setShowPanelCustomQRGenerator] =
+  const [filteredLoadbanks, setFilteredLoadbanks] = useState([]);
+
+  const [openAddLoadbankModal, setOpenLoadbankModal] = useState(false);
+
+  const [showLoadbankCustomQRGenerator, setShowLoadbankCustomQRGenerator] =
     useState(false);
+
+  const fetchLoadbankData_API =
+    "http://localhost:3001/SubAssembly/Loadbank/getAllLoadbank";
 
   // Ref
   const captureRef = useRef(null);
 
-  const fetchPanelData_API =
-    "http://localhost:3001/SubAssembly/Panel/getAllPanel";
-
   useEffect(() => {
-    fetchPanelData();
+    fetchLoadbankData();
   }, []);
 
   useEffect(() => {
-    // Update filteredPDCs whenever panelData or searchQuery changes
+    // Update filteredPDCs whenever loadbankData or searchQuery changes
     const searchQueryWithoutSpaces = searchQuery
       .replace(/\s/g, "")
       .toLowerCase();
 
     const words = searchQueryWithoutSpaces.split(/\s+/);
 
-    const filteredData = panelData.filter((row) => {
-      const panelIdWithoutSpaces = row.panelId.replace(/\s/g, "").toLowerCase();
+    const filteredData = loadbankData.filter((row) => {
+      const loadbankIdWithoutSpaces = row.loadbankId
+        .replace(/\s/g, "")
+        .toLowerCase();
       const generatedDateWithoutSpaces = moment(row.generatedDate)
         .tz("Australia/Sydney")
         .format("DD MMMM YYYY")
         .replace(/\s/g, "")
         .toLowerCase();
 
-      const matchPanelId = words.every((word) =>
-        panelIdWithoutSpaces.includes(word)
+      const matchLoadbankId = words.every((word) =>
+        loadbankIdWithoutSpaces.includes(word)
       );
 
       const matchGeneratedDate = words.every((word) =>
         generatedDateWithoutSpaces.includes(word)
       );
 
-      return matchPanelId || matchGeneratedDate;
+      return matchLoadbankId || matchGeneratedDate;
     });
 
-    setFilteredPanels(filteredData);
-  }, [panelData, searchQuery]);
+    setFilteredLoadbanks(filteredData);
+  }, [loadbankData, searchQuery]);
 
-  const fetchPanelData = () => {
-    axios
-      .get(`${fetchPanelData_API}`)
-      .then((response) => {
-        setPanelData(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
+  const fetchLoadbankData = () => {
+    axios.get(`${fetchLoadbankData_API}`).then((response) => {
+      setLoadbankData(response.data);
+    });
   };
 
-  const handleAddPanelModal = () => {
-    setOpenPanelModal(true);
-    setShowPanelCustomQRGenerator(false);
-  };
-
-  const handleAddPanelCloseModal = () => {
-    setOpenPanelModal(false);
-    fetchPanelData();
-  };
-
-  const showQRCodes = (data, row) => {
-    setQrCodeData(
-      JSON.stringify({
-        link: data.link,
-        panelId: data.panelId,
-      })
-    );
-    setModalPanelID(data.panelId);
-    setOpenQRModal(true);
-  };
-
-  const handleCloseQRModal = () => {
-    setOpenQRModal(false);
-  };
-
-  const handleDownload = (panelID) => {
-    const captureOptions = {
-      width: 512,
-      height: 565,
-    };
-
-    html2canvas(captureRef.current, captureOptions)
-      .then((canvas) => {
-        const imgData = canvas.toDataURL("image/png");
-        const fileName = `${panelID}.png`;
-        const a = document.createElement("a");
-        a.href = imgData;
-        a.download = fileName;
-        a.click();
-      })
-      .catch((error) => {
-        console.error("Error capturing image:", error);
-      });
+  const handleFormSubmit = (event) => {
+    event.preventDefault();
   };
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
   };
 
+  const handleAddLoadbankCloseModal = () => {
+    setOpenLoadbankModal(false);
+    fetchLoadbankData();
+  };
+
+  const handleChangeComponent = () => {
+    setShowLoadbankCustomQRGenerator(!showLoadbankCustomQRGenerator);
+  };
+
   const handleSelectAll = () => {
     if (selectAll) {
       setSelectedRows([]);
     } else {
-      const allRowIds = panelData.map((row) => row._id);
+      const allRowIds = loadbankData.map((row) => row._id);
       setSelectedRows(allRowIds);
     }
     setSelectAll(!selectAll);
 
     // Update the selectedRowsCount state
-    setSelectedRowsCount(selectAll ? "" : panelData.length);
+    setSelectedRowsCount(selectAll ? "" : loadbankData.length);
+  };
+  const showQRCodes = (data, row) => {
+    setQrCodeData(
+      JSON.stringify({
+        link: data.link,
+        loadbankId: data.loadbankId,
+      })
+    );
+    setModalLoadbankID(data.loadbankId);
+    setOpenQRModal(true);
   };
 
   const handleSelectRow = (rowId) => {
@@ -171,24 +150,49 @@ const Panel = () => {
     );
   };
 
-  const handleChangeComponent = () => {
-    setShowPanelCustomQRGenerator(!showPanelCustomQRGenerator);
+  const handleCloseQRModal = () => {
+    setOpenQRModal(false);
   };
 
-  const handlePanelDashboard = (panelId) => {
-    window.open(`http://localhost:3000/Dashboard/Panel/${panelId}`, "_blank");
+  const handleDownload = (loadbankID) => {
+    const captureOptions = {
+      width: 512,
+      height: 565,
+    };
+
+    html2canvas(captureRef.current, captureOptions)
+      .then((canvas) => {
+        const imgData = canvas.toDataURL("image/png");
+        const fileName = `${loadbankID}.png`;
+        const a = document.createElement("a");
+        a.href = imgData;
+        a.download = fileName;
+        a.click();
+      })
+      .catch((error) => {
+        console.error("Error capturing image:", error);
+      });
   };
 
-  // To prevent submission when search query
-  const handleFormSubmit = (event) => {
-    event.preventDefault();
+  const handleAddLoadbankModal = () => {
+    setOpenLoadbankModal(true);
+    setShowLoadbankCustomQRGenerator(false);
+  };
+
+  const handleLoadbankDashboard = (loadbankId) => {
+    window.open(
+      `http://localhost:3000/Dashboard/Loadbank/${loadbankId}`,
+      "_blank"
+    );
   };
 
   return (
     <div>
       <div className="flex justify-center bg-background border-none">
         <div className="w-3/4 p-6 shadow-lg bg-white rounded-md my-5">
-          <p className="text-4xl text-signature font-black mb-5 mt-3">Panel</p>
+          <p className="text-4xl text-signature font-black mb-5 mt-3">
+            Loadbank
+          </p>
           <div className="flex items-center">
             <form className="p-1 flex-grow" onSubmit={handleFormSubmit}>
               <div className="relative">
@@ -212,7 +216,7 @@ const Panel = () => {
                   type="search"
                   id="default-search"
                   className="block h-12 p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 w-1/3"
-                  placeholder="Search Panel"
+                  placeholder="Search Loadbank"
                   required
                   onChange={handleSearchChange}
                   value={searchQuery}
@@ -232,7 +236,6 @@ const Panel = () => {
           <hr className="h-px m-1 my-2 bg-gray-200 border-0 dark:bg-gray-700" />
           {selectedRowsCount && (
             <p className="p-3 m-1 bg-black text-white font-black rounded-xl">
-              {" "}
               Selected Rows: {selectedRowsCount}
               <button className="bg-signature rounded-md ml-16 p-1 pl-2 pr-2">
                 Download Selected Row QR
@@ -240,7 +243,7 @@ const Panel = () => {
             </p>
           )}
           <div className="flex justify-center">
-            <TableContainer className="w-full m-1 border border-blue-500 rounded-md ">
+            <TableContainer className="w-full m-1 border border-blue-500 rounded-md">
               <Table className="border-collapse w-full">
                 <TableHead className="bg-signature m-4">
                   <TableCell
@@ -271,7 +274,7 @@ const Panel = () => {
                       fontSize: "1.10rem",
                     }}
                   >
-                    Panel ID
+                    Loadbank ID
                   </TableCell>
                   <TableCell
                     align="center"
@@ -297,9 +300,8 @@ const Panel = () => {
                   </TableCell>
                 </TableHead>
                 <TableBody>
-                  {" "}
-                  {filteredPanels
-                    .sort((a, b) => b.panelId.localeCompare(a.panelId))
+                  {filteredLoadbanks
+                    .sort((a, b) => b.loadbankId.localeCompare(a.loadbankId))
                     .map((row) => (
                       <TableRow key={row.id} className="hover:bg-gray-100">
                         <TableCell align="center">
@@ -315,7 +317,7 @@ const Panel = () => {
                             fontWeight: "bold",
                           }}
                         >
-                          {row.panelId}
+                          {row.loadbankId}
                         </TableCell>
                         <TableCell align="center">
                           {moment(row.generatedDate)
@@ -352,7 +354,9 @@ const Panel = () => {
                           >
                             <LaunchIcon
                               fontSize="small"
-                              onClick={() => handlePanelDashboard(row.panelId)}
+                              onClick={() =>
+                                handleLoadbankDashboard(row.loadbankId)
+                              }
                             />
                           </IconButton>
                           <IconButton
@@ -367,7 +371,6 @@ const Panel = () => {
                     ))}
                 </TableBody>
               </Table>
-              {/* QR Code Modal */}
               <Dialog
                 open={openQRModal}
                 onClose={handleCloseQRModal}
@@ -401,14 +404,14 @@ const Panel = () => {
                         marginTop: "5px",
                       }}
                     >
-                      Panel ID: {modalPanelID}
+                      Loadbank ID: {modalLoadbankID}
                     </p>
                   </div>
                 </DialogContent>
                 <DialogActions>
                   <button
                     className="bg-signature hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded "
-                    onClick={() => handleDownload(modalPanelID)}
+                    onClick={() => handleDownload(modalLoadbankID)}
                   >
                     Download
                   </button>
@@ -424,7 +427,6 @@ const Panel = () => {
           </div>
         </div>
       </div>
-      {/* Add Panel Button */}
       <div className="fixed bottom-5 right-5">
         <Fab
           variant="extended"
@@ -438,16 +440,15 @@ const Panel = () => {
               backgroundColor: "#6c757d",
             },
           }}
-          onClick={handleAddPanelModal}
+          onClick={handleAddLoadbankModal}
         >
           <AddIcon sx={{ mr: 1 }} />
-          Generate Panel
+          Generate Loadbank
         </Fab>
       </div>
-      {/* Add Panel Modal */}
       <Dialog
-        open={openAddPanelModal}
-        onClose={handleAddPanelCloseModal}
+        open={openAddLoadbankModal}
+        onClose={handleAddLoadbankCloseModal}
         PaperProps={{
           sx: {
             borderRadius: "12px",
@@ -462,16 +463,18 @@ const Panel = () => {
               className="text-xs text-white font-bold bg-blue-400 p-1 pl-2 pr-2 rounded-md hover:bg-secondary hover:text-white"
               onClick={handleChangeComponent}
             >
-              {showPanelCustomQRGenerator === true ? "Increment" : "Customise"}
+              {showLoadbankCustomQRGenerator === true
+                ? "Increment"
+                : "Customise"}
             </button>
             <button
               className="bg-red-600 hover:bg-red-500 text-white font-semibold py-1 pl-2 pr-2 rounded generate-button"
-              onClick={handleAddPanelCloseModal}
+              onClick={handleAddLoadbankCloseModal}
             >
               <CloseIcon style={{ fontSize: "small" }} />
             </button>
           </div>
-          {showPanelCustomQRGenerator ? (
+          {showLoadbankCustomQRGenerator ? (
             <SubAssemblyCustomQRGenerator />
           ) : (
             <SubAssemblyQRGenerator />
@@ -482,4 +485,4 @@ const Panel = () => {
   );
 };
 
-export default Panel;
+export default LoadBank;

@@ -24,6 +24,12 @@ const PDCSchema = new mongoose.Schema(
         ref: "PanelModel",
       },
     ],
+    loadbanks: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "LoadbankModel",
+      },
+    ],
   },
   {
     collection: "pdc",

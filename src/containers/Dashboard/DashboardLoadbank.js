@@ -4,29 +4,27 @@ import axios from "axios";
 import "animate.css";
 import moment from "moment";
 
-const Dashboard = () => {
-  const { panelId } = useParams();
+const DashboardLoadbank = () => {
+  const { loadbankId } = useParams();
   const [dashboardData, setDashboardData] = useState([]);
-  const [dashboardType, setDashboardType] = useState("");
 
-  const fetchDashboardPanelData_API = `http://localhost:3001/Dashboard/${panelId}/showPanelDashboard`;
+  const fetchDashboardLoadbankData_API = `http://localhost:3001/Dashboard/${loadbankId}/showLoadbankDashboard`;
 
   useEffect(() => {
-    if (panelId) {
-      fetchDashboardPanelData();
-      setDashboardType("Panel");
+    if (loadbankId) {
+      fetchDashboardLoadbankData();
     }
   }, []);
 
-  const fetchDashboardPanelData = () => {
+  const fetchDashboardLoadbankData = () => {
     axios
-      .get(`${fetchDashboardPanelData_API}`)
+      .get(`${fetchDashboardLoadbankData_API}`)
       .then((response) => {
         setDashboardData(response.data);
         console.log(response.data);
       })
       .catch((error) => {
-        console.error("Error fetching Panel data:", error);
+        console.error("Error fetching Loadbank data");
       });
   };
 
@@ -41,29 +39,22 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 text-white">
               <div className="flex flex-col items-start p-2">
                 <p className="text-3xl font-bold mb-1">WorkOrder</p>
-                {dashboardType === "Panel" && (
-                  <p className="font-semibold">{dashboardData.workOrderId}</p>
-                )}
+                <p className="font-semibold">{dashboardData.workOrderId}</p>
               </div>
               <div className="flex flex-col items-start p-2">
                 <p className="text-3xl font-bold mb-1">PDC</p>
-                {dashboardType === "Panel" && (
-                  <p className="font-semibold text-white rounded-full inline-block">
-                    {dashboardData.pdcId}
-                  </p>
-                )}
+                <p className="font-semibold text-white rounded-full inline-block">
+                  {dashboardData.pdcId}
+                </p>
               </div>
               <div className="flex flex-col items-start p-2">
-                <p className="text-3xl font-bold mb-1">Panel</p>
-                {dashboardType === "Panel" && (
-                  <p className="font-semibold text-white rounded-full inline-block">
-                    {panelId}
-                  </p>
-                )}
+                <p className="text-3xl font-bold mb-1">Loadbank</p>
+                <p className="font-semibold text-white rounded-full inline-block">
+                  {loadbankId}
+                </p>
               </div>
             </div>
           </div>
-
           <div className="w-full flex flex-col justify-start p-5 bg-signature mt-2 rounded-md">
             <div className="text-2xl text-start font-black text-white">
               Components
@@ -109,4 +100,5 @@ const Dashboard = () => {
     </div>
   );
 };
-export default Dashboard;
+
+export default DashboardLoadbank;

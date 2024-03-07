@@ -26,7 +26,10 @@ import {
   Queue as QueueIcon,
   DynamicForm as DynamicFormIcon,
 } from "@mui/icons-material";
+import Menu from "@mui/material/Menu";
 import { BiSolidComponent } from "react-icons/bi";
+import { RiArrowRightSFill } from "react-icons/ri";
+import Avatar from "@mui/material/Avatar";
 
 import logo from "../../Images/FE-logo.png";
 import Home from "../Home";
@@ -42,11 +45,13 @@ import SubAssemblyCustomQRGenerator from "../SubAssemblyQRGenerator/SubAssemblyC
 import DashboardWorkOrder from "../../containers/Dashboard/DashboardWorkOrder";
 import DashboardPDC from "../../containers/Dashboard/DashboardPDC";
 import DashboardPanel from "../../containers/Dashboard/DashboardPanel";
+import DashboardLoadbank from "../../containers/Dashboard/DashboardLoadbank";
 import DashboardComponent from "../../containers/Dashboard/DashboardComponent";
 import AllocateComponents from "../../containers/Allocate/AllocateComponents";
 import Components from "../../containers/Component/Component";
+import Loadbank from "../../containers/SubAssembly/Loadbank";
 
-const drawerWidth = 240;
+const drawerWidth = 200;
 
 const openedMixin = (theme) => ({
   width: drawerWidth,
@@ -222,6 +227,29 @@ const NavBar = () => {
     };
   }, []);
 
+  const DropdownMenuItem = ({ to, primary, icon }) => {
+    return (
+      <ListItem disablePadding sx={{ display: "block" }}>
+        <ListItemButton component={Link} to={to}>
+          {icon ? (
+            <ListItemIcon>{icon}</ListItemIcon>
+          ) : (
+            <ListItemText primary={primary} />
+          )}
+        </ListItemButton>
+      </ListItem>
+    );
+  };
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleOpenMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <div onKeyDown={handleKeyPress} tabIndex={0}>
       <Router>
@@ -267,7 +295,7 @@ const NavBar = () => {
           <Drawer variant="permanent" open={open}>
             <DrawerHeader>
               <div className="flex justify-content-start">
-                <p className="text-start font-black text-2xl mr-28">Menu</p>
+                <p className="text-start font-black text-2xl mr-20">Menu</p>
               </div>
               <IconButton onClick={handleDrawerClose}>
                 {theme.direction === "rtl" ? (
@@ -337,17 +365,49 @@ const NavBar = () => {
               </ListItem>
 
               <ListItem disablePadding sx={{ display: "block" }}>
-                <ListItemButton component={Link} to="/Panel">
+                <ListItemButton onClick={handleOpenMenu}>
                   {open ? (
-                    <ListItemText primary="Panel" />
+                    <ListItemText
+                      primary="Sub-Assembly"
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                      secondary={
+                        <ListItemIcon className="ml-2 mt-2">
+                          <RiArrowRightSFill
+                            style={{
+                              color: "black",
+                              backgroundColor: "none",
+                              border: "none",
+                            }}
+                          />
+                        </ListItemIcon>
+                      }
+                    />
                   ) : (
                     <ListItemIcon>
-                      <DynamicFormIcon />
+                      SA{" "}
+                      <span className="flex justify-center items-center">
+                        <RiArrowRightSFill />
+                      </span>
                     </ListItemIcon>
-                    // <ListItemText primary="Panel" />
                   )}
                 </ListItemButton>
               </ListItem>
+
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleCloseMenu}
+                anchorOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+              >
+                <DropdownMenuItem to="/Panel" primary="Panel" />
+                <DropdownMenuItem to="/Loadbank" primary="LoadBank" />
+              </Menu>
 
               <ListItem disablePadding sx={{ display: "block" }}>
                 <ListItemButton component={Link} to="/Components">
@@ -457,6 +517,10 @@ const NavBar = () => {
                 path="/Dashboard/Component/:componentSerialNumber"
                 element={<DashboardComponent />}
               />
+              <Route
+                path="/Dashboard/Loadbank/:loadbankId"
+                element={<DashboardLoadbank />}
+              />
               {/* <Route
                 path="/WorkOrderQRGenerator"
                 element={<WorkOrderGenerator />}
@@ -475,6 +539,7 @@ const NavBar = () => {
                 element={<AllocateComponents />}
               />
               <Route path="/Components" element={<Components />} />
+              <Route path="/Loadbank" element={<Loadbank />} />
             </Routes>
           </Box>
         </Box>

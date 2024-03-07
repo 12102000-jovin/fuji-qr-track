@@ -4,11 +4,12 @@ import axios from "axios";
 import moment from "moment-timezone";
 import QrCodeScannerRoundedIcon from "@mui/icons-material/QrCodeScannerRounded";
 import PanelComponentForm from "../../components/ComponentForms/PanelComponentForm";
+import LoadbankComponentForm from "../../components/ComponentForms/LoadbankComponentForm";
 
 const AllocateComponents = () => {
   const [inputSubAssemblyValue, setInputSubAssemblyValue] = useState("");
   const [showPanelForm, setShowPanelForm] = useState(false);
-  const [showPDCForm, setShowPDCForm] = useState(false);
+  const [showLoadbankForm, setShowLoadbankForm] = useState(false);
 
   const handleSubAssemblyChange = (event) => {
     setInputSubAssemblyValue(event.target.value);
@@ -17,24 +18,28 @@ const AllocateComponents = () => {
   const handleSubAssemblyKeyDown = (event) => {
     if (event.key === "Enter") {
       const isPanelPattern = /^PANEL\d{6}$/.test(inputSubAssemblyValue);
+      const isLoadbankPattern = /^LB\d{6}$/.test(inputSubAssemblyValue);
+
       if (isPanelPattern) {
-        setInputSubAssemblyValue(inputSubAssemblyValue);
         setShowPanelForm(true);
-        setShowPDCForm(false);
+        setShowLoadbankForm(false);
+      } else if (isLoadbankPattern) {
+        setShowPanelForm(false);
+        setShowLoadbankForm(true);
       } else {
         try {
           const parsedInput = JSON.parse(inputSubAssemblyValue);
           if (parsedInput.panelId && /^PANEL\d{6}$/.test(parsedInput.panelId)) {
             setInputSubAssemblyValue(parsedInput.panelId);
             setShowPanelForm(true);
-            setShowPDCForm(false);
+            setShowLoadbankForm(false);
           } else if (
-            parsedInput.pdcId &&
-            /^PDC\d{6}$/.test(parsedInput.pdcId)
+            parsedInput.loadbankId &&
+            /^LB\d{6}$/.test(parsedInput.loadbankId)
           ) {
-            setInputSubAssemblyValue(parsedInput.pdcId);
+            setInputSubAssemblyValue(parsedInput.loadbankId);
             setShowPanelForm(false);
-            setShowPDCForm(true);
+            setShowLoadbankForm(true);
           }
         } catch (error) {
           console.log(false);
@@ -92,9 +97,11 @@ const AllocateComponents = () => {
           {showPanelForm && (
             <PanelComponentForm panelId={inputSubAssemblyValue} />
           )}
+          {showLoadbankForm && (
+            <LoadbankComponentForm loadbankId={inputSubAssemblyValue} />
+          )}
         </div>
       </div>
-      {showPDCForm && <h1>PDC FORM</h1>}
     </div>
   );
 };

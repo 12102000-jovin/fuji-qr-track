@@ -47,6 +47,15 @@ const LoadbankSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    allocatedDate: {
+      type: String,
+    },
+    components: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ComponentModel",
+      },
+    ],
   },
   {
     collection: "loadbank",
