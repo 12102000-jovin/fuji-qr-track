@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 
 const { LoadbankModel } = require("../models/SubAssemblyModel");
+const PDCModel = require("../models/PDCModel");
 
 router.post("/Loadbank/generateSubAssembly", async (req, res) => {
   const Loadbanks = req.body.Loadbanks;
@@ -51,6 +52,33 @@ router.get("/Loadbank/getAllLoadbank", async (req, res) => {
     res.json(LoadbankData);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+// Delete Loadbank
+router.delete("/Loadbank/deleteLoadbank/:loadbankId", async (req, res) => {
+  try {
+    const loadbankId = req.params.loadbankId;
+
+    const loadbankToDelete = await LoadbankModel.findOneAndDelete({
+      loadbankId: loadbankId,
+    });
+
+    if (!loadbankToDelete) {
+      res.status(404).json({ mesage: "Loadbank not found!" });
+    }
+
+    const deletedLoadbankObjectId = loadbankToDelete._id;
+
+    await PDCModel.updateMany(
+      { loadbanks: deletedLoadbankObjectId },
+      { $pull: { loadbanks: deletedLoadbankObjectId } }
+    );
+
+    console.log(loadbankToDelete);
+    res.status(200).json({ message: "Loadbank deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 

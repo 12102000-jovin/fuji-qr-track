@@ -45,7 +45,7 @@ const PanelComponentForm = (panelId) => {
   return (
     <div>
       <div className="p-5 bg-signature text-white font-bold rounded-md">
-        <div className="flex justify-start text-3xl font-black ">
+        <div className="flex justify-start text-2xl font-black mb-5">
           Panel Components
         </div>
         {errorMessage && (
@@ -61,7 +61,7 @@ const PanelComponentForm = (panelId) => {
         <div className="flex justify-start">
           <label
             htmlFor="component1"
-            className="block text-base mt-10 font-black text-xl p-1 text-white rounded-md"
+            className="block text-base mt-5 font-black text-xl p-1 text-white rounded-md"
           >
             Switch
           </label>

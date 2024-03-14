@@ -4,6 +4,7 @@ const router = express.Router();
 
 const WorkOrderModel = require("../models/WorkOrderModel");
 
+// Generate Work Order API
 router.post("/generateWorkOrder", async (req, res) => {
   const workOrders = req.body.WorkOrders;
 
@@ -32,6 +33,7 @@ router.post("/generateWorkOrder", async (req, res) => {
   res.json(insertedWorkOrders);
 });
 
+// Get the latest Work Order API
 router.get("/getLatestWorkOrder", async (req, res) => {
   try {
     // Find the document with the highest Work Order ID
@@ -50,13 +52,67 @@ router.get("/getLatestWorkOrder", async (req, res) => {
   }
 });
 
-// Get All WorkOrder
+// Get All WorkOrder API
 router.get("/getAllWorkOrder", async (req, res) => {
   try {
     const WorkOrderData = await WorkOrderModel.find();
     res.json(WorkOrderData);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+// Delete WorkOrder API
+router.delete("/deleteWorkOrder/:workOrderId", async (req, res) => {
+  try {
+    const workOrderId = req.params.workOrderId;
+
+    const workOrderToDelete = await WorkOrderModel.findOneAndDelete({
+      workOrderId: workOrderId,
+    });
+
+    if (!workOrderToDelete) {
+      return res.status(404).json({ message: "Work order not found" });
+    }
+
+    console.log(workOrderToDelete);
+    res.status(200).json({ message: "Work order deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting work order:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+// Edit WorkOrder API
+router.put("/editWorkOrder/:workOrderId", async (req, res) => {
+  try {
+    const workOrderId = req.params.workOrderId;
+    const updatedWorkOrderId = req.body;
+
+    const existingWorkOrder = await WorkOrderModel.findOne({
+      workOrderId: workOrderId,
+    });
+
+    if (!existingWorkOrder) {
+      return res.status(404).json({ message: "Work order not found" });
+    }
+
+    // Update the WorkOrder data
+    const updatedWorkOrder = await WorkOrderModel.findOneAndUpdate(
+      { workOrderId: workOrderId },
+      {
+        $set: {
+          workOrderId: updatedWorkOrderId.workOrderId,
+          link: `http://localhost:3000/Dashboard/WorkOrder/${updatedWorkOrderId.workOrderId}`,
+        },
+      },
+      { new: true }
+    );
+
+    res.json(updatedWorkOrder);
+  } catch (error) {
+    console.error("Error updating work order:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 

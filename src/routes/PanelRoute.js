@@ -3,7 +3,9 @@ const express = require("express");
 const router = express.Router();
 
 const { PanelModel } = require("../models/SubAssemblyModel");
+const PDCModel = require("../models/PDCModel");
 
+// Generate Panel API
 router.post("/Panel/generateSubAssembly", async (req, res) => {
   const Panels = req.body.Panels;
 
@@ -26,6 +28,7 @@ router.post("/Panel/generateSubAssembly", async (req, res) => {
   res.json(insertedPanels);
 });
 
+// Get the latest Panel API
 router.get("/Panel/getLatestPanel", async (req, res) => {
   try {
     // Find the document with the highest Panel ID
@@ -44,13 +47,40 @@ router.get("/Panel/getLatestPanel", async (req, res) => {
   }
 });
 
-// Get all panel
+// Get All Panel API
 router.get("/Panel/getAllPanel", async (req, res) => {
   try {
     const PanelData = await PanelModel.find();
     res.json(PanelData);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+// Delete Panel API
+router.delete("/Panel/deletePanel/:panelId", async (req, res) => {
+  try {
+    const panelId = req.params.panelId;
+
+    const panelToDelete = await PanelModel.findOneAndDelete({
+      panelId: panelId,
+    });
+
+    if (!panelToDelete) {
+      return res.status(404).json({ message: "Panel not found" });
+    }
+
+    const deletedPanelObjectId = panelToDelete._id;
+
+    await PDCModel.updateMany(
+      { panels: deletedPanelObjectId },
+      { $pull: { panels: deletedPanelObjectId } }
+    );
+
+    console.log(panelToDelete);
+    res.status(200).json({ message: "Panel deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 

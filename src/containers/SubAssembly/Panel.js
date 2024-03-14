@@ -15,6 +15,7 @@ import SubAssemblyQRGenerator from "../../components/SubAssemblyQRGenerator/SubA
 import SubAssemblyCustomQRGenerator from "../../components/SubAssemblyQRGenerator/SubAssemblyCustomQRGenerator";
 
 import {
+  Divider,
   Table,
   TableBody,
   TableCell,
@@ -46,11 +47,16 @@ const Panel = () => {
   const [showPanelCustomQRGenerator, setShowPanelCustomQRGenerator] =
     useState(false);
 
+  const [deletePanelModalState, setDeletePanelModalState] = useState(false);
+
   // Ref
   const captureRef = useRef(null);
 
   const fetchPanelData_API =
     "http://localhost:3001/SubAssembly/Panel/getAllPanel";
+
+  const deletePanel_API =
+    "http://localhost:3001/SubAssembly/Panel/deletePanel/";
 
   useEffect(() => {
     fetchPanelData();
@@ -182,6 +188,31 @@ const Panel = () => {
   // To prevent submission when search query
   const handleFormSubmit = (event) => {
     event.preventDefault();
+  };
+
+  const handleCloseDeletePanelModal = () => {
+    setDeletePanelModalState(false);
+  };
+
+  const handleOpenDeleteConfirmation = (panelId) => {
+    setDeletePanelModalState(true);
+    setModalPanelID(panelId);
+  };
+
+  const handleDeletePanel = async (panelId) => {
+    try {
+      const response = await axios.delete(`${deletePanel_API}${panelId}`);
+
+      if (response.status === 200) {
+        console.log("Panel Deleted Successfully");
+        fetchPanelData();
+        setDeletePanelModalState(false);
+      } else {
+        console.log("Error deleting panel:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error deleting panel:", error);
+    }
   };
 
   return (
@@ -328,7 +359,12 @@ const Panel = () => {
                             size="small"
                             style={{ color: "red" }}
                           >
-                            <DeleteIcon fontSize="small" />
+                            <DeleteIcon
+                              fontSize="small"
+                              onClick={() => {
+                                handleOpenDeleteConfirmation(row.panelId);
+                              }}
+                            />
                           </IconButton>
                           <IconButton
                             aria-label="icon"
@@ -478,6 +514,48 @@ const Panel = () => {
           )}
         </DialogContent>
       </Dialog>
+      <div>
+        <Dialog
+          open={deletePanelModalState}
+          onClose={handleCloseDeletePanelModal}
+        >
+          <DialogContent sx={{ padding: 0, minWidth: "500px" }}>
+            <Divider className="h-1 bg-red-500" />
+            <div className="flex justify-between items-center">
+              <p className=" font-black text-xl px-5 py-3">
+                Delete Confirmation
+              </p>
+              <CloseIcon
+                className="m-2 hover:cursor-pointer hover:bg-gray-100 hover:rounded"
+                onClick={handleCloseDeletePanelModal}
+              />
+            </div>
+            <Divider />
+            <p className="px-5 py-10">
+              Are you sure you want to delete <strong>{modalPanelID}</strong>?
+            </p>
+            <Divider />
+            <DialogActions>
+              <div className="flex justify-end">
+                <button
+                  className="bg-secondary text-white rounded font-semibold py-1 px-2 m-1 focus:outline-none hover:bg-gray-600"
+                  onClick={handleCloseDeletePanelModal}
+                >
+                  Close
+                </button>
+                <button
+                  className="bg-red-500 text-white rounded font-semibold py-1 px-2 m-1 focus:outline-none hover:bg-red-600"
+                  onClick={() => {
+                    handleDeletePanel(modalPanelID);
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            </DialogActions>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 };

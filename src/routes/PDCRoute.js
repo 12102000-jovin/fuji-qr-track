@@ -6,6 +6,7 @@ const PDCModel = require("../models/PDCModel");
 
 const WorkOrderModel = require("../models/WorkOrderModel");
 
+// Generate PDC API
 router.post("/generatePDC", async (req, res) => {
   const PDCs = req.body.PDCs;
 
@@ -54,7 +55,7 @@ router.post("/generatePDC", async (req, res) => {
   res.json(insertedPDCs);
 });
 
-// Get latest pdc id
+// Get the latest PDC API
 router.get("/getLatestPDC", async (req, res) => {
   try {
     // Find the document with the highest PDC ID
@@ -71,13 +72,130 @@ router.get("/getLatestPDC", async (req, res) => {
   }
 });
 
-// Get All PDC
+// Get All PDC API
 router.get("/getAllPDC", async (req, res) => {
   try {
     const PDCData = await PDCModel.find();
     res.json(PDCData);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+// Delete PDC API
+router.delete("/deletePDC/:pdcId", async (req, res) => {
+  try {
+    const pdcId = req.params.pdcId;
+
+    const pdcToDelete = await PDCModel.findOneAndDelete({
+      pdcId: pdcId,
+    });
+
+    if (!pdcToDelete) {
+      return res.status(404).json({ message: "PDC not found" });
+    }
+
+    // Extract the _id field of the deleted PDC
+    const deletedPdcObjectId = pdcToDelete._id;
+
+    await WorkOrderModel.updateMany(
+      { pdcs: deletedPdcObjectId }, // Use the _id field for matching
+      { $pull: { pdcs: deletedPdcObjectId } }
+    );
+
+    console.log(pdcToDelete);
+    res.status(200).json({ message: "PDC deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+// Edit PDC API
+router.put("/editPDC/:workOrderId/:pdcId", async (req, res) => {
+  try {
+    const { workOrderId, pdcId } = req.params;
+    const { workOrderIdToEdit, pdcIdToEdit } = req.body;
+
+    // Find the current work order
+    const currentWorkOrder = await WorkOrderModel.findOne({ workOrderId });
+
+    // Find the future work order
+    const futureWorkOrder = await WorkOrderModel.findOne({
+      workOrderId: workOrderIdToEdit,
+    });
+
+    // Find the current PDC
+    const currentPdcId = await PDCModel.findOne({ pdcId });
+
+    if (!currentWorkOrder || !futureWorkOrder || !currentPdcId) {
+      return res.status(404).json({
+        message: "Current Work Order, Future Work Order, or PDC not found",
+      });
+    }
+
+    if (workOrderId !== workOrderIdToEdit && pdcId === pdcIdToEdit) {
+      // Add the PDC to the future work order and remove it from the current work order
+      futureWorkOrder.pdcs.push(currentPdcId._id);
+      currentWorkOrder.pdcs.pull(currentPdcId._id);
+
+      // Save changes to both work orders
+      await futureWorkOrder.save();
+      await currentWorkOrder.save();
+
+      res
+        .status(200)
+        .json({ message: "PDC moved successfully", futureWorkOrder });
+    } else if (pdcId !== pdcIdToEdit && workOrderId === workOrderIdToEdit) {
+      const updatedPDC = await PDCModel.findOneAndUpdate(
+        { pdcId: pdcId },
+        {
+          $set: {
+            pdcId: pdcIdToEdit,
+            link: `http://localhost:3000/Dashboard/PDC/${pdcIdToEdit}`,
+          },
+        },
+        { new: true } // This option returns the modified document rather than the original
+      );
+
+      if (!updatedPDC) {
+        return res.status(404).json({
+          message: "PDC not found",
+        });
+      }
+
+      res.status(200).json({ message: "PDC updated successfully", updatedPDC });
+    } else if (workOrderId !== workOrderIdToEdit && pdcId !== pdcIdToEdit) {
+      const updatedPDC = await PDCModel.findOneAndUpdate(
+        { pdcId: pdcId },
+        {
+          $set: {
+            pdcId: pdcIdToEdit,
+            link: `http://localhost:3000/Dashboard/PDC/${pdcIdToEdit}`,
+          },
+        },
+        { new: true } // This option returns the modified document rather than the original
+      );
+
+      // Add the PDC to the future work order and remove it from the current work order
+      futureWorkOrder.pdcs.push(currentPdcId._id);
+      currentWorkOrder.pdcs.pull(currentPdcId._id);
+
+      // Save changes to both work orders
+      await futureWorkOrder.save();
+      await currentWorkOrder.save();
+
+      res
+        .status(200)
+        .json({
+          message: "PDC moved and updated successfully",
+          futureWorkOrder,
+          updatedPDC,
+        });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
   }
 });
 

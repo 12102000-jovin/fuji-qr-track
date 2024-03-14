@@ -15,6 +15,7 @@ import SubAssemblyQRGenerator from "../../components/SubAssemblyQRGenerator/SubA
 import SubAssemblyCustomQRGenerator from "../../components/SubAssemblyQRGenerator/SubAssemblyCustomQRGenerator";
 
 import {
+  Divider,
   Table,
   TableBody,
   TableCell,
@@ -50,8 +51,14 @@ const LoadBank = () => {
   const [showLoadbankCustomQRGenerator, setShowLoadbankCustomQRGenerator] =
     useState(false);
 
+  const [deleteLoadbankModalState, setDeleteLoadbankModalState] =
+    useState(false);
+
   const fetchLoadbankData_API =
     "http://localhost:3001/SubAssembly/Loadbank/getAllLoadbank";
+
+  const deleteLoadbank_API =
+    "http://localhost:3001/SubAssembly/Loadbank/deleteLoadbank/";
 
   // Ref
   const captureRef = useRef(null);
@@ -184,6 +191,32 @@ const LoadBank = () => {
       `http://localhost:3000/Dashboard/Loadbank/${loadbankId}`,
       "_blank"
     );
+  };
+
+  const handleCloseDeleteLoadbankModal = () => {
+    setDeleteLoadbankModalState(false);
+  };
+
+  const handleOpenDeleteConfirmationModal = (loadbankId) => {
+    setDeleteLoadbankModalState(true);
+    setModalLoadbankID(loadbankId);
+  };
+
+  const handleDeleteLoadbank = async (loadbankId) => {
+    console.log(loadbankId);
+    try {
+      const response = await axios.delete(`${deleteLoadbank_API}${loadbankId}`);
+
+      if (response.status === 200) {
+        console.log("Loadbank Deleted Successfully");
+        fetchLoadbankData();
+        setDeleteLoadbankModalState(false);
+      } else {
+        console.log("Error deleting loadbank:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error deleting loadbank", error);
+    }
   };
 
   return (
@@ -330,7 +363,14 @@ const LoadBank = () => {
                             size="small"
                             style={{ color: "red" }}
                           >
-                            <DeleteIcon fontSize="small" />
+                            <DeleteIcon
+                              fontSize="small"
+                              onClick={() => {
+                                handleOpenDeleteConfirmationModal(
+                                  row.loadbankId
+                                );
+                              }}
+                            />
                           </IconButton>
                           <IconButton
                             aria-label="icon"
@@ -481,6 +521,49 @@ const LoadBank = () => {
           )}
         </DialogContent>
       </Dialog>
+      <div>
+        <Dialog
+          open={deleteLoadbankModalState}
+          onClose={handleCloseDeleteLoadbankModal}
+        >
+          <DialogContent sx={{ padding: 0, minWidth: "500px" }}>
+            <Divider className="h-1 bg-red-500" />
+            <div className="flex justify-between items-center">
+              <p className=" font-black text-xl px-5 py-3">
+                Delete Confirmation
+              </p>
+              <CloseIcon
+                className="m-2 hover:cursor-pointer hover:bg-gray-100 hover:rounded"
+                onClick={handleCloseDeleteLoadbankModal}
+              />
+            </div>
+            <Divider />
+            <p className="px-5 py-10">
+              Are you sure you want to delete <strong>{modalLoadbankID}</strong>
+              ?
+            </p>
+            <Divider />
+            <DialogActions>
+              <div className="flex justify-end">
+                <button
+                  className="bg-secondary text-white rounded font-semibold py-1 px-2 m-1 focus:outline-none hover:bg-gray-600"
+                  onClick={handleCloseDeleteLoadbankModal}
+                >
+                  Close
+                </button>
+                <button
+                  className="bg-red-500 text-white rounded font-semibold py-1 px-2 m-1 focus:outline-none hover:bg-red-600"
+                  onClick={() => {
+                    handleDeleteLoadbank(modalLoadbankID);
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            </DialogActions>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 };

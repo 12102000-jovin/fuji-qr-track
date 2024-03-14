@@ -10,6 +10,7 @@ import {
   Dialog,
   DialogContent,
   DialogActions,
+  Divider,
   Fab,
   Checkbox,
 } from "@mui/material";
@@ -26,6 +27,7 @@ import html2canvas from "html2canvas";
 import AddIcon from "@mui/icons-material/Add";
 
 import logo from "../../Images/FE-logo.png";
+import EditWorkOrder from "./EditWorkOrder";
 
 //Components
 import WorkOrderQRGenerator from "../../components/WorkOrderQRGenerator/WorkOrderQRGenerator";
@@ -48,12 +50,22 @@ const WorkOrder = () => {
   const [showWorkOrderCustomQRGenerator, setShowWorkOrderCustomQRGenerator] =
     useState(false);
 
+  const [deleteWorkOrderModalState, setDeleteWorkOrderModalState] =
+    useState(false);
+
+  const [editWorkOrderModalState, setEditWorkOrderModalState] = useState(false);
+
+  const [workOrderIdToEdit, setWorkOrderIdToEdit] = useState("");
+
   // Ref
   const captureRef = useRef(null);
 
   // Constants
   const fetchWorkOrderData_API =
     "http://localhost:3001/WorkOrder/getAllWorkOrder";
+
+  const deleteWorkOrder_API =
+    "http://localhost:3001/WorkOrder/deleteWorkOrder/";
 
   // Effects
   useEffect(() => {
@@ -191,6 +203,40 @@ const WorkOrder = () => {
   // To prevent submission when search query
   const handleFormSubmit = (event) => {
     event.preventDefault();
+  };
+
+  const handleCloseDeleteWorkOrderModal = () => {
+    setDeleteWorkOrderModalState(false);
+  };
+
+  const handleOpenDeleteConfirmationModal = (workOrderId) => {
+    setDeleteWorkOrderModalState(true);
+    setModalWorkOrderID(workOrderId);
+  };
+
+  const handleDeleteWorkOrder = async (workOrderId) => {
+    try {
+      // Delete request tot the API
+      const response = await axios.delete(
+        `${deleteWorkOrder_API}${workOrderId}`
+      );
+
+      if (response.status === 200) {
+        console.log("Work Order Deleted Succesfully");
+        fetchWorkOrderData();
+        setDeleteWorkOrderModalState(false);
+      } else {
+        console.log("Error deleting work order:", response.data.message);
+        // Optionally, handle the case where deletion was not successful
+      }
+    } catch (error) {
+      console.error("Error deleting work order:", error);
+    }
+  };
+
+  const handleOpenEditModal = (workOrderId) => {
+    setEditWorkOrderModalState(true);
+    setWorkOrderIdToEdit(workOrderId);
   };
 
   return (
@@ -341,14 +387,22 @@ const WorkOrder = () => {
                           size="small"
                           style={{ color: "red" }}
                         >
-                          <DeleteIcon fontSize="small" />
+                          <DeleteIcon
+                            fontSize="small"
+                            onClick={() =>
+                              handleOpenDeleteConfirmationModal(row.workOrderId)
+                            }
+                          />
                         </IconButton>
                         <IconButton
                           aria-label="icon"
                           size="small"
                           style={{ color: "black" }}
                         >
-                          <EditIcon fontSize="small" />
+                          <EditIcon
+                            fontSize="small"
+                            onClick={() => handleOpenEditModal(row.workOrderId)}
+                          />
                         </IconButton>
                         <IconButton
                           aria-label="QR"
@@ -488,6 +542,60 @@ const WorkOrder = () => {
           )}
         </DialogContent>
       </Dialog>
+      {/* Delete WorkOrder Modal */}
+      <div>
+        <Dialog
+          open={deleteWorkOrderModalState}
+          onClose={handleCloseDeleteWorkOrderModal}
+        >
+          <DialogContent sx={{ padding: 0, minWidth: "500px" }}>
+            <Divider className="h-1 bg-red-500" />
+            <div className="flex justify-between items-center">
+              <p className=" font-black text-xl px-5 py-3">
+                Delete Confirmation
+              </p>
+              <CloseIcon
+                className="m-2 hover:cursor-pointer hover:bg-gray-100 hover:rounded"
+                onClick={handleCloseDeleteWorkOrderModal}
+              />
+            </div>
+            <Divider />
+            <p className="px-5 py-10">
+              Are you sure you want to delete{" "}
+              <strong>{modalWorkOrderID}</strong>?
+            </p>
+            <Divider />
+            <DialogActions>
+              <div className="flex justify-end">
+                <button
+                  className="bg-secondary text-white rounded font-semibold py-1 px-2 m-1 focus:outline-none hover:bg-gray-600"
+                  onClick={handleCloseDeleteWorkOrderModal}
+                >
+                  Close
+                </button>
+                <button
+                  className="bg-red-500 text-white rounded font-semibold py-1 px-2 m-1 focus:outline-none hover:bg-red-600"
+                  onClick={() => {
+                    handleDeleteWorkOrder(modalWorkOrderID);
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            </DialogActions>
+          </DialogContent>
+        </Dialog>
+      </div>
+      <div>
+        <EditWorkOrder
+          open={editWorkOrderModalState}
+          onClose={() => {
+            fetchWorkOrderData();
+            setEditWorkOrderModalState(false);
+          }}
+          workOrderId={workOrderIdToEdit}
+        />
+      </div>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
+  Divider,
   Table,
   TableBody,
   TableCell,
@@ -31,6 +32,7 @@ import JSZip from "jszip";
 //Components
 import PDCQRGenerator from "../../components/PDCQRGenerator/PDCQRGenerator";
 import PDCCustomQRGenerator from "../../components/PDCQRGenerator/PDCCustomQRGenerator";
+import EditPDC from "./EditPDC";
 
 const PDC = () => {
   // State variables
@@ -49,11 +51,19 @@ const PDC = () => {
   const [showPDCCustomQRGenerator, setShowPDCCustomQRGenerator] =
     useState(false);
 
+  const [deletePDCModalState, setDeletePDCModalState] = useState(false);
+
+  const [editPDCModalState, setEditPDCModalState] = useState(false);
+
+  const [pdcIdToEdit, setPDCIdToEdit] = useState("");
+
   // Ref
   const captureRef = useRef(null);
 
   // Constants
   const fetchPDCData_API = "http://localhost:3001/PDC/getAllPDC";
+
+  const deletePDC_API = "http://localhost:3001/PDC/deletePDC/";
 
   // Effects
   useEffect(() => {
@@ -186,6 +196,36 @@ const PDC = () => {
   // To prevent submission when search query
   const handleFormSubmit = (event) => {
     event.preventDefault();
+  };
+
+  const handleCloseDeletePDCModal = () => {
+    setDeletePDCModalState(false);
+  };
+
+  const handleOpenDeleteConfirmationModal = (workOrderId) => {
+    setDeletePDCModalState(true);
+    setModalPdcID(workOrderId);
+  };
+
+  const handleDeletePDC = async (pdcId) => {
+    try {
+      const response = await axios.delete(`${deletePDC_API}${pdcId}`);
+
+      if (response.status === 200) {
+        console.log("PDC Deleted Successfully");
+        fetchPDCData();
+        setDeletePDCModalState(false);
+      } else {
+        console.log("Error deleting pdc:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error deleting pdc:", error);
+    }
+  };
+
+  const handleOpenEditModal = (pdcId) => {
+    setEditPDCModalState(true);
+    setPDCIdToEdit(pdcId);
   };
 
   return (
@@ -335,14 +375,24 @@ const PDC = () => {
                           size="small"
                           style={{ color: "red" }}
                         >
-                          <DeleteIcon fontSize="small" />
+                          <DeleteIcon
+                            fontSize="small"
+                            onClick={() => {
+                              handleOpenDeleteConfirmationModal(row.pdcId);
+                            }}
+                          />
                         </IconButton>
                         <IconButton
                           aria-label="icon"
                           size="small"
                           style={{ color: "black" }}
                         >
-                          <EditIcon fontSize="small" />
+                          <EditIcon
+                            fontSize="small"
+                            onClick={() => {
+                              handleOpenEditModal(row.pdcId);
+                            }}
+                          />
                         </IconButton>
                         <IconButton
                           aria-label="QR"
@@ -478,6 +528,56 @@ const PDC = () => {
           )}
         </DialogContent>
       </Dialog>
+      {/* Delete PDC Modal */}
+      <div>
+        <Dialog open={deletePDCModalState} onClose={handleCloseDeletePDCModal}>
+          <DialogContent sx={{ padding: 0, minWidth: "500px" }}>
+            <Divider className="h-1 bg-red-500" />
+            <div className="flex justify-between items-center">
+              <p className=" font-black text-xl px-5 py-3">
+                Delete Confirmation
+              </p>
+              <CloseIcon
+                className="m-2 hover:cursor-pointer hover:bg-gray-100 hover:rounded"
+                onClick={handleCloseDeletePDCModal}
+              />
+            </div>
+            <Divider />
+            <p className="px-5 py-10">
+              Are you sure you want to delete <strong>{modalPdcID}</strong>?
+            </p>
+            <Divider />
+            <DialogActions>
+              <div className="flex justify-end">
+                <button
+                  className="bg-secondary text-white rounded font-semibold py-1 px-2 m-1 focus:outline-none hover:bg-gray-600"
+                  onClick={handleCloseDeletePDCModal}
+                >
+                  Close
+                </button>
+                <button
+                  className="bg-red-500 text-white rounded font-semibold py-1 px-2 m-1 focus:outline-none hover:bg-red-600"
+                  onClick={() => {
+                    handleDeletePDC(modalPdcID);
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            </DialogActions>
+          </DialogContent>
+        </Dialog>
+      </div>
+      <div>
+        <EditPDC
+          open={editPDCModalState}
+          onClose={() => {
+            fetchPDCData();
+            setEditPDCModalState(false);
+          }}
+          pdcId={pdcIdToEdit}
+        />
+      </div>
     </div>
   );
 };

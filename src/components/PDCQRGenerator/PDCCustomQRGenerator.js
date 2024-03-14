@@ -285,7 +285,7 @@ const PDCCustomQRGenerator = () => {
           <div className="flex justify-center">
             <div className="m-5 flex justify-center items-center bg-slate-200 pb-5 w-full rounded-xl">
               <button
-                className=" bg-secondary hover:bg-neutral-800 text-white font-semibold py-2 px-4 rounded mt-5 "
+                className="bg-secondary hover:bg-neutral-800 text-white font-semibold py-2 px-4 rounded mt-5 "
                 onClick={handleDownloadAll}
               >
                 Download All Generated QR
