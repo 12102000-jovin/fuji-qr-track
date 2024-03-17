@@ -284,7 +284,10 @@ const NavBar = () => {
                   ref={openScanQRModal}
                   onClick={handleQRScanner}
                 >
-                  <span className="font-black">Scan QR Code </span>
+                  <span className="font-black text-base sm:text-sm">
+                    Scan QR Code
+                  </span>
+
                   <QrCodeScannerRoundedIcon
                     style={{ fontSize: 28, marginLeft: 8 }}
                   />

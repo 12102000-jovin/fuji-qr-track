@@ -127,6 +127,14 @@ router.put("/editPDC/:workOrderId/:pdcId", async (req, res) => {
     // Find the current PDC
     const currentPdcId = await PDCModel.findOne({ pdcId });
 
+    // Check if pdcIdToEdit already exists
+    const futurePDC = await PDCModel.findOne({ pdcId: pdcIdToEdit });
+    if (futurePDC) {
+      return res
+        .status(400)
+        .json({ error: "PDC already exists. Please choose a different one." });
+    }
+
     if (!currentWorkOrder || !futureWorkOrder || !currentPdcId) {
       return res.status(404).json({
         message: "Current Work Order, Future Work Order, or PDC not found",
@@ -184,13 +192,11 @@ router.put("/editPDC/:workOrderId/:pdcId", async (req, res) => {
       await futureWorkOrder.save();
       await currentWorkOrder.save();
 
-      res
-        .status(200)
-        .json({
-          message: "PDC moved and updated successfully",
-          futureWorkOrder,
-          updatedPDC,
-        });
+      res.status(200).json({
+        message: "PDC moved and updated successfully",
+        futureWorkOrder,
+        updatedPDC,
+      });
     }
   } catch (error) {
     res

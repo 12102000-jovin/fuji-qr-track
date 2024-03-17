@@ -52,8 +52,12 @@ const Dashboard = () => {
                 <p className="text-3xl font-bold mb-1">
                   {dashboardData.subAssemblyType}
                 </p>
-                {dashboardData && (
+                {dashboardData && dashboardData.panelId && (
                   <p className="font-semibold">{dashboardData.panelId}</p>
+                )}
+
+                {dashboardData && dashboardData.loadbankId && (
+                  <p className="font-semibold">{dashboardData.loadbankId}</p>
                 )}
               </div>
             </div>

@@ -98,14 +98,12 @@ router.get("/:panelId/showPanelDashboard", async (req, res) => {
     }).populate("panels"); // Populate the 'panels' field
 
     if (!pdc) {
-      return res
-        .status(404)
-        .json({ message: "PDC not found for the given panel" });
+      console.log("PDC not found for the given panel"); // Optionally log the message
     }
 
     // Find the first Work Order that references this PDC
     const workOrder = await WorkOrderModel.findOne({
-      pdcs: pdc._id,
+      pdcs: pdc ? pdc._id : null, // Pass null if pdc is not found
     });
 
     // Extracting workOrderId from the found work order
@@ -113,9 +111,9 @@ router.get("/:panelId/showPanelDashboard", async (req, res) => {
 
     // Respond with the pdcId of the found PDC along with the populated 'panels'
     res.status(200).json({
-      pdcId: pdc.pdcId,
+      pdcId: pdc ? pdc.pdcId : null, // Pass null if pdc is not found
       workOrderId,
-      panels: pdc.panels,
+      panels: pdc ? pdc.panels : null, // Pass null if pdc is not found
       componentData,
     });
   } catch (error) {
@@ -153,23 +151,21 @@ router.get("/:loadbankId/showLoadbankDashboard", async (req, res) => {
     }).populate("loadbanks");
 
     if (!pdc) {
-      return res
-        .status(404)
-        .json({ message: "PDC not found for the given loadbank" });
+      console.log("PDC not found for the given panel");
     }
 
     // Find the first Work Order that references this PDC
     const workOrder = await WorkOrderModel.findOne({
-      pdcs: pdc._id,
+      pdcs: pdc ? pdc._id : null, // Pass null if pdc is not found
     });
     // Extracting workOrderId from the found work order
     const workOrderId = workOrder ? workOrder.workOrderId : null;
 
     // Respond with the pdcId of the found PDC along with the populated 'loadbanks'
     res.status(200).json({
-      pdcId: pdc.pdcId,
+      pdcId: pdc ? pdc.pdcId : null,
       workOrderId,
-      loadbanks: pdc.loadbanks,
+      loadbanks: pdc ? pdc.loadbanks : null,
       componentData,
     });
   } catch (error) {
@@ -183,7 +179,7 @@ router.get(
     try {
       const { componentSerialNumber } = req.params;
 
-      // Find the component based on tje componentSerialNumber
+      // Find the component based on the componentSerialNumber
       const component = await ComponentModel.findOne({ componentSerialNumber });
 
       if (!component) {
@@ -197,44 +193,95 @@ router.get(
         components: componentObjectId,
       }).populate("components");
 
-      // Check if a matching Panel was found
-      if (!panel) {
+      // Find the Loadbank that contains the specified component
+      const loadbank = await LoadbankModel.findOne({
+        components: componentObjectId,
+      }).populate("components");
+
+      // Check if the component is part of a Panel or a Loadbank
+      if (panel) {
+        // Include panelId in the response
+        const panelId = panel.panelId;
+        const subAssemblyType = "Panel";
+
+        // Get the object id of the panel
+        const panelObjectId = panel._id;
+
+        // Find the PDC that contains the specified panel
+        const PDC = await PDCModel.findOne({
+          panels: panelObjectId,
+        }).populate("panels");
+
+        let pdcId = null;
+        let workOrderId = null;
+
+        // If PDC exists, get its properties
+        if (PDC) {
+          // Get the object id of the pdc
+          pdcId = PDC.pdcId;
+
+          // Get the object id of the pdc
+          const pdcObjectId = PDC._id;
+
+          const WorkOrder = await WorkOrderModel.findOne({
+            pdcs: pdcObjectId,
+          }).populate("pdcs");
+
+          workOrderId = WorkOrder.workOrderId;
+        }
+
+        res.json({
+          component,
+          panelId,
+          pdcId,
+          workOrderId,
+          subAssemblyType,
+        });
+      } else if (loadbank) {
+        // Include loadbankId in the response
+        const loadbankId = loadbank.loadbankId;
+        const subAssemblyType = "Loadbank";
+
+        // Get the object id of the loadbank
+        const loadbankObjectId = loadbank._id;
+
+        // Find the PDC that contains the specified loadbank
+        const PDC = await PDCModel.findOne({
+          loadbanks: loadbankObjectId,
+        }).populate("loadbanks");
+
+        let pdcId = null;
+        let workOrderId = null;
+
+        // If PDC exists, get its properties
+        if (PDC) {
+          // Get the object id of the pdc
+          pdcId = PDC.pdcId;
+
+          // Get the object id of the pdc
+          const pdcObjectId = PDC._id;
+
+          const WorkOrder = await WorkOrderModel.findOne({
+            pdcs: pdcObjectId,
+          }).populate("pdcs");
+
+          workOrderId = WorkOrder.workOrderId;
+        }
+
+        res.json({
+          component,
+          loadbankId,
+          pdcId,
+          workOrderId,
+          subAssemblyType,
+        });
+      } else {
         return res
           .status(404)
-          .json({ message: "Panel not found for the component" });
+          .json({ message: "Panel or Loadbank not found for the component" });
       }
-
-      // Include panelId in the response
-      const panelId = panel.panelId;
-      const subAssemblyType = "Panel";
-
-      // Get the object id of the panel
-      const panelObjectId = panel._id;
-
-      const PDC = await PDCModel.findOne({
-        panels: panelObjectId,
-      }).populate("panels");
-
-      // Get the object id of the pdc
-      const pdcId = PDC.pdcId;
-
-      // Get the object id of the pdc
-      const pdcObjectId = PDC._id;
-
-      const WorkOrder = await WorkOrderModel.findOne({
-        pdcs: pdcObjectId,
-      }).populate("pdcs");
-
-      const workOrderId = WorkOrder.workOrderId;
-
-      res.json({
-        component,
-        panelId,
-        pdcId,
-        workOrderId,
-        subAssemblyType,
-      });
     } catch (error) {
+      console.error("Error retrieving Component Data:", error);
       res.status(500).json({ message: `Error retrieving Component Data` });
     }
   }

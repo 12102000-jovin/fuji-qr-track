@@ -97,6 +97,16 @@ router.put("/editWorkOrder/:workOrderId", async (req, res) => {
       return res.status(404).json({ message: "Work order not found" });
     }
 
+    const inputWorkOrderExist = await WorkOrderModel.findOne({
+      workOrderId: updatedWorkOrderId.workOrderId,
+    });
+
+    if (inputWorkOrderExist) {
+      return res.status(409).json({
+        error: "Work Order already exists. Please choose a different one.",
+      });
+    }
+
     // Update the WorkOrder data
     const updatedWorkOrder = await WorkOrderModel.findOneAndUpdate(
       { workOrderId: workOrderId },

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
+  Divider,
   Table,
   TableBody,
   TableCell,
@@ -28,8 +29,15 @@ const Component = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredComponent, setFilteredComponent] = useState([]);
 
+  const [deleteComponentModalState, setDeleteComponentModalState] =
+    useState(false);
+  const [modalComponentSerialNumber, setModalComponentSerialNumber] =
+    useState("");
+
   const fetchComponentData_API =
     "http://localhost:3001/Component/getAllComponents";
+
+  const deleteComponent_API = `http://localhost:3001/Component/deleteComponent/`;
 
   useEffect(() => {
     fetchComponentData();
@@ -90,6 +98,33 @@ const Component = () => {
       `http://localhost:3000/Dashboard/Component/${componentSerialNumber}`,
       "_blank"
     );
+  };
+
+  const handleCloseDeleteComponentModal = () => {
+    setDeleteComponentModalState(false);
+  };
+
+  const handleOpenDeleteConfirmationModal = (componentSerialNumber) => {
+    setDeleteComponentModalState(true);
+    setModalComponentSerialNumber(componentSerialNumber);
+  };
+
+  const handleDeletePDC = async (componentSerialNumber) => {
+    try {
+      const response = await axios.delete(
+        `${deleteComponent_API}${componentSerialNumber}`
+      );
+
+      if (response.status === 200) {
+        console.log("PDC Deleted Successfully");
+        fetchComponentData();
+        setDeleteComponentModalState(false);
+      } else {
+        console.log("Error deleting component:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error deleting component:", error);
+    }
   };
 
   return (
@@ -177,6 +212,17 @@ const Component = () => {
                       fontSize: "1.10rem",
                     }}
                   >
+                    Allocated Date
+                  </TableCell>
+                  <TableCell
+                    align="center"
+                    style={{
+                      width: "20%",
+                      color: "white",
+                      fontWeight: "bold",
+                      fontSize: "1.10rem",
+                    }}
+                  >
                     Action
                   </TableCell>
                 </TableHead>
@@ -194,10 +240,20 @@ const Component = () => {
                       </TableCell>
                       <TableCell align="center">{row.componentType}</TableCell>
                       <TableCell align="center">
+                        {moment(row.allocatedDate)
+                          .tz("Australia/Sydney")
+                          .format("DD MMMM YYYY")}
+                      </TableCell>
+                      <TableCell align="center">
                         <IconButton
                           aria-label="delete"
                           size="small"
                           style={{ color: "red" }}
+                          onClick={() => {
+                            handleOpenDeleteConfirmationModal(
+                              row.componentSerialNumber
+                            );
+                          }}
                         >
                           <DeleteIcon fontSize="small" />
                         </IconButton>
@@ -238,6 +294,50 @@ const Component = () => {
             </TableContainer>
           </div>
         </div>
+      </div>
+      <div>
+        {/* Delete Component Modal */}
+        <Dialog
+          open={deleteComponentModalState}
+          onClose={handleCloseDeleteComponentModal}
+        >
+          <DialogContent sx={{ padding: 0, minWidth: "500px" }}>
+            <Divider className="h-1 bg-red-500" />
+            <div className="flex justify-between items-center">
+              <p className=" font-black text-xl px-5 py-3">
+                Delete Confirmation
+              </p>
+              <CloseIcon
+                className="m-2 hover:cursor-pointer hover:bg-gray-100 hover:rounded"
+                onClick={handleCloseDeleteComponentModal}
+              />
+            </div>
+            <Divider />
+            <p className="px-5 py-10">
+              Are you sure you want to delete{" "}
+              <strong>{modalComponentSerialNumber}</strong>?
+            </p>
+            <Divider />
+            <DialogActions>
+              <div className="flex justify-end">
+                <button
+                  className="bg-secondary text-white rounded font-semibold py-1 px-2 m-1 focus:outline-none hover:bg-gray-600"
+                  onClick={handleCloseDeleteComponentModal}
+                >
+                  Close
+                </button>
+                <button
+                  className="bg-red-500 text-white rounded font-semibold py-1 px-2 m-1 focus:outline-none hover:bg-red-600"
+                  onClick={() => {
+                    handleDeletePDC(modalComponentSerialNumber);
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            </DialogActions>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

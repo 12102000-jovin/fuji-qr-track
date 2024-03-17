@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import EditIcon from "@mui/icons-material/Edit";
 import { Dialog, DialogContent } from "@mui/material";
 import axios from "axios";
 
 const EditWorkOrder = ({ open, onClose, workOrderId }) => {
   const [workOrderIdToEdit, setWorkOrderIdToEdit] = useState("");
   const [workOrderDisabled, setWorkOrderDisabled] = useState(true);
+
+  const [generalError, setGeneralError] = useState("");
 
   useEffect(() => {
     // Update the local state when the workOrderId prop changes
@@ -15,12 +16,14 @@ const EditWorkOrder = ({ open, onClose, workOrderId }) => {
 
   useEffect(() => {
     setWorkOrderDisabled(true);
+    setGeneralError("");
   }, [open]);
 
   const EditWorkOrder_API = "http://localhost:3001/WorkOrder/editWorkOrder/";
 
   const handleEditWorkOrder = async () => {
     try {
+      setGeneralError("");
       const response = await axios.put(`${EditWorkOrder_API}${workOrderId}`, {
         workOrderId: workOrderIdToEdit,
       });
@@ -30,10 +33,16 @@ const EditWorkOrder = ({ open, onClose, workOrderId }) => {
         onClose();
       } else {
         console.log("Error editing work order:", response.data.message);
-        // Optionally, handle the case where deletion was not successful
+        setGeneralError("An error occurred. Please try again later.");
       }
     } catch (error) {
       console.error("Error editing work order:", error);
+      if (error.response && error.response.data) {
+        const { error: errorMessage } = error.response.data;
+        setGeneralError(errorMessage); // Set general error message from backend
+      } else {
+        setGeneralError("An error occurred. Please try again later."); // Set a generic error message
+      }
     }
   };
 
@@ -42,7 +51,7 @@ const EditWorkOrder = ({ open, onClose, workOrderId }) => {
   };
 
   return (
-    <Dialog fullWidth open={open} onClose={onClose} sx={{ marginTop: "-60vh" }}>
+    <Dialog fullWidth open={open} onClose={onClose} sx={{ marginTop: "-40vh" }}>
       <DialogContent>
         <div className="relative">
           <div className="absolute top-0 right-0">
@@ -56,9 +65,16 @@ const EditWorkOrder = ({ open, onClose, workOrderId }) => {
           </div>
         </div>
 
-        <p className="block mb-10 flex justify-center text-signature font-bold text-3xl">
+        <p className="block flex justify-center text-signature font-bold text-3xl mb-5">
           Edit Work Order
         </p>
+        {generalError && (
+          <div className="flex justify-center mb-10">
+            <p className="text-xs font-bold text-white px-2 py-1 rounded-xl bg-red-600">
+              {generalError}
+            </p>
+          </div>
+        )}
         <div>
           <label
             htmlFor="workOrderId"

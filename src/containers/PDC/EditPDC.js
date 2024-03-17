@@ -13,6 +13,8 @@ const EditPDC = ({ open, onClose, pdcId }) => {
 
   const [pdcDisabled, setPDCdisabled] = useState(true);
 
+  const [generalError, setGeneralError] = useState(false);
+
   const fetchDashboardPDCData_API = `http://localhost:3001/Dashboard/${pdcId}/showPDCDashboard`;
   const fetchWorkOrderData_API =
     "http://localhost:3001/WorkOrder/getAllWorkOrder";
@@ -30,6 +32,7 @@ const EditPDC = ({ open, onClose, pdcId }) => {
   useEffect(() => {
     setWorkOrderDisabled(true);
     setPDCdisabled(true);
+    setGeneralError("");
   }, [open]);
 
   useEffect(() => {
@@ -79,11 +82,17 @@ const EditPDC = ({ open, onClose, pdcId }) => {
       }
     } catch (error) {
       console.error("Error editing work order:", error);
+      if (error.response && error.response.data) {
+        const { error: errorMessage } = error.response.data;
+        setGeneralError(errorMessage);
+      } else {
+        setGeneralError("An error occurred. Please try again later.");
+      }
     }
   };
 
   return (
-    <Dialog fullWidth open={open} onClose={onClose} sx={{ marginTop: "-60vh" }}>
+    <Dialog fullWidth open={open} onClose={onClose} sx={{ marginTop: "-40vh" }}>
       <DialogContent>
         <div className="relative">
           <div className="absolute top-0 right-0">
@@ -97,10 +106,16 @@ const EditPDC = ({ open, onClose, pdcId }) => {
           </div>
         </div>
 
-        <p className="block mb-10 flex justify-center text-signature font-bold text-3xl">
+        <p className="block mb-5 flex justify-center text-signature font-bold text-3xl">
           Edit PDC
         </p>
-
+        {generalError && (
+          <div className="flex justify-center mb-10">
+            <p className="text-xs font-bold text-white px-2 py-1 rounded-xl bg-red-600">
+              {generalError}
+            </p>
+          </div>
+        )}
         <div>
           <label
             htmlFor="pdcId"
