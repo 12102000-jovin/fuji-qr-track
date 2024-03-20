@@ -116,8 +116,14 @@ router.put("/editPDC/:workOrderId/:pdcId", async (req, res) => {
     const { workOrderId, pdcId } = req.params;
     const { workOrderIdToEdit, pdcIdToEdit } = req.body;
 
-    // Find the current work order
-    const currentWorkOrder = await WorkOrderModel.findOne({ workOrderId });
+    console.log("This is workOrder: ", workOrderId);
+
+    let currentWorkOrder;
+
+    if (workOrderId) {
+      // Find the current work order
+      currentWorkOrder = await WorkOrderModel.findOne({ workOrderId });
+    }
 
     // Find the future work order
     const futureWorkOrder = await WorkOrderModel.findOne({
@@ -129,19 +135,27 @@ router.put("/editPDC/:workOrderId/:pdcId", async (req, res) => {
 
     // Check if pdcIdToEdit already exists
     const futurePDC = await PDCModel.findOne({ pdcId: pdcIdToEdit });
-    if (futurePDC) {
+    if (futurePDC && currentPdcId && futurePDC.pdcId !== currentPdcId.pdcId) {
       return res
         .status(400)
         .json({ error: "PDC already exists. Please choose a different one." });
     }
 
-    if (!currentWorkOrder || !futureWorkOrder || !currentPdcId) {
-      return res.status(404).json({
-        message: "Current Work Order, Future Work Order, or PDC not found",
-      });
-    }
+    // if (!currentWorkOrder || !futureWorkOrder || !currentPdcId) {
+    //   return res.status(404).json({
+    //     message: "Current Work Order, Future Work Order, or PDC not found",
+    //   });
+    // }
 
-    if (workOrderId !== workOrderIdToEdit && pdcId === pdcIdToEdit) {
+    if (workOrderId === null || workOrderId === "null" || workOrderId === "") {
+      futureWorkOrder.pdcs.push(currentPdcId._id);
+      await futureWorkOrder.save();
+
+      return res.status(200).json({
+        message: "PDC added to future work order successfully",
+        futureWorkOrder,
+      });
+    } else if (workOrderId !== workOrderIdToEdit && pdcId === pdcIdToEdit) {
       // Add the PDC to the future work order and remove it from the current work order
       futureWorkOrder.pdcs.push(currentPdcId._id);
       currentWorkOrder.pdcs.pull(currentPdcId._id);
@@ -197,6 +211,8 @@ router.put("/editPDC/:workOrderId/:pdcId", async (req, res) => {
         futureWorkOrder,
         updatedPDC,
       });
+    } else if (workOrderId === workOrderIdToEdit && pdcId == pdcIdToEdit) {
+      res.status(200).json({ message: "No changes" });
     }
   } catch (error) {
     res

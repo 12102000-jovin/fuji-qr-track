@@ -8,11 +8,12 @@ import LaunchIcon from "@mui/icons-material/Launch";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import QueueIcon from "@mui/icons-material/AddToPhotos";
-import logo from "../../Images/FE-logo.png";
+import logo from "../../../Images/FE-logo.png";
 import ReactQRCode from "qrcode.react";
 import html2canvas from "html2canvas";
-import SubAssemblyQRGenerator from "../../components/SubAssemblyQRGenerator/SubAssemblyQRGenerator";
-import SubAssemblyCustomQRGenerator from "../../components/SubAssemblyQRGenerator/SubAssemblyCustomQRGenerator";
+import SubAssemblyQRGenerator from "../../../components/SubAssemblyQRGenerator/SubAssemblyQRGenerator";
+import SubAssemblyCustomQRGenerator from "../../../components/SubAssemblyQRGenerator/SubAssemblyCustomQRGenerator";
+import EditLoadbank from "./EditLoadbank";
 
 import {
   Divider,
@@ -53,6 +54,9 @@ const LoadBank = () => {
 
   const [deleteLoadbankModalState, setDeleteLoadbankModalState] =
     useState(false);
+
+  const [editLoadbankModalState, setEditLoadbankModalState] = useState(false);
+  const [loadbankIdToEdit, setLoadbankIdToEdit] = useState("");
 
   const fetchLoadbankData_API =
     "http://localhost:3001/SubAssembly/Loadbank/getAllLoadbank";
@@ -219,6 +223,12 @@ const LoadBank = () => {
     }
   };
 
+  const handleOpenEditModal = (loadbankId) => {
+    setEditLoadbankModalState(true);
+    setLoadbankIdToEdit(loadbankId);
+    console.log(editLoadbankModalState);
+  };
+
   return (
     <div>
       <div className="flex justify-center bg-background border-none">
@@ -256,7 +266,8 @@ const LoadBank = () => {
                 />
               </div>
             </form>
-            <form className="max-w-sm mx-auto mr-1">
+            <form className="max-w-sm mx-auto mr-1 flex items-center">
+              <p className="mr-2 font-bold text-xs"> Rows: </p>
               <select className="bg-gray-50 h-12 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                 <option value="10" defaultValue>
                   10
@@ -377,7 +388,12 @@ const LoadBank = () => {
                             size="small"
                             style={{ color: "black" }}
                           >
-                            <EditIcon fontSize="small" />
+                            <EditIcon
+                              fontSize="small"
+                              onClick={() =>
+                                handleOpenEditModal(row.loadbankId)
+                              }
+                            />
                           </IconButton>
                           <IconButton
                             aria-label="QR"
@@ -398,13 +414,6 @@ const LoadBank = () => {
                                 handleLoadbankDashboard(row.loadbankId)
                               }
                             />
-                          </IconButton>
-                          <IconButton
-                            aria-label="links"
-                            size="small"
-                            style={{ color: "smokewhite" }}
-                          >
-                            <QueueIcon fontSize="small" />
                           </IconButton>
                         </TableCell>
                       </TableRow>
@@ -563,6 +572,16 @@ const LoadBank = () => {
             </DialogActions>
           </DialogContent>
         </Dialog>
+      </div>
+      <div>
+        <EditLoadbank
+          open={editLoadbankModalState}
+          onClose={() => {
+            fetchLoadbankData();
+            setEditLoadbankModalState(false);
+          }}
+          loadbankId={loadbankIdToEdit}
+        />
       </div>
     </div>
   );

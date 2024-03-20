@@ -4,6 +4,7 @@ const router = express.Router();
 
 const { LoadbankModel } = require("../models/SubAssemblyModel");
 const PDCModel = require("../models/PDCModel");
+const ComponentModel = require("../models/ComponentModel");
 
 router.post("/Loadbank/generateSubAssembly", async (req, res) => {
   const Loadbanks = req.body.Loadbanks;
@@ -68,6 +69,12 @@ router.delete("/Loadbank/deleteLoadbank/:loadbankId", async (req, res) => {
       res.status(404).json({ mesage: "Loadbank not found!" });
     }
 
+    const componentIds = loadbankToDelete.components;
+
+    for (const componentId of componentIds) {
+      await ComponentModel.findOneAndDelete({ _id: componentId });
+    }
+
     const deletedLoadbankObjectId = loadbankToDelete._id;
 
     await PDCModel.updateMany(
@@ -79,6 +86,109 @@ router.delete("/Loadbank/deleteLoadbank/:loadbankId", async (req, res) => {
     res.status(200).json({ message: "Loadbank deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+router.put("/Loadbank/editLoadbank/:pdcId/:loadbankId", async (req, res) => {
+  try {
+    const { pdcId, loadbankId } = req.params;
+    const { pdcToEdit, loadbankToEdit } = req.body;
+
+    // Find the current pdcId
+    const currentPdc = await PDCModel.findOne({ pdcId });
+
+    // Find the future pdcId
+    const futurePdc = await PDCModel.findOne({ pdcId: pdcToEdit });
+
+    // Find the current loadbankId
+    const currentLoadbank = await LoadbankModel.findOne({ loadbankId });
+
+    // Find the future loadbankId
+    const futureLoadbank = await LoadbankModel.findOne({
+      loadbankId: loadbankToEdit,
+    });
+
+    // console.log("Current PDC: ", currentPdc);
+    console.log("Future PDC: ", futurePdc);
+    // console.log("Current Loadbank: ", currentLoadbank);
+    // console.log("Future Loadbank: ", futureLoadbank);
+
+    if (
+      futureLoadbank &&
+      currentLoadbank &&
+      futureLoadbank.loadbankId !== currentLoadbank.loadbankId
+    ) {
+      return res.status(409).json({
+        error: "Loadbank already exists. Please choose a different one",
+      });
+    }
+
+    if (pdcId !== pdcToEdit && loadbankId === loadbankToEdit) {
+      // Add the loadbank to the future pdc and remove it from the current pdc
+      if (futurePdc && currentPdc && currentPdc.loadbanks) {
+        futurePdc.loadbanks.push(currentLoadbank._id);
+        currentPdc.loadbanks.pull(currentLoadbank._id);
+
+        // Save changes to both pdcs
+        await futurePdc.save();
+        await currentPdc.save();
+      }
+      res.status(200).json({ message: "PDC moved successfully", futurePdc });
+    } else if (pdcId === pdcToEdit && loadbankId !== loadbankToEdit) {
+      const updatedLoadbankId = await LoadbankModel.findOneAndUpdate(
+        { loadbankId: loadbankId },
+        {
+          $set: {
+            loadbankId: loadbankToEdit,
+            link: `http://localhost:3000/Dashboard/Loadbank/${loadbankToEdit}`,
+          },
+        },
+        { new: true }
+      );
+
+      if (!updatedLoadbankId) {
+        return res.status(404).json({
+          message: "Loadbank not found",
+        });
+      }
+
+      res
+        .status(200)
+        .json({ message: "Loadbank updated successfully", updatedLoadbankId });
+    } else if (pdcId !== pdcToEdit && loadbankId !== loadbankToEdit) {
+      const updatedLoadbankId = await LoadbankModel.findOneAndUpdate(
+        { loadbankId: loadbankId },
+        {
+          $set: {
+            loadbankId: loadbankToEdit,
+            link: `http://localhost:3000/Dashboard/Loadbank/${loadbankToEdit}`,
+          },
+        },
+        { new: true }
+      );
+
+      // Add the loadbank to the future pdc and remove it from the current pdc
+      if (futurePdc && currentPdc && currentPdc.loadbanks) {
+        futurePdc.loadbanks.push(currentLoadbank._id);
+        currentPdc.loadbanks.pull(currentLoadbank._id);
+
+        // Save changes to both pdcs
+        await futurePdc.save();
+        await currentPdc.save();
+      }
+
+      res.status(200).json({
+        message: "Loadbank moved and updated successfully",
+        futurePdc,
+        updatedLoadbankId,
+      });
+    } else if (pdcId === pdcToEdit && loadbankId === loadbankToEdit) {
+      res.status(200).json({ message: "No changes" });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
   }
 });
 

@@ -36,7 +36,7 @@ import Home from "../Home";
 import PDCQRGenerator from "../PDCQRGenerator/PDCQRGenerator";
 import SubAssemblyQRGenerator from "../SubAssemblyQRGenerator/SubAssemblyQRGenerator";
 import PDC from "../../containers/PDC/PDC";
-import Panel from "../../containers/SubAssembly/Panel";
+import Panel from "../../containers/SubAssembly/Panel/Panel";
 import Allocate from "../../containers/Allocate/Allocate";
 import WorkOrder from "../../containers/WorkOrder/WorkOrder";
 import WorkOrderGenerator from "../WorkOrderQRGenerator/WorkOrderQRGenerator";
@@ -49,7 +49,7 @@ import DashboardLoadbank from "../../containers/Dashboard/DashboardLoadbank";
 import DashboardComponent from "../../containers/Dashboard/DashboardComponent";
 import AllocateComponents from "../../containers/Allocate/AllocateComponents";
 import Components from "../../containers/Component/Component";
-import Loadbank from "../../containers/SubAssembly/Loadbank";
+import Loadbank from "../../containers/SubAssembly/Loadbank/Loadbank";
 
 const drawerWidth = 200;
 

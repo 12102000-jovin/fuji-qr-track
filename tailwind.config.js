@@ -10,6 +10,7 @@ module.exports = {
       },
       colors: {
         signature: "#043f9d",
+        secondary: "#1853b1",
       },
     },
   },

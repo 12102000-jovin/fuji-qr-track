@@ -23,7 +23,7 @@ const EditPDC = ({ open, onClose, pdcId }) => {
 
   useEffect(() => {
     setPDCIdToEdit(pdcId);
-  }, [pdcId]);
+  }, [pdcId, open]);
 
   useEffect(() => {
     setSelectedWorkOrderId(workOrderId);
@@ -33,6 +33,7 @@ const EditPDC = ({ open, onClose, pdcId }) => {
     setWorkOrderDisabled(true);
     setPDCdisabled(true);
     setGeneralError("");
+    setWorkOrderId("");
   }, [open]);
 
   useEffect(() => {
@@ -46,17 +47,17 @@ const EditPDC = ({ open, onClose, pdcId }) => {
     };
 
     fetchWorkOrderId();
-  }, [pdcId]);
+  }, [open]);
 
   useEffect(() => {
-    // Fetch work orders from your API
+    // Fetch work orders from API
     fetch(`${fetchWorkOrderData_API}`)
       .then((response) => response.json())
       .then((data) => {
         setWorkOrders(data);
       })
       .catch((error) => console.error("Error fetching work orders:", error));
-  }, []);
+  }, [open]);
 
   const handleWorkOrderDisabled = () => {
     setWorkOrderDisabled(false);
@@ -118,11 +119,20 @@ const EditPDC = ({ open, onClose, pdcId }) => {
         )}
         <div>
           <label
-            htmlFor="pdcId"
+            htmlFor="workOrderIdDropdown"
             className="block mb-2 flex justify-start font-bold text-xl"
           >
-            Work Order Id
+            Work Order Id{" "}
+            <span className="flex items-center">
+              {!workOrderId && (
+                <p className="text-xs text-white px-2 bg-red-500 rounded-full ml-3">
+                  {" "}
+                  This PDC is not associated with any Work Order.
+                </p>
+              )}
+            </span>
           </label>
+
           <div className="flex items-center">
             <select
               id="WorkOrderIdDropdown"

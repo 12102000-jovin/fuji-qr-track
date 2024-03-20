@@ -20,7 +20,6 @@ import axios from "axios";
 import moment from "moment-timezone";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import QrCodeIcon from "@mui/icons-material/QrCode";
 import LaunchIcon from "@mui/icons-material/Launch";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -165,7 +164,8 @@ const Component = () => {
                 />
               </div>
             </form>
-            <form className="max-w-sm mx-auto mr-1">
+            <form className="max-w-sm mx-auto mr-1 flex items-center">
+              <p className="mr-2 font-bold text-xs"> Rows: </p>
               <select className="bg-gray-50 h-12 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                 <option value="10" defaultValue>
                   {" "}
@@ -263,14 +263,6 @@ const Component = () => {
                           style={{ color: "black" }}
                         >
                           <EditIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          aria-label="QR"
-                          size="small"
-                          style={{ color: "navy" }}
-                          //   onClick={() => showQRCodes(row)}
-                        >
-                          <QrCodeIcon fontSize="small" />
                         </IconButton>
                         <IconButton
                           aria-label="links"

@@ -13,6 +13,7 @@ import {
   Divider,
   Fab,
   Checkbox,
+  Pagination,
 } from "@mui/material";
 
 import moment from "moment-timezone";
@@ -56,6 +57,31 @@ const WorkOrder = () => {
   const [editWorkOrderModalState, setEditWorkOrderModalState] = useState(false);
 
   const [workOrderIdToEdit, setWorkOrderIdToEdit] = useState("");
+
+  // Pagination
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  useEffect(() => {
+    fetchWorkOrderData();
+  }, [page, rowsPerPage]);
+
+  const indexOfLastRow = page * rowsPerPage;
+  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+  const currentRows = filteredWorkOrders.slice(indexOfFirstRow, indexOfLastRow);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(event.target.value);
+    setPage(1); // Reset page to 1 when changing rows per page
+  };
+
+  useEffect(() => {
+    setPage(1);
+  }, [rowsPerPage]);
 
   // Ref
   const captureRef = useRef(null);
@@ -279,14 +305,17 @@ const WorkOrder = () => {
                 />
               </div>
             </form>
-            <form className="max-w-sm mx-auto mr-1">
-              <select className="bg-gray-50 h-12 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                <option value="10" defaultValue>
-                  {" "}
-                  10
+            <form className="max-w-sm mx-auto mr-1 flex items-center">
+              <p className="mr-2 font-bold text-xs"> Rows: </p>
+              <select
+                className="bg-gray-50 h-12 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                onChange={(e) => setRowsPerPage(Number(e.target.value))}
+              >
+                <option value="5" defaultValue>
+                  5
                 </option>
+                <option value="10">10</option>
                 <option value="15">15</option>
-                <option value="20">20</option>
               </select>
             </form>
           </div>
@@ -359,7 +388,7 @@ const WorkOrder = () => {
                 </TableHead>
 
                 <TableBody>
-                  {filteredWorkOrders.map((row) => (
+                  {currentRows.map((row) => (
                     <TableRow key={row.id} className="hover:bg-gray-100">
                       <TableCell align="center">
                         <Checkbox
@@ -483,6 +512,17 @@ const WorkOrder = () => {
                 </DialogActions>
               </Dialog>
             </TableContainer>
+          </div>
+          <div className="flex justify-center mt-5">
+            <Pagination
+              count={Math.ceil(filteredWorkOrders.length / rowsPerPage)}
+              page={page}
+              onChange={handleChangePage}
+              rowsPerPageOptions={[5, 10, 15]}
+              rowsPerPage={rowsPerPage}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
           </div>
         </div>
       </div>

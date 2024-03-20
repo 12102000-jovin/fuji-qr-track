@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import SubAssembly from "../SubAssembly/Panel";
+import SubAssembly from "../SubAssembly/Panel/Panel";
 import axios from "axios";
 import moment from "moment-timezone";
 import QrCodeScannerRoundedIcon from "@mui/icons-material/QrCodeScannerRounded";

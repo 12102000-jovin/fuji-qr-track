@@ -8,11 +8,12 @@ import LaunchIcon from "@mui/icons-material/Launch";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import QueueIcon from "@mui/icons-material/AddToPhotos";
-import logo from "../../Images/FE-logo.png";
+import logo from "../../../Images/FE-logo.png";
 import ReactQRCode from "qrcode.react";
 import html2canvas from "html2canvas";
-import SubAssemblyQRGenerator from "../../components/SubAssemblyQRGenerator/SubAssemblyQRGenerator";
-import SubAssemblyCustomQRGenerator from "../../components/SubAssemblyQRGenerator/SubAssemblyCustomQRGenerator";
+import SubAssemblyQRGenerator from "../../../components/SubAssemblyQRGenerator/SubAssemblyQRGenerator";
+import SubAssemblyCustomQRGenerator from "../../../components/SubAssemblyQRGenerator/SubAssemblyCustomQRGenerator";
+import EditPanel from "./EditPanel";
 
 import {
   Divider,
@@ -49,6 +50,9 @@ const Panel = () => {
 
   const [deletePanelModalState, setDeletePanelModalState] = useState(false);
 
+  const [editPanelModalState, setEditPanelModalState] = useState(false);
+  const [panelToEdit, setPanelIdToEdit] = useState("");
+
   // Ref
   const captureRef = useRef(null);
 
@@ -60,7 +64,7 @@ const Panel = () => {
 
   useEffect(() => {
     fetchPanelData();
-  }, []);
+  }, [searchQuery]);
 
   useEffect(() => {
     // Update filteredPDCs whenever panelData or searchQuery changes
@@ -199,6 +203,11 @@ const Panel = () => {
     setModalPanelID(panelId);
   };
 
+  const handleOpenEditModal = (panelId) => {
+    setEditPanelModalState(true);
+    setPanelIdToEdit(panelId);
+  };
+
   const handleDeletePanel = async (panelId) => {
     try {
       const response = await axios.delete(`${deletePanel_API}${panelId}`);
@@ -250,7 +259,8 @@ const Panel = () => {
                 />
               </div>
             </form>
-            <form className="max-w-sm mx-auto mr-1">
+            <form className="max-w-sm mx-auto mr-1 flex items-center">
+              <p className="mr-2 font-bold text-xs"> Rows: </p>
               <select className="bg-gray-50 h-12 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                 <option value="10" defaultValue>
                   10
@@ -371,7 +381,12 @@ const Panel = () => {
                             size="small"
                             style={{ color: "black" }}
                           >
-                            <EditIcon fontSize="small" />
+                            <EditIcon
+                              fontSize="small"
+                              onClick={() => {
+                                handleOpenEditModal(row.panelId);
+                              }}
+                            />
                           </IconButton>
                           <IconButton
                             aria-label="QR"
@@ -555,6 +570,16 @@ const Panel = () => {
             </DialogActions>
           </DialogContent>
         </Dialog>
+      </div>
+      <div>
+        <EditPanel
+          open={editPanelModalState}
+          onClose={() => {
+            fetchPanelData();
+            setEditPanelModalState(false);
+          }}
+          panelId={panelToEdit}
+        />
       </div>
     </div>
   );

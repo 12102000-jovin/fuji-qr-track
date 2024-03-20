@@ -94,7 +94,10 @@ router.post("/AllocatePanelComponent", async (req, res) => {
     });
 
     if (existingComponents.length > 0) {
-      return res.json({ error: "Existing component" });
+      return res.status(409).json({
+        message:
+          "Component already allocated. Please select a different component.",
+      });
     } else {
       // If there are no existing components, proceed to insert new components
       const components = await ComponentModel.insertMany([
