@@ -41,15 +41,24 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 text-white">
               <div className="flex flex-col items-start p-2">
                 <p className="text-3xl font-bold mb-1">WorkOrder</p>
-                {dashboardType === "Panel" && (
+                {dashboardType === "Panel" && dashboardData.workOrderId ? (
                   <p className="font-semibold">{dashboardData.workOrderId}</p>
+                ) : (
+                  <p className="bg-red-500 font-black text-white p-1 pr-2 pl-2 rounded-full text-xs">
+                    No WorkOrder Found
+                  </p>
                 )}
               </div>
               <div className="flex flex-col items-start p-2">
                 <p className="text-3xl font-bold mb-1">PDC</p>
-                {dashboardType === "Panel" && (
+                {dashboardType === "Panel" && dashboardData.pdcId ? (
                   <p className="font-semibold text-white rounded-full inline-block">
                     {dashboardData.pdcId}
+                  </p>
+                ) : (
+                  <p className="bg-red-500 font-black text-white p-1 pr-2 pl-2 rounded-full text-xs">
+                    {" "}
+                    No PDC Found
                   </p>
                 )}
               </div>
@@ -97,7 +106,7 @@ const Dashboard = () => {
                 ))
               ) : (
                 <div className="flex justify-start">
-                  <p className="bg-red-500 font-black text-white p-1 pr-2 pl-2 rounded-full">
+                  <p className="bg-red-500 font-black text-white p-1 pr-2 pl-2 rounded-full text-xs">
                     No Component
                   </p>
                 </div>

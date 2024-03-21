@@ -13,6 +13,7 @@ import {
   DialogActions,
   Fab,
   Checkbox,
+  Pagination,
 } from "@mui/material";
 
 import axios from "axios";
@@ -37,6 +38,31 @@ const Component = () => {
     "http://localhost:3001/Component/getAllComponents";
 
   const deleteComponent_API = `http://localhost:3001/Component/deleteComponent/`;
+
+  // Pagination
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  useEffect(() => {
+    fetchComponentData();
+  }, [page, rowsPerPage]);
+
+  const indexOfLastRow = page * rowsPerPage;
+  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+  const currentRows = filteredComponent.slice(indexOfFirstRow, indexOfLastRow);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(event.target.value);
+    setPage(1);
+  };
+
+  useEffect(() => {
+    setPage(1);
+  }, [rowsPerPage, searchQuery]);
 
   useEffect(() => {
     fetchComponentData();
@@ -167,12 +193,12 @@ const Component = () => {
             <form className="max-w-sm mx-auto mr-1 flex items-center">
               <p className="mr-2 font-bold text-xs"> Rows: </p>
               <select className="bg-gray-50 h-12 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                <option value="10" defaultValue>
+                <option value="5" defaultValue>
                   {" "}
-                  10
+                  5
                 </option>
+                <option value="10">10</option>
                 <option value="15">15</option>
-                <option value="20">20</option>
               </select>
             </form>
           </div>
@@ -228,7 +254,7 @@ const Component = () => {
                 </TableHead>
 
                 <TableBody>
-                  {filteredComponent.map((row) => (
+                  {currentRows.map((row) => (
                     <TableRow key={row.id} className="hover:bg-gray-100">
                       <TableCell
                         align="center"
@@ -258,13 +284,6 @@ const Component = () => {
                           <DeleteIcon fontSize="small" />
                         </IconButton>
                         <IconButton
-                          aria-label="icon"
-                          size="small"
-                          style={{ color: "black" }}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
                           aria-label="links"
                           size="small"
                           style={{ color: "smokewhite" }}
@@ -284,6 +303,17 @@ const Component = () => {
                 </TableBody>
               </Table>
             </TableContainer>
+          </div>
+          <div className="flex justify-center mt-5">
+            <Pagination
+              count={Math.ceil(filteredComponent.length / rowsPerPage)}
+              page={page}
+              onChange={handleChangePage}
+              rowsPerPageOptions={[5, 10, 15]}
+              rowsPerPage={rowsPerPage}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
           </div>
         </div>
       </div>

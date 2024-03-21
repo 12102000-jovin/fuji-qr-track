@@ -39,12 +39,26 @@ const DashboardLoadbank = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 text-white">
               <div className="flex flex-col items-start p-2">
                 <p className="text-3xl font-bold mb-1">WorkOrder</p>
-                <p className="font-semibold">{dashboardData.workOrderId}</p>
+                <p className="font-semibold">
+                  {dashboardData.workOrderId ? (
+                    <p>dashboardData.workOrderId</p>
+                  ) : (
+                    <p className="bg-red-500 font-black text-white p-1 pr-2 pl-2 rounded-full text-xs">
+                      No Work Order Found
+                    </p>
+                  )}
+                </p>
               </div>
               <div className="flex flex-col items-start p-2">
                 <p className="text-3xl font-bold mb-1">PDC</p>
                 <p className="font-semibold text-white rounded-full inline-block">
-                  {dashboardData.pdcId}
+                  {dashboardData.pdcId ? (
+                    <p>dashboardData.pdcId</p>
+                  ) : (
+                    <p className="bg-red-500 font-black text-white p-1 pr-2 pl-2 rounded-full text-xs">
+                      No PDC Found
+                    </p>
+                  )}
                 </p>
               </div>
               <div className="flex flex-col items-start p-2">
@@ -88,7 +102,7 @@ const DashboardLoadbank = () => {
                 ))
               ) : (
                 <div className="flex justify-start">
-                  <p className="bg-red-500 font-black text-white p-1 pr-2 pl-2 rounded-full">
+                  <p className="bg-red-500 font-black text-white p-1 pr-2 pl-2 rounded-full text-xs">
                     No Component
                   </p>
                 </div>

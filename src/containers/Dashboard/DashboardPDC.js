@@ -42,7 +42,15 @@ const Dashboard = () => {
               <div className="flex flex-col items-start p-2">
                 <p className="text-3xl font-bold mb-1 ">WorkOrder</p>
                 {dashboardType === "PDC" && (
-                  <p className="font-semibold">{dashboardData.workOrderId}</p>
+                  <p className="font-semibold">
+                    {dashboardData.workOrderId ? (
+                      <p> {dashboardData.workOrderId}</p>
+                    ) : (
+                      <p className="bg-red-500 font-black text-white p-1 pr-2 pl-2 rounded-full text-xs">
+                        No Work Order Found
+                      </p>
+                    )}
+                  </p>
                 )}
               </div>
               <div className="flex flex-col items-start p-2">
@@ -91,7 +99,7 @@ const Dashboard = () => {
                       ))
                     ) : (
                       <span className="bg-red-500 text-white p-1 pl-2 pr-2 font-black rounded-full text-xs inline-block">
-                        No panels found
+                        No Panel found
                       </span>
                     )
                   ) : (
@@ -135,7 +143,7 @@ const Dashboard = () => {
                       ))
                     ) : (
                       <span className="bg-red-500 text-white p-1 pl-2 pr-2 font-black rounded-full text-xs inline-block">
-                        No loadbanks found
+                        No Loadbank found
                       </span>
                     )
                   ) : (
@@ -145,15 +153,7 @@ const Dashboard = () => {
                   )}
                 </div>
               </div>
-
               {/* Other Sub-Assembly Section */}
-              <div className="text-start mt-4 p-2 w-full md:w-1/2">
-                <div className="w-full p-5 pl-10 pr-10 bg-white rounded-md ">
-                  <p className="text-black font-black text-2xl mb-2">
-                    Other Sub-Assembly...
-                  </p>
-                </div>
-              </div>
             </div>
           </div>
         </div>

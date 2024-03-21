@@ -96,7 +96,7 @@ const Dashboard = () => {
                 </div>
               ) : (
                 <div className="flex justify-start">
-                  <p className="bg-red-500 font-black  p-1 pr-2 pl-2 rounded-full">
+                  <p className="bg-red-500 font-black  p-1 pr-2 pl-2 rounded-full text-xs">
                     No PDC Found
                   </p>
                 </div>

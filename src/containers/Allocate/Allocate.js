@@ -1,24 +1,27 @@
 import React, { useState, useRef } from "react";
-import QrCodeScannerRoundedIcon from "@mui/icons-material/QrCodeScannerRounded";
 import axios from "axios";
-import moment from "moment-timezone";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const Allocate = () => {
   const [inputPDCValue, setInputPDCValue] = useState("");
   const [showSubAssemblyInput, setShowSubAssemblyInput] = useState(false);
+  const [detectedType, setDetectedType] = useState("");
   const [wrongPDCQRError, setWrongPDCQRError] = useState(false);
+  const [isAllocateLoading, setIsAllocateLoading] = useState(false);
 
-  const [inputPanelValue, setInputPanelValue] = useState("");
-  const [wrongPanelQRError, setWrongPanelQRError] = useState(false);
-
-  const [inputLoadbankValue, setInputLoadbankValue] = useState("");
-  const [wrongLoadbankQRError, setWrongLoadbankQRError] = useState(false);
+  const [subAssemblyInputValue, setSubAssemblyInputValue] = useState("");
+  const [wrongSubAssemblyError, setWrongSubAssemblyError] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState("");
   const [successfulMessage, setSuccessfulMessage] = useState("");
 
-  const pdcInputRef = useRef(null); // Create a ref for the "Select PDC" input
-  const resetPDCRef = useRef(null); // Create a ref for the scan button
+  const pdcInputRef = useRef(null);
+  const resetPDCRef = useRef(null);
+
+  const subAssemblyInputRef = useRef(null);
+  const resetSubAssemblyRef = useRef(null);
+
+  const allocateSubAssemblyRef = useRef(null);
 
   const AllocateSubAssembly_API =
     "http://localhost:3001/Allocate/AllocateSubAssembly";
@@ -27,12 +30,8 @@ const Allocate = () => {
     setInputPDCValue(event.target.value);
   };
 
-  const handlePanelInputChange = (event) => {
-    setInputPanelValue(event.target.value);
-  };
-
-  const handleLoadbankInputChange = (event) => {
-    setInputLoadbankValue(event.target.value);
+  const handleSubAssemblyInputChange = (event) => {
+    setSubAssemblyInputValue(event.target.value);
   };
 
   const handlePDCKeyDown = (event) => {
@@ -42,8 +41,6 @@ const Allocate = () => {
         setInputPDCValue(inputPDCValue);
         setShowSubAssemblyInput(true);
         setWrongPDCQRError(false);
-        setInputPanelValue("");
-        setWrongPanelQRError(false);
       } else {
         try {
           const parsedInput = JSON.parse(inputPDCValue);
@@ -51,8 +48,6 @@ const Allocate = () => {
             setInputPDCValue(parsedInput.pdcId);
             setShowSubAssemblyInput(true);
             setWrongPDCQRError(false);
-            setInputPanelValue("");
-            setWrongPanelQRError(false);
           } else {
             setShowSubAssemblyInput(false);
             setWrongPDCQRError(true);
@@ -65,92 +60,108 @@ const Allocate = () => {
     }
   };
 
-  const handlePanelKeyDown = (event) => {
+  const handleSubAssemblyKeyDown = (event) => {
     if (event.key === "Enter") {
-      const isPanelPattern = /^PANEL\d{6}$/.test(inputPanelValue);
+      console.log("Entered");
+      const isPanelPattern = /^PANEL\d{6}$/.test(subAssemblyInputValue);
+      const isLoadbankPattern = /^LB\d{6}$/.test(subAssemblyInputValue);
+
       if (isPanelPattern) {
-        setInputPanelValue(inputPanelValue);
-        setWrongPanelQRError(false);
+        setShowSubAssemblyInput(subAssemblyInputValue);
+        setDetectedType("Panel");
+        setWrongSubAssemblyError(false);
+      } else if (isLoadbankPattern) {
+        setShowSubAssemblyInput(subAssemblyInputValue);
+        setDetectedType("Loadbank");
+        setWrongSubAssemblyError(false);
       } else {
         try {
-          const parsedInput = JSON.parse(inputPanelValue);
+          const parsedInput = JSON.parse(subAssemblyInputValue);
           if (parsedInput.panelId) {
-            setInputPanelValue(parsedInput.panelId);
-            setWrongPanelQRError(false);
+            console.log("Panel Detected");
+            setSubAssemblyInputValue(parsedInput.panelId);
+            setDetectedType("Panel");
+            setWrongSubAssemblyError(false);
+          } else if (parsedInput.loadbankId) {
+            console.log("Loadbank Detected");
+            setSubAssemblyInputValue(parsedInput.loadbankId);
+            setDetectedType("Loadbank");
+            setWrongSubAssemblyError(false);
           } else {
-            // setShowSubAssemblyInput(false);
-            setWrongPanelQRError(true);
+            setWrongSubAssemblyError(true);
+            setDetectedType("");
           }
         } catch (error) {
-          //   setShowSubAssemblyInput(false);
-          setWrongPanelQRError(true);
+          setWrongSubAssemblyError(true);
+          setDetectedType("");
         }
       }
     }
   };
 
-  const handleLoadbankKeyDown = (event) => {
-    if (event.key === "Enter") {
-      const isLoadbankPattern = /^LB\d{6}$/.test(inputLoadbankValue);
-      if (isLoadbankPattern) {
-        setInputLoadbankValue(inputLoadbankValue);
-        setWrongLoadbankQRError(false);
-      } else {
-        try {
-          const parsedInput = JSON.parse(inputLoadbankValue);
-          if (parsedInput.loadbankId) {
-            setInputLoadbankValue(parsedInput.loadbankId);
-            setWrongLoadbankQRError(false);
-          } else {
-            setWrongLoadbankQRError(true);
-          }
-        } catch (error) {
-          //   setShowSubAssemblyInput(false);
-          setWrongLoadbankQRError(true);
-        }
-      }
-    }
-  };
-
-  const handlePDCscan = () => {
+  const handleResetPDCscan = () => {
     // Focus on the "Select PDC" input when the button is clicked
     pdcInputRef.current.focus();
     setInputPDCValue("");
     setShowSubAssemblyInput(false);
     setErrorMessage("");
+    setSuccessfulMessage("");
+  };
+
+  const handleResetSubAssemblyScan = () => {
+    // Focus on the "Select SubAssembly" input when the button is clicked
+    subAssemblyInputRef.current.focus();
+    setSubAssemblyInputValue("");
+    setErrorMessage("");
+    setDetectedType("");
+    setSuccessfulMessage("");
+    setWrongSubAssemblyError("");
   };
 
   const handleKeyPress = (event) => {
     if (event.key === "]") {
       event.preventDefault();
-      // Focus on the scan button when "]" key is pressed      // Reset PDC
+      // Focus on the reset button when "]" key is pressed      // Reset PDC
       resetPDCRef.current.focus();
       setSuccessfulMessage("");
       setErrorMessage("");
+      setSubAssemblyInputValue("");
+      setDetectedType("");
+      setWrongPDCQRError("");
+    } else if (event.key === "[") {
+      // Focus on the reset button when "[" key is pressed      // Reset SubAssembly
+      resetSubAssemblyRef.current.focus();
+    } else if (event.key === "#") {
+      allocateSubAssemblyRef.current.focus();
     }
   };
 
   const handleAllocate = async () => {
     try {
+      setIsAllocateLoading(true);
       const response = await axios.post(AllocateSubAssembly_API, {
         inputPDCValue,
-        inputPanelValue,
-        inputLoadbankValue,
+        subAssemblyInputValue,
       });
       // Handle the response
       console.log(response.data);
 
       // Clear error message if successful
       setErrorMessage("");
-      setSuccessfulMessage("Sub-Assembly Allocated to PDC successfully");
+      if (response.status === 200) {
+        setSuccessfulMessage("Sub-Assembly Allocated to PDC successfully");
+        setIsAllocateLoading(false);
+      }
     } catch (error) {
       // Handle error and set error message
       if (error.response) {
         setSuccessfulMessage("");
         setErrorMessage(error.response.data.message || "Internal Server Error");
+        setIsAllocateLoading(false);
       } else {
         setSuccessfulMessage("");
         setErrorMessage("Error making the request");
+        setIsAllocateLoading(false);
       }
     }
   };
@@ -158,7 +169,7 @@ const Allocate = () => {
   return (
     <div onKeyDown={handleKeyPress} tabIndex={0}>
       <div className="flex justify-center bg-background border-none">
-        <div className="w-3/4 p-6 shadow-lg bg-white text-black rounded-md mt-5 mb-10">
+        <div className="w-3/4 p-5 shadow-lg bg-white text-black rounded-md mt-5 mb-10">
           <div className="text-4xl text-center font-black text-signature">
             {" "}
             Allocate Sub-Assembly{" "}
@@ -196,16 +207,15 @@ const Allocate = () => {
                 ref={pdcInputRef}
                 className="border w-full px-2 py-4 rounded-md focus:outline-none focus:ring-3 focus:border-gray-600 text-black"
                 disabled={showSubAssemblyInput}
+                placeholder="Enter PDC"
               />
               <button
                 ref={resetPDCRef}
-                className="absolute right-0 top-1/2 transform -translate-y-1/2  bg-signature text-white p-2 mr-2 rounded-md hover:bg-secondary"
-                onClick={handlePDCscan}
+                className="absolute right-0 top-1/2 transform -translate-y-1/2  bg-black text-white p-2 mr-2 rounded-md hover:bg-secondary"
+                onClick={handleResetPDCscan}
               >
                 <div className="flex items-center">
-                  <span className="font-bold"> Scan </span>
-                  <span> &nbsp; </span>
-                  <QrCodeScannerRoundedIcon />
+                  <span className="font-bold"> Reset </span>
                 </div>
               </button>
             </div>
@@ -213,7 +223,7 @@ const Allocate = () => {
 
           {wrongPDCQRError && (
             <div className="flex justify-start">
-              <span className="p-1 pl-2 pr-2 bg-red-500 text-xs rounded-full text-white font-bold mt-2">
+              <span className="p-1 pl-2 pr-2 bg-red-500 text-xs rounded-full text-white mt-2">
                 {" "}
                 Invalid PDC QR{" "}
               </span>{" "}
@@ -226,91 +236,82 @@ const Allocate = () => {
         <div className="w-3/4">
           {showSubAssemblyInput && (
             <div>
-              <div className="p-5 bg-signature text-white font-bold rounded-md">
-                <div className="flex justify-start text-3xl font-black ">
-                  Sub-Assembly
-                </div>
-
-                {/* =============== P A N E L  ===============*/}
+              <div className="p-5 bg-signature rounded-md">
                 <div className="flex justify-start">
                   <label
-                    htmlFor="Panel"
-                    className="block text-base mt-10 font-black text-xl p-1 text-white rounded-md"
+                    htmlFor="subAssembly"
+                    className="block text-base font-black text-xl p-1 text-white "
                   >
-                    Panel
+                    Select Sub-Assembly
                   </label>
                 </div>
-                <input
-                  type="text"
-                  id="Panel"
-                  onChange={handlePanelInputChange}
-                  onKeyDown={handlePanelKeyDown}
-                  autoFocus
-                  value={inputPanelValue}
-                  className="border w-full px-2 py-3 rounded-md focus:outline-none focus:ring-3 focus:border-gray-600 text-black"
-                />
-                {wrongPanelQRError && (
+                <div className="relative w-full">
+                  <input
+                    type="text"
+                    id="subAssembly"
+                    onChange={handleSubAssemblyInputChange}
+                    onKeyDown={handleSubAssemblyKeyDown}
+                    autoFocus
+                    ref={subAssemblyInputRef}
+                    value={subAssemblyInputValue}
+                    className="border w-full px-2 py-4 rounded-md focus:outline-none focus:ring-3 focus:border-gray-600 text-black"
+                    placeholder="Enter Sub-Assembly"
+                  />
+                  <button
+                    ref={resetSubAssemblyRef}
+                    className="absolute right-0 top-1/2 transform -translate-y-1/2  font-bold bg-black text-white p-2 mr-2 rounded-md hover:bg-secondary"
+                    onClick={handleResetSubAssemblyScan}
+                  >
+                    Reset
+                  </button>
+                </div>
+
+                {wrongSubAssemblyError && (
                   <div className="flex justify-start">
                     <span className="p-1 pl-2 pr-2 bg-red-500 text-xs rounded-full text-white font-bold mt-2">
                       {" "}
-                      Invalid Panel QR{" "}
+                      Invalid SubAssembly QR{" "}
                     </span>{" "}
                   </div>
                 )}
-
-                {/* =============== L O A D B A N K  ===============*/}
-                <div className="flex justify-start">
-                  <label
-                    htmlFor="Panel"
-                    className="block text-base mt-10 font-black text-xl p-1 text-white rounded-md"
-                  >
-                    Loadbank
-                  </label>
-                </div>
-
-                <input
-                  type="text"
-                  id="Loadbank"
-                  onChange={handleLoadbankInputChange}
-                  onKeyDown={handleLoadbankKeyDown}
-                  autoFocus
-                  value={inputLoadbankValue}
-                  className="border w-full px-2 py-3 rounded-md focus:outline-none focus:ring-3 focus:border-gray-600 text-black"
-                />
-                {wrongLoadbankQRError && (
+                {detectedType && (
                   <div className="flex justify-start">
-                    <span className="p-1 pl-2 pr-2 bg-red-500 text-xs rounded-full text-white font-bold mt-2">
-                      {" "}
-                      Invalid Loadbank QR{" "}
-                    </span>{" "}
+                    <span className="p-1 pl-2 pr-2 bg-green-500 text-xs rounded-full text-white font-bold mt-2">
+                      {detectedType} Detected
+                    </span>
                   </div>
                 )}
-
-                <div className="flex justify-start">
-                  <label
-                    htmlFor="Other Sub-Assembly"
-                    className="block text-base mt-10 font-black text-xl p-1 text-whhite rounded-md"
-                  >
-                    Other Sub-Assembly...
-                  </label>
-                </div>
-                <input
-                  type="text"
-                  className="border w-full px-2 py-3 rounded-md focus:outline-none focus:ring-3 focus:border-gray-600 text-black"
-                />
               </div>
             </div>
           )}
         </div>
       </div>
 
-      <button
-        className="p-3 bg-black text-white font-black rounded-md mt-5"
-        onClick={handleAllocate}
-      >
-        {" "}
-        Allocate SubAssembly to PDC
-      </button>
+      {inputPDCValue && subAssemblyInputValue && detectedType && (
+        <div className="flex justify-center">
+          <button
+            className="p-3 bg-black text-white font-black rounded-md mt-5"
+            onClick={handleAllocate}
+            ref={allocateSubAssemblyRef}
+          >
+            <div className="flex justify-center items-center">
+              {isAllocateLoading && (
+                <CircularProgress
+                  color="inherit"
+                  style={{
+                    width: "20px",
+                    height: "20px",
+                    marginRight: "8px",
+                  }}
+                />
+              )}
+              {isAllocateLoading
+                ? "Allocating..."
+                : `Allocate ${detectedType} to PDC`}
+            </div>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

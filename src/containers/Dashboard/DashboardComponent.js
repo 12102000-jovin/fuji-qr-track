@@ -39,13 +39,25 @@ const Dashboard = () => {
               <div className="flex flex-col items-start p-2">
                 <p className="text-3xl font-bold mb-1">WorkOrder</p>
                 {dashboardData && (
-                  <p className="font-semibold">{dashboardData.workOrderId}</p>
+                  <p className="font-semibold">
+                    {dashboardData.workOrderId ? (
+                      <p>{dashboardData.workOrderId}</p>
+                    ) : (
+                      <p className="bg-red-500 font-black text-white p-1 pr-2 pl-2 rounded-full text-xs">
+                        No Work Order Found
+                      </p>
+                    )}
+                  </p>
                 )}
               </div>
               <div className="flex flex-col items-start p-2">
                 <p className="text-3xl font-bold mb-1">PDC</p>
-                {dashboardData && (
-                  <p className="font-semibold">{dashboardData.pdcId}</p>
+                {dashboardData.pdcId ? (
+                  <p className="font-semibold"> {dashboardData.pdcId}</p>
+                ) : (
+                  <p className="bg-red-500 font-black text-white p-1 pr-2 pl-2 rounded-full text-xs">
+                    No PDC Found
+                  </p>
                 )}
               </div>
               <div className="flex flex-col items-start p-2">

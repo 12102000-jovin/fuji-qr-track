@@ -19,6 +19,10 @@ const PanelSchema = new mongoose.Schema(
     allocatedDate: {
       type: String,
     },
+    isAllocated: {
+      type: Boolean,
+      default: false,
+    },
     components: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -49,6 +53,10 @@ const LoadbankSchema = new mongoose.Schema(
     },
     allocatedDate: {
       type: String,
+    },
+    isAllocated: {
+      type: Boolean,
+      default: false,
     },
     components: [
       {

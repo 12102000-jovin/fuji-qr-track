@@ -1,8 +1,4 @@
 import React, { useState, useRef } from "react";
-import SubAssembly from "../SubAssembly/Panel/Panel";
-import axios from "axios";
-import moment from "moment-timezone";
-import QrCodeScannerRoundedIcon from "@mui/icons-material/QrCodeScannerRounded";
 import PanelComponentForm from "../../components/ComponentForms/PanelComponentForm";
 import LoadbankComponentForm from "../../components/ComponentForms/LoadbankComponentForm";
 
@@ -10,6 +6,9 @@ const AllocateComponents = () => {
   const [inputSubAssemblyValue, setInputSubAssemblyValue] = useState("");
   const [showPanelForm, setShowPanelForm] = useState(false);
   const [showLoadbankForm, setShowLoadbankForm] = useState(false);
+
+  const subAssemblyInputRef = useRef(null);
+  const resetSubAssemblyRef = useRef(null);
 
   const handleSubAssemblyChange = (event) => {
     setInputSubAssemblyValue(event.target.value);
@@ -48,10 +47,21 @@ const AllocateComponents = () => {
     }
   };
 
+  const handleKeyPress = (event) => {
+    if (event.key === "[") {
+      console.log("test");
+      event.preventDefault();
+      subAssemblyInputRef.current.focus();
+      setInputSubAssemblyValue("");
+      setShowPanelForm("");
+      setShowLoadbankForm("");
+    }
+  };
+
   return (
-    <div>
+    <div onKeyDown={handleKeyPress} tabIndex={0}>
       <div className="flex justify-center bg-background border-none">
-        <div className="w-3/4 p-6 shadow-lg bg-white text-black rounded-md mt-5 mb-10">
+        <div className="w-3/4 p-5 shadow-lg bg-white text-black rounded-md mt-5 mb-10">
           <div className="text-4xl text-center font-black text-signature">
             {" "}
             Allocate Components{" "}
@@ -73,20 +83,17 @@ const AllocateComponents = () => {
                 onChange={handleSubAssemblyChange}
                 onKeyDown={handleSubAssemblyKeyDown}
                 autoFocus
-                // ref={SubAssemblyRef}
+                ref={subAssemblyInputRef}
                 className="border w-full px-2 py-4 rounded-md focus:outline-none focus:ring-3 focus:border-gray-600 text-black"
-                // disabled={showComponentInput}
+                disabled={showPanelForm || showLoadbankForm}
+                placeholder="Enter Sub-Assembly"
               />
               <button
-                // ref={resetSubAssemblyRef}
-                className="absolute right-0 top-1/2 transform -translate-y-1/2  bg-signature text-white p-2 mr-2 rounded-md hover:bg-secondary"
+                ref={resetSubAssemblyRef}
+                className="absolute right-0 top-1/2 transform -translate-y-1/2  bg-black text-white p-2 mr-2 rounded-md hover:bg-secondary"
                 // onClick={handlePDCscan}
               >
-                <div className="flex items-center">
-                  <span className="font-bold"> Scan </span>
-                  <span> &nbsp; </span>
-                  <QrCodeScannerRoundedIcon />
-                </div>
+                <div className="flex items-center font-bold">Reset</div>
               </button>
             </div>
           </div>

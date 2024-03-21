@@ -81,7 +81,7 @@ const WorkOrder = () => {
 
   useEffect(() => {
     setPage(1);
-  }, [rowsPerPage]);
+  }, [rowsPerPage, searchQuery]);
 
   // Ref
   const captureRef = useRef(null);

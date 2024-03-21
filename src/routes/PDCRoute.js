@@ -6,6 +6,8 @@ const PDCModel = require("../models/PDCModel");
 
 const WorkOrderModel = require("../models/WorkOrderModel");
 
+const { PanelModel, LoadbankModel } = require("../models/SubAssemblyModel");
+
 // Generate PDC API
 router.post("/generatePDC", async (req, res) => {
   const PDCs = req.body.PDCs;
@@ -101,6 +103,16 @@ router.delete("/deletePDC/:pdcId", async (req, res) => {
     await WorkOrderModel.updateMany(
       { pdcs: deletedPdcObjectId }, // Use the _id field for matching
       { $pull: { pdcs: deletedPdcObjectId } }
+    );
+
+    await PanelModel.updateMany(
+      { _id: { $in: pdcToDelete.panels } },
+      { $set: { isAllocated: false, allocatedDate: null } }
+    );
+
+    await LoadbankModel.updateMany(
+      { _id: { $in: pdcToDelete.loadbanks } },
+      { $set: { isAllocated: false, allocatedDate: null } }
     );
 
     console.log(pdcToDelete);
