@@ -192,7 +192,10 @@ const Component = () => {
             </form>
             <form className="max-w-sm mx-auto mr-1 flex items-center">
               <p className="mr-2 font-bold text-xs"> Rows: </p>
-              <select className="bg-gray-50 h-12 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              <select
+                className="bg-gray-50 h-12 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                onChange={(e) => setRowsPerPage(Number(e.target.value))}
+              >
                 <option value="5" defaultValue>
                   {" "}
                   5
@@ -238,6 +241,17 @@ const Component = () => {
                       fontSize: "1.10rem",
                     }}
                   >
+                    Component Desc
+                  </TableCell>
+                  <TableCell
+                    align="center"
+                    style={{
+                      width: "20%",
+                      color: "white",
+                      fontWeight: "bold",
+                      fontSize: "1.10rem",
+                    }}
+                  >
                     Allocated Date
                   </TableCell>
                   <TableCell
@@ -265,6 +279,9 @@ const Component = () => {
                         {row.componentSerialNumber}
                       </TableCell>
                       <TableCell align="center">{row.componentType}</TableCell>
+                      <TableCell align="center">
+                        {row.componentDescription}
+                      </TableCell>
                       <TableCell align="center">
                         {moment(row.allocatedDate)
                           .tz("Australia/Sydney")

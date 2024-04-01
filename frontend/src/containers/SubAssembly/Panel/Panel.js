@@ -7,13 +7,13 @@ import QrCodeIcon from "@mui/icons-material/QrCode";
 import LaunchIcon from "@mui/icons-material/Launch";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
-import QueueIcon from "@mui/icons-material/AddToPhotos";
 import logo from "../../../Images/FE-logo.png";
 import ReactQRCode from "qrcode.react";
 import html2canvas from "html2canvas";
 import SubAssemblyQRGenerator from "../../../components/SubAssemblyQRGenerator/SubAssemblyQRGenerator";
 import SubAssemblyCustomQRGenerator from "../../../components/SubAssemblyQRGenerator/SubAssemblyCustomQRGenerator";
 import EditPanel from "./EditPanel";
+import JSZip from "jszip";
 
 import {
   Divider,
@@ -42,6 +42,8 @@ const Panel = () => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [selectedRowsCount, setSelectedRowsCount] = useState("");
+  const [selectedRowsQRCodes, setSelectedRowsQRCodes] = useState([]);
+  const [openSelectedQRModal, setOpenSelectedQRModal] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredPanels, setFilteredPanels] = useState([]);
@@ -250,6 +252,64 @@ const Panel = () => {
     }
   };
 
+  const handleDownloadSelectedRowQR = () => {
+    const qrCodes = selectedRows
+      .map((rowId) => {
+        const selectedRow = panelData.find((row) => row._id === rowId);
+        if (selectedRow) {
+          return {
+            panelId: selectedRow.panelId,
+            qrCodeData: JSON.stringify({
+              link: selectedRow.link,
+              workOrderId: selectedRow.workOrderId,
+            }),
+          };
+        }
+        return null;
+      })
+      .filter(Boolean);
+    setSelectedRowsQRCodes(qrCodes);
+    setOpenSelectedQRModal(true);
+  };
+
+  const handleDownloadAllSelectedQR = async () => {
+    const zip = new JSZip();
+
+    const promises = selectedRowsQRCodes.map(async (code) => {
+      const qrCodeElement = document.getElementById(
+        `selectedQRCode-${code.panelId}`
+      );
+      const qrCodeCanvas = await html2canvas(qrCodeElement, {
+        width: 512,
+        height: 565,
+      });
+
+      return {
+        name: `${code.panelId}.png`,
+        data: qrCodeCanvas
+          .toDataURL("image/png")
+          .replace(/^data:image\/(png|jpg);base64,/, ""),
+      };
+    });
+
+    const files = await Promise.all(promises);
+
+    files.forEach((file) => {
+      zip.file(file.name, file.data, { base64: true });
+    });
+
+    zip.generateAsync({ type: "blob" }).then((content) => {
+      const a = document.createElement("a");
+      const url = URL.createObjectURL(content);
+      a.href = url;
+      a.download = `Selected-Panel`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  };
+
   return (
     <div>
       <div className="flex justify-center bg-background border-none">
@@ -301,13 +361,15 @@ const Panel = () => {
           </div>
           <hr className="h-px m-1 my-2 bg-gray-200 border-0 dark:bg-gray-700" />
           {selectedRowsCount && (
-            <p className="p-3 m-1 bg-black text-white font-black rounded-xl">
-              {" "}
-              Selected Rows: {selectedRowsCount}
-              <button className="bg-signature rounded-md ml-16 p-1 pl-2 pr-2">
+            <div className="flex justify-around items-center p-3 m-1 bg-black text-white font-black rounded-xl">
+              <p className=""> Selected Rows: {selectedRowsCount}</p>
+              <button
+                className="bg-signature rounded-md ml-16 p-1 pl-2 pr-2"
+                onClick={handleDownloadSelectedRowQR}
+              >
                 Download Selected Row QR
               </button>
-            </p>
+            </div>
           )}
           <div className="flex justify-center">
             <TableContainer className="w-full m-1 border border-blue-500 rounded-md ">
@@ -434,13 +496,6 @@ const Panel = () => {
                               fontSize="small"
                               onClick={() => handlePanelDashboard(row.panelId)}
                             />
-                          </IconButton>
-                          <IconButton
-                            aria-label="links"
-                            size="small"
-                            style={{ color: "smokewhite" }}
-                          >
-                            <QueueIcon fontSize="small" />
                           </IconButton>
                         </TableCell>
                       </TableRow>
@@ -621,6 +676,68 @@ const Panel = () => {
           panelId={panelToEdit}
         />
       </div>
+      <Dialog
+        open={openSelectedQRModal}
+        onClose={() => setOpenSelectedQRModal(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: "12px",
+            outline: "none",
+            minWidth: "70vw",
+          },
+        }}
+      >
+        <DialogContent className="bg-blue-900">
+          <div className="flex flex-wrap justify-center items-center">
+            {selectedRowsQRCodes.map((qrCode, index) => (
+              <div
+                className="p-5 m-5 bg-white rounded-lg shadow-md"
+                key={index}
+              >
+                <div className="flex flex-col justify-center items-center">
+                  <div ref={captureRef} id={`selectedQRCode-${qrCode.panelId}`}>
+                    <ReactQRCode
+                      value={qrCode.qrCodeData}
+                      size={512}
+                      imageSettings={{
+                        text: "QR Code",
+                        src: logo,
+                        excavate: true,
+                        width: 60,
+                        height: 35,
+                      }}
+                    />
+                    <p
+                      style={{
+                        fontFamily: "Avenir, sans-serif",
+                        fontSize: "20px",
+                        fontWeight: "bold",
+                      }}
+                      className="text-signature text-center"
+                    >
+                      Panel ID: {qrCode.panelId}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <button
+            className="bg-signature text-white font-semibold rounded ml-16 py-2 px-4"
+            onClick={handleDownloadAllSelectedQR}
+          >
+            Download
+          </button>
+          <button
+            className="bg-red-600 hover:bg-red-500 text-white font-semibold py-2 px-4 rounded"
+            onClick={() => setOpenSelectedQRModal(false)}
+          >
+            Close
+          </button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

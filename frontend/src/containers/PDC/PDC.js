@@ -45,6 +45,8 @@ const PDC = () => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [selectedRowsCount, setSelectedRowsCount] = useState("");
+  const [selectedRowsQRCodes, setSelectedRowsQRCodes] = useState([]);
+  const [openSelectedQRModal, setOpenSelectedQRModal] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredPDCs, setFilteredPDCs] = useState([]);
@@ -254,6 +256,64 @@ const PDC = () => {
     setPDCIdToEdit(pdcId);
   };
 
+  const handleDownloadSelectedRowQR = () => {
+    const qrCodes = selectedRows
+      .map((rowId) => {
+        const selectedRow = PDCData.find((row) => row._id === rowId);
+        if (selectedRow) {
+          return {
+            pdcId: selectedRow.pdcId,
+            qrCodeData: JSON.stringify({
+              link: selectedRow.link,
+              pdcId: selectedRow.pdcId,
+            }),
+          };
+        }
+        return null;
+      })
+      .filter(Boolean);
+    setSelectedRowsQRCodes(qrCodes);
+    setOpenSelectedQRModal(true); // Open the modal to display QR codes
+  };
+
+  const handleDownloadAllSelectedQR = async () => {
+    const zip = new JSZip();
+
+    const promises = selectedRowsQRCodes.map(async (code) => {
+      const qrCodeElement = document.getElementById(
+        `selectedQRCode-${code.pdcId}`
+      );
+      const qrCodeCanvas = await html2canvas(qrCodeElement, {
+        width: 512,
+        height: 565,
+      });
+
+      return {
+        name: `${code.pdcId}.png`,
+        data: qrCodeCanvas
+          .toDataURL("image/png")
+          .replace(/^data:image\/(png|jpg);base64,/, ""),
+      };
+    });
+
+    const files = await Promise.all(promises);
+
+    files.forEach((file) => {
+      zip.file(file.name, file.data, { base64: true });
+    });
+
+    zip.generateAsync({ type: "blob" }).then((content) => {
+      const a = document.createElement("a");
+      const url = URL.createObjectURL(content);
+      a.href = url;
+      a.download = `Selected-PDC`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  };
+
   return (
     <div>
       {/* PDC Table */}
@@ -307,13 +367,15 @@ const PDC = () => {
           </div>
           <hr className="h-px m-1 my-2 bg-gray-200 border-0 dark:bg-gray-700" />
           {selectedRowsCount && (
-            <p className="p-3 m-1 bg-black text-white font-black rounded-xl">
-              {" "}
-              Selected Rows: {selectedRowsCount}
-              <button className="bg-signature rounded-md ml-16 p-1 pl-2 pr-2">
+            <div className="flex justify-around items-center p-3 m-1 bg-black text-white font-black rounded-xl">
+              <p className=""> Selected Rows: {selectedRowsCount}</p>
+              <button
+                className="bg-signature rounded-md ml-16 p-1 pl-2 pr-2"
+                onClick={handleDownloadSelectedRowQR}
+              >
                 Download Selected Row QR
               </button>
-            </p>
+            </div>
           )}
           <div className="flex justify-center">
             <TableContainer className="w-full m-1 border border-blue-500 rounded-md">
@@ -616,6 +678,68 @@ const PDC = () => {
           pdcId={pdcIdToEdit}
         />
       </div>
+      <Dialog
+        open={openSelectedQRModal}
+        onClose={() => setOpenSelectedQRModal(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: "12px",
+            outline: "none",
+            minWidth: "70vw",
+          },
+        }}
+      >
+        <DialogContent className="bg-blue-900">
+          <div className="flex flex-wrap justify-center items-center">
+            {selectedRowsQRCodes.map((qrCode, index) => (
+              <div
+                className="p-5 m-5 bg-white rounded-lg shadow-md"
+                key={index}
+              >
+                <div className="flex flex-col justify-center items-center">
+                  <div ref={captureRef} id={`selectedQRCode-${qrCode.pdcId}`}>
+                    <ReactQRCode
+                      value={qrCode.qrCodeData}
+                      size={512}
+                      imageSettings={{
+                        text: "QR Code",
+                        src: logo,
+                        excavate: true,
+                        width: 60,
+                        height: 35,
+                      }}
+                    />
+                    <p
+                      style={{
+                        fontFamily: "Avenir, sans-serif",
+                        fontSize: "20px",
+                        fontWeight: "bold",
+                      }}
+                      className="text-signature text-center"
+                    >
+                      PDC ID: {qrCode.pdcId}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <button
+            className="bg-signature text-white font-semibold rounded ml-16 py-2 px-4"
+            onClick={handleDownloadAllSelectedQR}
+          >
+            Download
+          </button>
+          <button
+            className="bg-red-600 hover:bg-red-500 text-white font-semibold py-2 px-4 rounded"
+            onClick={() => setOpenSelectedQRModal(false)}
+          >
+            Close
+          </button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

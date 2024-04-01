@@ -191,47 +191,58 @@ router.post("/AllocateSubAssembly", async (req, res) => {
 
 router.post("/AllocatePanelComponent", async (req, res) => {
   try {
-    const { componentSerialNumber, componentType, panelId } = req.body;
+    const {
+      componentSerialNumber,
+      componentType,
+      componentDescription,
+      panelId,
+    } = req.body;
 
-    console.log(panelId);
-    console.log(componentSerialNumber);
-
-    const existingComponents = await ComponentModel.find({
-      componentSerialNumber: { $in: componentSerialNumber },
+    // Check if a component with the same serial number exists
+    const existingComponent = await ComponentModel.findOne({
+      componentSerialNumber,
     });
 
-    if (existingComponents.length > 0) {
+    if (existingComponent) {
       return res.status(409).json({
         message:
           "Component already allocated. Please select a different component.",
       });
-    } else {
-      // Check if Panel with panelId exists
-      const panel = await PanelModel.findOne({ panelId: panelId });
-
-      if (!panel) {
-        return res.status(404).json({ message: "Panel not found" });
-      }
-
-      // If there are no existing components, proceed to insert new components
-      const components = await ComponentModel.insertMany([
-        {
-          componentSerialNumber: componentSerialNumber,
-          componentType: componentType,
-          allocatedDate: new Date(),
-        },
-      ]);
-
-      components.forEach((component) => {
-        panel.components.push(component._id);
-      });
-
-      await panel.save();
-
-      return res
-        .status(200)
-        .json({ message: "Component allocated to Panel successfully" });
     }
+
+    // Check if a component with the same type is already allocated to the panel
+    const panel = await PanelModel.findOne({ panelId }).populate("components");
+
+    if (!panel) {
+      return res.status(404).json({ message: "Panel not found" });
+    }
+
+    const existingComponentType = panel.components.find(
+      (component) => component.componentType === componentType
+    );
+
+    if (existingComponentType) {
+      return res.status(409).json({
+        message: `${existingComponentType.componentType} with serial number [${existingComponentType.componentSerialNumber}] is already allocated to the panel. Please choose another component.`,
+      });
+    }
+
+    // If there are no existing components, proceed to insert new components
+    const component = new ComponentModel({
+      componentSerialNumber,
+      componentType,
+      componentDescription,
+      allocatedDate: new Date(),
+    });
+
+    await component.save();
+
+    panel.components.push(component._id);
+    await panel.save();
+
+    return res
+      .status(200)
+      .json({ message: "Component allocated to Panel successfully" });
   } catch (error) {
     console.error("Error in allocation:", error);
     // Handle the error and send an appropriate response
@@ -241,47 +252,59 @@ router.post("/AllocatePanelComponent", async (req, res) => {
 
 router.post("/AllocateLoadbankComponent", async (req, res) => {
   try {
-    const { componentSerialNumber, componentType, loadbankId } = req.body;
+    const {
+      componentSerialNumber,
+      componentType,
+      componentDescription,
+      loadbankId,
+    } = req.body;
 
-    console.log(loadbankId);
-    console.log(componentSerialNumber);
-
-    const existingComponents = await ComponentModel.find({
-      componentSerialNumber: { $in: componentSerialNumber },
+    const existingComponent = await ComponentModel.findOne({
+      componentSerialNumber,
     });
 
-    if (existingComponents.length > 0) {
+    if (existingComponent) {
       return res.status(409).json({
         message:
           "Component already allocated. Please select a different component.",
       });
-    } else {
-      // Check if Loadbank with loadbankId exists
-      const loadbank = await LoadbankModel.findOne({ loadbankId: loadbankId });
-
-      if (!loadbank) {
-        return res.status(404).json({ message: "Loadbank not found" });
-      }
-
-      components.forEach((component) => {
-        loadbank.components.push(component._id);
-      });
-
-      // If there are no existing components, proceed to insert new components
-      const components = await ComponentModel.insertMany([
-        {
-          componentSerialNumber: componentSerialNumber,
-          componentType: componentType,
-          allocatedDate: new Date(),
-        },
-      ]);
-
-      await loadbank.save();
-
-      return res
-        .status(200)
-        .json({ message: "Component allocated to the Loadbank successfully " });
     }
+
+    // Check if a component with the same type is already allocated to the loadbank
+    const loadbank = await LoadbankModel.findOne({ loadbankId }).populate(
+      "components"
+    );
+
+    if (!loadbank) {
+      return res.status(404).json({ message: "Loadbank not found" });
+    }
+
+    const existingComponentType = loadbank.components.find(
+      (component) => component.componentType === componentType
+    );
+
+    if (existingComponentType) {
+      return res.status(409).json({
+        message: `${existingComponentType.componentType} with serial number [${existingComponentType.componentSerialNumber}] is already allocated to the loadbank. Please choose another component.`,
+      });
+    }
+
+    // If there are no existing components, proceed to insert new components
+    const component = new ComponentModel({
+      componentSerialNumber,
+      componentType,
+      componentDescription,
+      allocatedDate: new Date(),
+    });
+
+    await component.save();
+
+    loadbank.components.push(component._id);
+    await loadbank.save();
+
+    return res
+      .status(200)
+      .json({ message: "Component allocated to the Loadbank successfully " });
   } catch (error) {
     console.error("Error in allocation:", error);
     // Handle the error and send an appropriate response

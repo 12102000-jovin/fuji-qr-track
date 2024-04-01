@@ -36,6 +36,7 @@ const LoadbankComponentForm = (loadbankId) => {
       const response = await axios.post(AllocateLoadbank_API, {
         loadbankId: loadbankId.loadbankId,
         componentType: "Meter",
+        componentDescription: "MTR-DESC-12345678",
         componentSerialNumber: meterValue,
         allocatedDate: moment()
           .tz("Australia/Sydney")

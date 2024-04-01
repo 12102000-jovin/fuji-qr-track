@@ -2,6 +2,7 @@ import React from "react";
 import { Dialog, DialogContent } from "@mui/material";
 import Meter from "../../Images/Meter.jpg";
 import Switch from "../../Images/Switch.jpg";
+import Breaker from "../../Images/Breaker.jpg";
 
 const ComponentImageModal = ({ open, onClose, type }) => {
   return (
@@ -18,6 +19,13 @@ const ComponentImageModal = ({ open, onClose, type }) => {
           <div>
             <p className="text-center mb-10 text-2xl font-black"> Meter</p>
             <img src={Meter} alt="Meter" style={{ height: "300px" }} />
+          </div>
+        )}
+
+        {type === "Breaker" && (
+          <div>
+            <p className="text-center mb-10 text-2xl font-black"> Breaker</p>
+            <img src={Breaker} alt="Breaker" style={{ height: "300px" }} />
           </div>
         )}
 
