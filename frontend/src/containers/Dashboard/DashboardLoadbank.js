@@ -24,7 +24,7 @@ const DashboardLoadbank = () => {
         console.log(response.data);
       })
       .catch((error) => {
-        console.error("Error fetching Loadbank data");
+        console.error("Error fetching Loadbank data", error);
       });
   };
 

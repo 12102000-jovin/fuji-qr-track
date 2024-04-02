@@ -26,6 +26,7 @@ import axios from "axios";
 import ReactQRCode from "qrcode.react";
 import html2canvas from "html2canvas";
 import AddIcon from "@mui/icons-material/Add";
+import { FaSort } from "react-icons/fa6";
 
 import logo from "../../Images/FE-logo.png";
 import JSZip from "jszip";
@@ -47,6 +48,8 @@ const PDC = () => {
   const [selectedRowsCount, setSelectedRowsCount] = useState("");
   const [selectedRowsQRCodes, setSelectedRowsQRCodes] = useState([]);
   const [openSelectedQRModal, setOpenSelectedQRModal] = useState(false);
+
+  const [sortOrder, setSortOrder] = useState("DESC");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredPDCs, setFilteredPDCs] = useState([]);
@@ -70,7 +73,16 @@ const PDC = () => {
 
   const indexOfLastRow = page * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = filteredPDCs.slice(indexOfFirstRow, indexOfLastRow);
+
+  // Filtered and sorted data
+  const sortedData = filteredPDCs.sort((a, b) => {
+    if (sortOrder === "DESC") {
+      return b.pdcId.localeCompare(a.pdcId);
+    } else {
+      return a.pdcId.localeCompare(b.pdcId);
+    }
+  });
+  const currentRows = sortedData.slice(indexOfFirstRow, indexOfLastRow);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -192,13 +204,13 @@ const PDC = () => {
     if (selectAll) {
       setSelectedRows([]);
     } else {
-      const allRowIds = PDCData.map((row) => row._id);
+      const allRowIds = filteredPDCs.map((row) => row._id);
       setSelectedRows(allRowIds);
     }
     setSelectAll(!selectAll);
 
     // Update the selectedRowsCount state
-    setSelectedRowsCount(selectAll ? "" : PDCData.length);
+    setSelectedRowsCount(selectAll ? "" : filteredPDCs.length);
   };
 
   const handleSelectRow = (rowId) => {
@@ -314,6 +326,11 @@ const PDC = () => {
     });
   };
 
+  const handleSortPDCId = () => {
+    const newSortOrder = sortOrder === "DESC" ? "ASC" : "DESC";
+    setSortOrder(newSortOrder);
+  };
+
   return (
     <div>
       {/* PDC Table */}
@@ -409,7 +426,16 @@ const PDC = () => {
                       fontSize: "1.10rem",
                     }}
                   >
-                    PDC ID
+                    <div className="flex items-center justify-center">
+                      <p onClick={handleSortPDCId}> PDC ID</p>
+                      <span>
+                        <FaSort
+                          fontSize="small"
+                          className="m-2"
+                          onClick={handleSortPDCId}
+                        />
+                      </span>
+                    </div>
                   </TableCell>
                   <TableCell
                     align="center"

@@ -7,6 +7,7 @@ import QrCodeIcon from "@mui/icons-material/QrCode";
 import LaunchIcon from "@mui/icons-material/Launch";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
+import { FaSort } from "react-icons/fa6";
 import logo from "../../../Images/FE-logo.png";
 import ReactQRCode from "qrcode.react";
 import html2canvas from "html2canvas";
@@ -46,6 +47,8 @@ const LoadBank = () => {
   const [selectedRowsQRCodes, setSelectedRowsQRCodes] = useState([]);
   const [openSelectedQRModal, setOpenSelectedQRModal] = useState(false);
 
+  const [sortOrder, setSortOrder] = useState("DESC");
+
   const [loadbankData, setLoadbankData] = useState([]);
 
   const [filteredLoadbanks, setFilteredLoadbanks] = useState([]);
@@ -71,7 +74,16 @@ const LoadBank = () => {
 
   const indexOfLastRow = page * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = filteredLoadbanks.slice(indexOfFirstRow, indexOfLastRow);
+
+  // Filtered and sorted data
+  const sortedData = filteredLoadbanks.sort((a, b) => {
+    if (sortOrder === "DESC") {
+      return b.loadbankId.localeCompare(a.loadbankId);
+    } else {
+      return a.loadbankId.localeCompare(b.loadbankId);
+    }
+  });
+  const currentRows = sortedData.slice(indexOfFirstRow, indexOfLastRow);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -158,13 +170,13 @@ const LoadBank = () => {
     if (selectAll) {
       setSelectedRows([]);
     } else {
-      const allRowIds = loadbankData.map((row) => row._id);
+      const allRowIds = filteredLoadbanks.map((row) => row._id);
       setSelectedRows(allRowIds);
     }
     setSelectAll(!selectAll);
 
     // Update the selectedRowsCount state
-    setSelectedRowsCount(selectAll ? "" : loadbankData.length);
+    setSelectedRowsCount(selectAll ? "" : filteredLoadbanks.length);
   };
   const showQRCodes = (data, row) => {
     setQrCodeData(
@@ -315,6 +327,11 @@ const LoadBank = () => {
     });
   };
 
+  const handleSortLoadankId = () => {
+    const newSortOder = sortOrder === "DESC" ? "ASC" : "DESC";
+    setSortOrder(newSortOder);
+  };
+
   return (
     <div>
       <div className="flex justify-center bg-background border-none">
@@ -410,7 +427,16 @@ const LoadBank = () => {
                       fontSize: "1.10rem",
                     }}
                   >
-                    Loadbank ID
+                    <div className="flex items-center justify-center">
+                      <p onClick={handleSortLoadankId}> Loadbank ID</p>
+                      <span>
+                        <FaSort
+                          fontSize="small"
+                          className="m-2"
+                          onClick={handleSortLoadankId}
+                        />
+                      </span>
+                    </div>
                   </TableCell>
                   <TableCell
                     align="center"
@@ -436,80 +462,74 @@ const LoadBank = () => {
                   </TableCell>
                 </TableHead>
                 <TableBody>
-                  {currentRows
-                    .sort((a, b) => b.loadbankId.localeCompare(a.loadbankId))
-                    .map((row) => (
-                      <TableRow key={row.id} className="hover:bg-gray-100">
-                        <TableCell align="center">
-                          <Checkbox
-                            type="checkbox"
-                            checked={selectedRows.includes(row._id)}
-                            onChange={() => handleSelectRow(row._id)}
-                          />
-                        </TableCell>
-                        <TableCell
-                          align="center"
-                          style={{
-                            fontWeight: "bold",
-                          }}
+                  {currentRows.map((row) => (
+                    <TableRow key={row.id} className="hover:bg-gray-100">
+                      <TableCell align="center">
+                        <Checkbox
+                          type="checkbox"
+                          checked={selectedRows.includes(row._id)}
+                          onChange={() => handleSelectRow(row._id)}
+                        />
+                      </TableCell>
+                      <TableCell
+                        align="center"
+                        style={{
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {row.loadbankId}
+                      </TableCell>
+                      <TableCell align="center">
+                        {moment(row.generatedDate)
+                          .tz("Australia/Sydney")
+                          .format("DD MMMM YYYY")}
+                      </TableCell>
+                      <TableCell align="center">
+                        <IconButton
+                          aria-label="delete"
+                          size="small"
+                          style={{ color: "red" }}
                         >
-                          {row.loadbankId}
-                        </TableCell>
-                        <TableCell align="center">
-                          {moment(row.generatedDate)
-                            .tz("Australia/Sydney")
-                            .format("DD MMMM YYYY")}
-                        </TableCell>
-                        <TableCell align="center">
-                          <IconButton
-                            aria-label="delete"
-                            size="small"
-                            style={{ color: "red" }}
-                          >
-                            <DeleteIcon
-                              fontSize="small"
-                              onClick={() => {
-                                handleOpenDeleteConfirmationModal(
-                                  row.loadbankId
-                                );
-                              }}
-                            />
-                          </IconButton>
-                          <IconButton
-                            aria-label="icon"
-                            size="small"
-                            style={{ color: "black" }}
-                          >
-                            <EditIcon
-                              fontSize="small"
-                              onClick={() =>
-                                handleOpenEditModal(row.loadbankId)
-                              }
-                            />
-                          </IconButton>
-                          <IconButton
-                            aria-label="QR"
-                            size="small"
-                            style={{ color: "navy" }}
-                            onClick={() => showQRCodes(row)}
-                          >
-                            <QrCodeIcon fontSize="small" />
-                          </IconButton>
-                          <IconButton
-                            aria-label="links"
-                            size="small"
-                            style={{ color: "smokewhite" }}
-                          >
-                            <LaunchIcon
-                              fontSize="small"
-                              onClick={() =>
-                                handleLoadbankDashboard(row.loadbankId)
-                              }
-                            />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          <DeleteIcon
+                            fontSize="small"
+                            onClick={() => {
+                              handleOpenDeleteConfirmationModal(row.loadbankId);
+                            }}
+                          />
+                        </IconButton>
+                        <IconButton
+                          aria-label="icon"
+                          size="small"
+                          style={{ color: "black" }}
+                        >
+                          <EditIcon
+                            fontSize="small"
+                            onClick={() => handleOpenEditModal(row.loadbankId)}
+                          />
+                        </IconButton>
+                        <IconButton
+                          aria-label="QR"
+                          size="small"
+                          style={{ color: "navy" }}
+                          onClick={() => showQRCodes(row)}
+                        >
+                          <QrCodeIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          aria-label="links"
+                          size="small"
+                          style={{ color: "smokewhite" }}
+                        >
+                          <LaunchIcon
+                            fontSize="small"
+                            onClick={() =>
+                              handleLoadbankDashboard(row.loadbankId)
+                            }
+                          />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
               <Dialog

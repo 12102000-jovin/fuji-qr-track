@@ -239,11 +239,13 @@ const PDCQRGenerator = () => {
               <option value="" disabled defaultValue selected>
                 Select Work Order Id
               </option>
-              {workOrders.map((workOrder) => (
-                <option key={workOrder._id} value={workOrder.workOrderId}>
-                  {workOrder.workOrderId}
-                </option>
-              ))}
+              {workOrders
+                .sort((a, b) => b.workOrderId.localeCompare(a.workOrderId))
+                .map((workOrder) => (
+                  <option key={workOrder._id} value={workOrder.workOrderId}>
+                    {workOrder.workOrderId}
+                  </option>
+                ))}
             </select>
           </div>
           <div className="mt-10">

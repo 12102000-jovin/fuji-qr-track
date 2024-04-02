@@ -95,6 +95,16 @@ const Component = () => {
         .replace(/\s/g, "")
         .toLowerCase();
 
+      const componentDescriptionWithoutSpaces = row.componentDescription
+        .replace(/\s/g, "")
+        .toLowerCase();
+
+      const allocatedDateWithoutSpaces = moment(row.allocatedDate)
+        .tz("Australia/Sydney")
+        .format("DD MMMM YYYY")
+        .replace(/\s/g, "")
+        .toLowerCase();
+
       const matchComponentSerialNumber = words.every((word) =>
         componentSerialNumberWithoutSpaces.includes(word)
       );
@@ -103,7 +113,20 @@ const Component = () => {
         componentTypeWithoutSpaces.includes(word)
       );
 
-      return matchComponentSerialNumber || matchComponentType;
+      const matchComponentDescription = words.every((word) =>
+        componentDescriptionWithoutSpaces.includes(word)
+      );
+
+      const matchAllocatedDate = words.every((word) =>
+        allocatedDateWithoutSpaces.includes(word)
+      );
+
+      return (
+        matchComponentSerialNumber ||
+        matchComponentType ||
+        matchComponentDescription ||
+        matchAllocatedDate
+      );
     });
 
     setFilteredComponent(filteredData);
@@ -157,7 +180,7 @@ const Component = () => {
       <div className="flex justify-center bg-background border-none">
         <div className="w-3/4 p-6 shadow-lg bg-white rounded-md my-5">
           <p className="text-4xl text-signature font-black mb-5 mt-3">
-            Component
+            Components
           </p>
           <div className="flex items-center">
             {/* Search Function */}

@@ -26,6 +26,7 @@ import axios from "axios";
 import ReactQRCode from "qrcode.react";
 import html2canvas from "html2canvas";
 import AddIcon from "@mui/icons-material/Add";
+import { FaSort } from "react-icons/fa6";
 import JSZip from "jszip";
 
 import logo from "../../Images/FE-logo.png";
@@ -42,11 +43,14 @@ const WorkOrder = () => {
   const [qrCodeData, setQrCodeData] = useState(null);
   const [modalWorkOrderID, setModalWorkOrderID] = useState(null);
   const [openAddWorkOrderModal, setOpenWorkOrderModal] = useState(false);
+
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [selectedRowsCount, setSelectedRowsCount] = useState("");
   const [selectedRowsQRCodes, setSelectedRowsQRCodes] = useState([]);
   const [openSelectedQRModal, setOpenSelectedQRModal] = useState(false);
+
+  const [sortOrder, setSortOrder] = useState("DESC");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredWorkOrders, setFilteredWorkOrders] = useState([]);
@@ -71,7 +75,17 @@ const WorkOrder = () => {
 
   const indexOfLastRow = page * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = filteredWorkOrders.slice(indexOfFirstRow, indexOfLastRow);
+
+  // Filtered and sorted data
+  const sortedData = filteredWorkOrders.sort((a, b) => {
+    if (sortOrder === "DESC") {
+      return b.workOrderId.localeCompare(a.workOrderId);
+    } else {
+      return a.workOrderId.localeCompare(b.workOrderId);
+    }
+  });
+
+  const currentRows = sortedData.slice(indexOfFirstRow, indexOfLastRow);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -198,13 +212,13 @@ const WorkOrder = () => {
     if (selectAll) {
       setSelectedRows([]);
     } else {
-      const allRowIds = WorkOrderData.map((row) => row._id);
+      const allRowIds = filteredWorkOrders.map((row) => row._id);
       setSelectedRows(allRowIds);
     }
     setSelectAll(!selectAll);
 
     // Update the selectedRowsCount state
-    setSelectedRowsCount(selectAll ? "" : WorkOrderData.length);
+    setSelectedRowsCount(selectAll ? "" : filteredWorkOrders.length);
   };
 
   const handleSelectRow = (rowId) => {
@@ -326,6 +340,11 @@ const WorkOrder = () => {
     });
   };
 
+  const handleSortWorkOrderId = () => {
+    const newSortOrder = sortOrder === "DESC" ? "ASC" : "DESC";
+    setSortOrder(newSortOrder);
+  };
+
   return (
     <div>
       {/* WorkOrder Table */}
@@ -424,7 +443,16 @@ const WorkOrder = () => {
                       fontSize: "1.10rem",
                     }}
                   >
-                    WorkOrder ID
+                    <div className="flex items-center justify-center">
+                      <p onClick={handleSortWorkOrderId}>WorkOrder ID </p>
+                      <span>
+                        <FaSort
+                          fontSize="small"
+                          className="m-2"
+                          onClick={handleSortWorkOrderId}
+                        />
+                      </span>
+                    </div>
                   </TableCell>
                   <TableCell
                     align="center"

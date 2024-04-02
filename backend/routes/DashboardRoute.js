@@ -90,6 +90,7 @@ router.get("/:panelId/showPanelDashboard", async (req, res) => {
     const componentData = components.map((component) => ({
       componentType: component.componentType,
       componentSerialNumber: component.componentSerialNumber,
+      allocatedDate: component.allocatedDate,
     }));
 
     // Find the PDC that contains the given panel

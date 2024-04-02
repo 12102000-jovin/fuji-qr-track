@@ -7,6 +7,7 @@ import QrCodeIcon from "@mui/icons-material/QrCode";
 import LaunchIcon from "@mui/icons-material/Launch";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
+import { FaSort } from "react-icons/fa6";
 import logo from "../../../Images/FE-logo.png";
 import ReactQRCode from "qrcode.react";
 import html2canvas from "html2canvas";
@@ -45,6 +46,8 @@ const Panel = () => {
   const [selectedRowsQRCodes, setSelectedRowsQRCodes] = useState([]);
   const [openSelectedQRModal, setOpenSelectedQRModal] = useState(false);
 
+  const [sortOrder, setSortOrder] = useState("DESC");
+
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredPanels, setFilteredPanels] = useState([]);
 
@@ -66,7 +69,16 @@ const Panel = () => {
 
   const indexOfLastRow = page * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = filteredPanels.slice(indexOfFirstRow, indexOfLastRow);
+
+  // Filtered and sorted data
+  const sortedData = filteredPanels.sort((a, b) => {
+    if (sortOrder === "DESC") {
+      return b.panelId.localeCompare(a.panelId);
+    } else {
+      return a.panelId.localeCompare(b.panelId);
+    }
+  });
+  const currentRows = sortedData.slice(indexOfFirstRow, indexOfLastRow);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -188,13 +200,13 @@ const Panel = () => {
     if (selectAll) {
       setSelectedRows([]);
     } else {
-      const allRowIds = panelData.map((row) => row._id);
+      const allRowIds = filteredPanels.map((row) => row._id);
       setSelectedRows(allRowIds);
     }
     setSelectAll(!selectAll);
 
     // Update the selectedRowsCount state
-    setSelectedRowsCount(selectAll ? "" : panelData.length);
+    setSelectedRowsCount(selectAll ? "" : filteredPanels.length);
   };
 
   const handleSelectRow = (rowId) => {
@@ -310,6 +322,11 @@ const Panel = () => {
     });
   };
 
+  const handleSortPanelId = () => {
+    const newSortOrder = sortOrder === "DESC" ? "ASC" : "DESC";
+    setSortOrder(newSortOrder);
+  };
+
   return (
     <div>
       <div className="flex justify-center bg-background border-none">
@@ -403,7 +420,16 @@ const Panel = () => {
                       fontSize: "1.10rem",
                     }}
                   >
-                    Panel ID
+                    <div className="flex items-center justify-center">
+                      <p onClick={handleSortPanelId}> PDC ID </p>
+                      <span>
+                        <FaSort
+                          fontSize="small"
+                          className="m-2"
+                          onClick={handleSortPanelId}
+                        />
+                      </span>
+                    </div>
                   </TableCell>
                   <TableCell
                     align="center"
@@ -430,76 +456,74 @@ const Panel = () => {
                 </TableHead>
                 <TableBody>
                   {" "}
-                  {currentRows
-                    .sort((a, b) => b.panelId.localeCompare(a.panelId))
-                    .map((row) => (
-                      <TableRow key={row.id} className="hover:bg-gray-100">
-                        <TableCell align="center">
-                          <Checkbox
-                            type="checkbox"
-                            checked={selectedRows.includes(row._id)}
-                            onChange={() => handleSelectRow(row._id)}
-                          />
-                        </TableCell>
-                        <TableCell
-                          align="center"
-                          style={{
-                            fontWeight: "bold",
-                          }}
+                  {currentRows.map((row) => (
+                    <TableRow key={row.id} className="hover:bg-gray-100">
+                      <TableCell align="center">
+                        <Checkbox
+                          type="checkbox"
+                          checked={selectedRows.includes(row._id)}
+                          onChange={() => handleSelectRow(row._id)}
+                        />
+                      </TableCell>
+                      <TableCell
+                        align="center"
+                        style={{
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {row.panelId}
+                      </TableCell>
+                      <TableCell align="center">
+                        {moment(row.generatedDate)
+                          .tz("Australia/Sydney")
+                          .format("DD MMMM YYYY")}
+                      </TableCell>
+                      <TableCell align="center">
+                        <IconButton
+                          aria-label="delete"
+                          size="small"
+                          style={{ color: "red" }}
                         >
-                          {row.panelId}
-                        </TableCell>
-                        <TableCell align="center">
-                          {moment(row.generatedDate)
-                            .tz("Australia/Sydney")
-                            .format("DD MMMM YYYY")}
-                        </TableCell>
-                        <TableCell align="center">
-                          <IconButton
-                            aria-label="delete"
-                            size="small"
-                            style={{ color: "red" }}
-                          >
-                            <DeleteIcon
-                              fontSize="small"
-                              onClick={() => {
-                                handleOpenDeleteConfirmation(row.panelId);
-                              }}
-                            />
-                          </IconButton>
-                          <IconButton
-                            aria-label="icon"
-                            size="small"
-                            style={{ color: "black" }}
-                          >
-                            <EditIcon
-                              fontSize="small"
-                              onClick={() => {
-                                handleOpenEditModal(row.panelId);
-                              }}
-                            />
-                          </IconButton>
-                          <IconButton
-                            aria-label="QR"
-                            size="small"
-                            style={{ color: "navy" }}
-                            onClick={() => showQRCodes(row)}
-                          >
-                            <QrCodeIcon fontSize="small" />
-                          </IconButton>
-                          <IconButton
-                            aria-label="links"
-                            size="small"
-                            style={{ color: "smokewhite" }}
-                          >
-                            <LaunchIcon
-                              fontSize="small"
-                              onClick={() => handlePanelDashboard(row.panelId)}
-                            />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          <DeleteIcon
+                            fontSize="small"
+                            onClick={() => {
+                              handleOpenDeleteConfirmation(row.panelId);
+                            }}
+                          />
+                        </IconButton>
+                        <IconButton
+                          aria-label="icon"
+                          size="small"
+                          style={{ color: "black" }}
+                        >
+                          <EditIcon
+                            fontSize="small"
+                            onClick={() => {
+                              handleOpenEditModal(row.panelId);
+                            }}
+                          />
+                        </IconButton>
+                        <IconButton
+                          aria-label="QR"
+                          size="small"
+                          style={{ color: "navy" }}
+                          onClick={() => showQRCodes(row)}
+                        >
+                          <QrCodeIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          aria-label="links"
+                          size="small"
+                          style={{ color: "smokewhite" }}
+                        >
+                          <LaunchIcon
+                            fontSize="small"
+                            onClick={() => handlePanelDashboard(row.panelId)}
+                          />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
               {/* QR Code Modal */}
