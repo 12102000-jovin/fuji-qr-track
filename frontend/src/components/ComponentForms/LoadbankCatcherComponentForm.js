@@ -16,7 +16,7 @@ const LoadbankComponentForm = (loadbankId) => {
   const [isAllocateLoading, setIsAllocateLoading] = useState(false);
 
   const AllocateLoadbank_API =
-    "http://localhost:3001/Allocate/AllocateLoadbankComponent";
+    "http://localhost:3001/Allocate/AllocateLoadbankCatcherComponent";
 
   const handleMeterChange = (event) => {
     setMeterValue(event.target.value);
@@ -69,7 +69,7 @@ const LoadbankComponentForm = (loadbankId) => {
     <div>
       <div className="p-5 bg-signature text-white font-bold rounded-md">
         <div className="flex justify-start text-2xl font-black mb-5">
-          Loadbank (Primary) Components
+          Loadbank (Catcher) Components
         </div>
         {errorMessage && (
           <span className="p-1 pl-2 pr-2 bg-red-500 text-xs rounded-full text-white font-bold mt-2">

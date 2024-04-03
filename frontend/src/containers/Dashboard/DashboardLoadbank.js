@@ -9,16 +9,34 @@ const DashboardLoadbank = () => {
   const [dashboardData, setDashboardData] = useState([]);
 
   const fetchDashboardLoadbankData_API = `http://localhost:3001/Dashboard/${loadbankId}/showLoadbankDashboard`;
+  const fetchDashboardLoadbankCatcherData_API = `http://localhost:3001/Dashboard/${loadbankId}/showLoadbankCatcherDashboard`;
 
   useEffect(() => {
-    if (loadbankId) {
+    const isLoadbankPrimaryPattern = /^LB\d{6}-P$/.test(loadbankId);
+    const isLoadbankCatcherPattern = /^LB\d{6}-C$/.test(loadbankId);
+
+    if (isLoadbankPrimaryPattern) {
       fetchDashboardLoadbankData();
+    } else if (isLoadbankCatcherPattern) {
+      fetchDashboardLoadbankCatcherData();
     }
   }, []);
 
   const fetchDashboardLoadbankData = () => {
     axios
       .get(`${fetchDashboardLoadbankData_API}`)
+      .then((response) => {
+        setDashboardData(response.data);
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching Loadbank data", error);
+      });
+  };
+
+  const fetchDashboardLoadbankCatcherData = () => {
+    axios
+      .get(`${fetchDashboardLoadbankCatcherData_API}`)
       .then((response) => {
         setDashboardData(response.data);
         console.log(response.data);

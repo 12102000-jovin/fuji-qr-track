@@ -13,7 +13,7 @@ import ReactQRCode from "qrcode.react";
 import html2canvas from "html2canvas";
 import SubAssemblyQRGenerator from "../../../components/SubAssemblyQRGenerator/SubAssemblyQRGenerator";
 import SubAssemblyCustomQRGenerator from "../../../components/SubAssemblyQRGenerator/SubAssemblyCustomQRGenerator";
-import EditLoadbank from "./EditLoadbank";
+import EditLoadbankCatcher from "./EditLoadbankCatcher";
 import JSZip from "jszip";
 
 import {
@@ -102,10 +102,10 @@ const LoadBank = () => {
   const captureRef = useRef(null);
 
   const fetchLoadbankData_API =
-    "http://localhost:3001/SubAssembly/LoadbankPrimary/getAllLoadbank";
+    "http://localhost:3001/SubAssembly/LoadbankCatcher/getAllLoadbank";
 
   const deleteLoadbank_API =
-    "http://localhost:3001/SubAssembly/Loadbank/deleteLoadbank/";
+    "http://localhost:3001/SubAssembly/LoadbankCatcher/deleteLoadbank/";
 
   useEffect(() => {
     fetchLoadbankData();
@@ -182,7 +182,7 @@ const LoadBank = () => {
     setQrCodeData(
       JSON.stringify({
         link: data.link,
-        loadbankPrimaryId: data.loadbankId,
+        loadbankCatcherId: data.loadbankId,
       })
     );
     setModalLoadbankID(data.loadbankId);
@@ -340,7 +340,7 @@ const LoadBank = () => {
             <div className="flex items-center justify-center">
               <p>Loadbank</p>
               <span className="text-xl text-white bg-red-500 py-2 px-3 font-black rounded-full ml-2">
-                Primary
+                Catcher
               </span>
             </div>
           </p>
@@ -598,7 +598,7 @@ const LoadBank = () => {
                       Loadbank ID: {modalLoadbankID}
                       <span className="text-red-500 ml-1 mr-1 font-black">
                         {" "}
-                        (Primary)
+                        (Catcher)
                       </span>
                     </p>
                   </div>
@@ -731,7 +731,7 @@ const LoadBank = () => {
         </Dialog>
       </div>
       <div>
-        <EditLoadbank
+        <EditLoadbankCatcher
           open={editLoadbankModalState}
           onClose={() => {
             fetchLoadbankData();
@@ -782,10 +782,10 @@ const LoadBank = () => {
                       }}
                       className="text-signature text-center"
                     >
-                      Loadbank ID: {qrCode.loadbankId}
+                      Loadbank ID: {qrCode.loadbankId}{" "}
                       <span className="text-red-500 ml-1 mr-1 font-black">
                         {" "}
-                        (Primary)
+                        (Catcher)
                       </span>
                     </p>
                   </div>

@@ -39,8 +39,6 @@ import PDC from "../../containers/PDC/PDC";
 import Panel from "../../containers/SubAssembly/Panel/Panel";
 import Allocate from "../../containers/Allocate/Allocate";
 import WorkOrder from "../../containers/WorkOrder/WorkOrder";
-import WorkOrderGenerator from "../WorkOrderQRGenerator/WorkOrderQRGenerator";
-import WorkOrderCustomGenerator from "../WorkOrderQRGenerator/WorkOrderCustomQRGenerator";
 import SubAssemblyCustomQRGenerator from "../SubAssemblyQRGenerator/SubAssemblyCustomQRGenerator";
 import DashboardWorkOrder from "../../containers/Dashboard/DashboardWorkOrder";
 import DashboardPDC from "../../containers/Dashboard/DashboardPDC";
@@ -50,6 +48,7 @@ import DashboardComponent from "../../containers/Dashboard/DashboardComponent";
 import AllocateComponents from "../../containers/Allocate/AllocateComponents";
 import Components from "../../containers/Component/Component";
 import LoadbankPrimary from "../../containers/SubAssembly/Loadbank/LoadbankPrimary";
+import LoadbankCatcher from "../../containers/SubAssembly/Loadbank/LoadbankCatcher";
 
 const drawerWidth = 200;
 
@@ -413,6 +412,10 @@ const NavBar = () => {
                   to="/LoadbankPrimary"
                   primary="Loadbank (Primary)"
                 />
+                <DropdownMenuItem
+                  to="/LoadbankCatcher"
+                  primary="Loadbank (Catcher)"
+                />
               </Menu>
 
               <ListItem disablePadding sx={{ display: "block" }}>
@@ -546,6 +549,7 @@ const NavBar = () => {
               />
               <Route path="/Components" element={<Components />} />
               <Route path="/LoadbankPrimary" element={<LoadbankPrimary />} />
+              <Route path="/LoadbankCatcher" element={<LoadbankCatcher />} />
             </Routes>
           </Box>
         </Box>

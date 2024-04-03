@@ -21,6 +21,14 @@ const SubAssemblyQRGenerator = () => {
   const [showExpectedLoadbankRange, setShowExpectedLoadbankRange] =
     useState(true);
 
+  const [latestLoadbankCatcherId, setLatestLoadbankCatcherId] = useState("0");
+  const [expectedLoadbankCatcherRange, setExpectedLoadbankCatcherRange] =
+    useState("");
+  const [
+    showExpectedLoadbankCatcherRange,
+    setShowExpectedLoadbankCatcherRange,
+  ] = useState(true);
+
   const [emptyInputError, setEmptyInputError] = useState(false);
   const [qrGeneratedStatus, setQRGeneratedStatus] = useState(false);
   const [qrCode, setQRcode] = useState([]);
@@ -32,11 +40,15 @@ const SubAssemblyQRGenerator = () => {
   const generatePanel_API =
     "http://localhost:3001/SubAssembly/Panel/generateSubAssembly";
   const generateLoadbank_API =
-    "http://localhost:3001/SubAssembly/Loadbank/generateSubAssembly";
+    "http://localhost:3001/SubAssembly/LoadbankPrimary/generateSubAssembly";
+  const generateLoadbankCatcher_API =
+    "http://localhost:3001/SubAssembly/LoadbankCatcher/generateSubAssembly";
   const getLatestPanel_API =
     "http://localhost:3001/SubAssembly/Panel/getLatestPanel";
   const getLatestLoadbank_API =
-    "http://localhost:3001/SubAssembly/Loadbank/getLatestLoadbank";
+    "http://localhost:3001/SubAssembly/LoadbankPrimary/getLatestLoadbank";
+  const getLatestLoadbankCatcher_API =
+    "http://localhost:3001/SubAssembly/LoadbankCatcher/getLatestLoadbank";
 
   // ======================================= P A N E L =======================================
   useEffect(() => {
@@ -128,6 +140,47 @@ const SubAssemblyQRGenerator = () => {
     return loadbankString.replace("LB", "").replace("-P", "");
   };
 
+  // ==================================== L O A D B A N K (C A T C H E R) =======================================
+
+  useEffect(() => {
+    fetchLatestLoadbankCatcher();
+  }, []);
+
+  useEffect(() => {
+    if (numQR === "1") {
+      setExpectedLoadbankCatcherRange(
+        `Expected Output: LB${formatId(Number(latestLoadbankCatcherId) + 1)}-C`
+      );
+    } else if (numQR > 1 && numQR !== "1") {
+      setExpectedLoadbankCatcherRange(
+        ` Expected Output: LB${formatId(
+          Number(latestLoadbankCatcherId) + 1
+        )}-C - LB${formatId(Number(latestLoadbankCatcherId) + Number(numQR))}-C`
+      );
+    } else {
+      setExpectedLoadbankCatcherRange("");
+    }
+  }, [numQR, latestLoadbankCatcherId]);
+
+  useEffect(() => {
+    setShowExpectedLoadbankCatcherRange(true);
+  }, [numQR]);
+
+  const fetchLatestLoadbankCatcher = async () => {
+    try {
+      const response = await axios.get(getLatestLoadbankCatcher_API);
+      const latestLoadbank = response.data;
+      const latestLoadbankId = extractLoadbankCatcherId(latestLoadbank);
+      setLatestLoadbankCatcherId(Number(latestLoadbankId));
+    } catch (error) {
+      console.error("Error fetching latest Loadbank:", error.message);
+    }
+  };
+
+  const extractLoadbankCatcherId = (loadbankString) => {
+    // Remove "LB" prefix and "P" suffix from the loadbankString
+    return loadbankString.replace("LB", "").replace("-C", "");
+  };
   // ==================================== S U B M I T =======================================
 
   useEffect(() => {
@@ -211,6 +264,43 @@ const SubAssemblyQRGenerator = () => {
       } catch (error) {
         console.error("Error generating Loadbank:", error.message);
       }
+    } else if (selectedSubAssemblyType === "LoadbankCatcher") {
+      const Loadbanks = Array.from({ length: numQR }, (_, index) => {
+        const newLoadbankId = formatId(
+          Number(latestLoadbankCatcherId + 1) + index
+        );
+        return {
+          link: `${linkFormat}${applicationPortNumber}/Dashboard/Loadbank/LB${newLoadbankId}-C`,
+          generatedDate: moment()
+            .tz("Australia/Sydney")
+            .format("YYYY-MM-DD HH:mm:ss"),
+          loadbankId: `LB${newLoadbankId}-C`,
+        };
+      });
+
+      try {
+        const response = await axios.post(generateLoadbankCatcher_API, {
+          Loadbanks,
+        });
+        console.log(response.data);
+        fetchLatestLoadbankCatcher();
+
+        setQRcode(() => {
+          const newQRCodes = response.data.map((qrcode, index) => ({
+            ...qrcode,
+            loadbankId: `LB${formatId(
+              Number(latestLoadbankCatcherId + 1) + index
+            )}-C`,
+          }));
+          return newQRCodes;
+        });
+
+        setQRGeneratedStatus(true);
+        setShowExpectedLoadbankCatcherRange(false);
+        setEmptyInputError(false);
+      } catch (error) {
+        console.error("Error generating Loadbank:", error.message);
+      }
     } else {
       console.log("Unvalid Type");
     }
@@ -229,6 +319,10 @@ const SubAssemblyQRGenerator = () => {
       // Set the selected value of the dropdown to "Loadbank"
       setSelectedSubAssemblyType("LoadbankPrimary");
       fetchLatestLoadbank();
+    } else if (currentUrl.includes("LoadbankCatcher")) {
+      // Set the selected value of the dropdown to "Loadbank"
+      setSelectedSubAssemblyType("LoadbankCatcher");
+      fetchLatestLoadbankCatcher();
     }
   }, []);
 
@@ -318,6 +412,7 @@ const SubAssemblyQRGenerator = () => {
 
               <option value="Panel">Panel</option>
               <option value="LoadbankPrimary">Loadbank (Primary)</option>
+              <option value="LoadbankCatcher">Loadbank (Catcher)</option>
             </select>
             {selectedSubAssemblyType && (
               <div className="mt-5">
@@ -328,7 +423,9 @@ const SubAssemblyQRGenerator = () => {
                   Number of{" "}
                   {selectedSubAssemblyType === "Panel"
                     ? "Panel"
-                    : " Loadbank (Primary)"}
+                    : selectedSubAssemblyType === "LoadbankPrimary"
+                    ? "Loadbank (Primary) "
+                    : "Loadbank (Catcher) "}
                   QR
                   <div className="flex items-center">
                     {selectedSubAssemblyType === "Panel" && (
@@ -340,6 +437,12 @@ const SubAssemblyQRGenerator = () => {
                       <span className="text-white p-1 pl-2 pr-2 ml-2  font-black rounded-full text-xs bg-green-700">
                         Latest Loadbank Id: LB
                         {formatId(Number(latestLoadbankId))}-P
+                      </span>
+                    )}
+                    {selectedSubAssemblyType === "LoadbankCatcher" && (
+                      <span className="text-white p-1 pl-2 pr-2 ml-2  font-black rounded-full text-xs bg-green-700">
+                        Latest Loadbank Id: LB
+                        {formatId(Number(latestLoadbankCatcherId))}-C
                       </span>
                     )}
                   </div>
@@ -369,6 +472,15 @@ const SubAssemblyQRGenerator = () => {
                       </p>
                     </div>
                   )}
+                {selectedSubAssemblyType === "LoadbankCatcher" &&
+                  showExpectedLoadbankCatcherRange &&
+                  expectedLoadbankRange && (
+                    <div className="flex justify-start">
+                      <p className="mt-2 font-black p-1 text-white bg-secondary text-xs rounded-full pl-2 pr-2">
+                        {expectedLoadbankCatcherRange}
+                      </p>
+                    </div>
+                  )}
               </div>
             )}
 
@@ -379,7 +491,7 @@ const SubAssemblyQRGenerator = () => {
               >
                 <div className="flex items-center">
                   <FaQrcode className="mr-2" />
-                  <span> Generate {selectedSubAssemblyType} </span>
+                  <span> Generate QR </span>
                 </div>
               </button>
             </div>
@@ -468,7 +580,7 @@ const SubAssemblyQRGenerator = () => {
                       <ReactQRCode
                         value={JSON.stringify({
                           link: code.link,
-                          loadbankId: code.loadbankId,
+                          loadbankPrimaryId: code.loadbankId,
                         })}
                         size={512}
                         imageSettings={{
@@ -483,6 +595,64 @@ const SubAssemblyQRGenerator = () => {
                         <span className="text-red-500 ml-1 mr-1 font-black">
                           {" "}
                           (Primary)
+                        </span>
+                      </div>
+                    </div>
+
+                    <img
+                      src={imageData[code.loadbankId]}
+                      alt={`Converted ${code.loadbankId}`}
+                      style={{ display: "none", margin: "10px auto" }}
+                    />
+
+                    <div className="mt-5 flex items-center justify-center">
+                      <button
+                        className="bg-signature hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded "
+                        onClick={() => handleDownload(code.loadbankId)}
+                      >
+                        Download
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {selectedSubAssemblyType === "LoadbankCatcher" && (
+            <div className="flex justify-center flex-wrap mt-5 rounded-xl">
+              {qrCode.map((code, index) => (
+                <div
+                  key={index}
+                  className="p-5 shadow-xl rounded-lg m-5 bg-white"
+                  style={{
+                    color: "#043f9d",
+                    fontFamily: "Avenir, sans-serif",
+                    fontSize: "20px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                  }}
+                >
+                  <div>
+                    <div id={`qrcode-${code.loadbankId}`}>
+                      <ReactQRCode
+                        value={JSON.stringify({
+                          link: code.link,
+                          loadbankCatcherId: code.loadbankId,
+                        })}
+                        size={512}
+                        imageSettings={{
+                          src: logo,
+                          excavate: true,
+                          width: 60,
+                          height: 35,
+                        }}
+                      />
+                      <div className="mb-5">
+                        Loadbank ID: {code.loadbankId}{" "}
+                        <span className="text-red-500 ml-1 mr-1 font-black">
+                          {" "}
+                          (Catcher)
                         </span>
                       </div>
                     </div>

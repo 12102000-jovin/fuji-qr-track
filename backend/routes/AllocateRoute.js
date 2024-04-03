@@ -1,7 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const PDCModel = require("../models/PDCModel");
-const { PanelModel, LoadbankModel } = require("../models/SubAssemblyModel");
+const {
+  PanelModel,
+  LoadbankModel,
+  LoadbankCatcherModel,
+} = require("../models/SubAssemblyModel");
 const ComponentModel = require("../models/ComponentModel");
 
 // router.post("/AllocateSubAssembly", async (req, res) => {
@@ -84,6 +88,7 @@ router.post("/AllocateSubAssembly", async (req, res) => {
 
     const isPanelPattern = /^PANEL\d{6}$/.test(subAssemblyInputValue);
     const isLoadbankPattern = /^LB\d{6}-P$/.test(subAssemblyInputValue);
+    const isLoadbankCatcherPattern = /^LB\d{6}-C$/.test(subAssemblyInputValue);
 
     const pdc = await PDCModel.findOne({
       pdcId: `${inputPDCValue}`,
@@ -188,6 +193,52 @@ router.post("/AllocateSubAssembly", async (req, res) => {
         console.error(error);
         return res.status(500).json({ error: "Internal Server Error" });
       }
+    } else if (isLoadbankCatcherPattern) {
+      try {
+        // Check if Loadbank exists
+        const loadbank = await LoadbankCatcherModel.findOne({
+          loadbankId: subAssemblyInputValue,
+        });
+
+        if (!loadbank) {
+          return res.status(404).json({ message: "Loadbank not found" });
+        }
+
+        // Check if the loadbank already exists in the PDC
+        if (
+          pdc.loadbanks.some((loadbankId) => loadbankId.equals(loadbank._id))
+        ) {
+          return res.status(400).json({
+            message: `The Loadbank already exists in the ${pdc.pdcId}`,
+          });
+        }
+
+        if (loadbank.isAllocated === true) {
+          return res.status(404).json({
+            message: `${loadbank.loadbankId} has been allocated to other PDC`,
+          });
+        }
+
+        // Set the allocated date for the loadbank
+        loadbank.allocatedDate = new Date();
+
+        // Set the isAllocated Flag to true
+        loadbank.isAllocated = true;
+
+        // Associate the Loadbank with the PDC by adding its ObjectId to the loadbanks array
+        pdc.catcherLoadbanks.push(loadbank._id);
+
+        // Save both the loadbank and the updated PDC document
+        await loadbank.save();
+        await pdc.save();
+
+        //  Respond with success message and the updated PDC
+        const response = "Subassembly allocation successful";
+        return res.status(200).json({ message: response });
+      } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
     }
   } catch (error) {
     console.error(error);
@@ -280,6 +331,68 @@ router.post("/AllocateLoadbankComponent", async (req, res) => {
     const loadbank = await LoadbankModel.findOne({ loadbankId }).populate(
       "components"
     );
+
+    if (!loadbank) {
+      return res.status(404).json({ message: "Loadbank not found" });
+    }
+
+    const existingComponentType = loadbank.components.find(
+      (component) => component.componentType === componentType
+    );
+
+    if (existingComponentType) {
+      return res.status(409).json({
+        message: `${existingComponentType.componentType} with serial number [${existingComponentType.componentSerialNumber}] is already allocated to the loadbank. Please choose another component.`,
+      });
+    }
+
+    // If there are no existing components, proceed to insert new components
+    const component = new ComponentModel({
+      componentSerialNumber,
+      componentType,
+      componentDescription,
+      allocatedDate: new Date(),
+    });
+
+    await component.save();
+
+    loadbank.components.push(component._id);
+    await loadbank.save();
+
+    return res
+      .status(200)
+      .json({ message: "Component allocated to the Loadbank successfully " });
+  } catch (error) {
+    console.error("Error in allocation:", error);
+    // Handle the error and send an appropriate response
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.post("/AllocateLoadbankCatcherComponent", async (req, res) => {
+  try {
+    const {
+      componentSerialNumber,
+      componentType,
+      componentDescription,
+      loadbankId,
+    } = req.body;
+
+    const existingComponent = await ComponentModel.findOne({
+      componentSerialNumber,
+    });
+
+    if (existingComponent) {
+      return res.status(409).json({
+        message:
+          "Component already allocated. Please select a different component.",
+      });
+    }
+
+    // Check if a component with the same type is already allocated to the loadbank
+    const loadbank = await LoadbankCatcherModel.findOne({
+      loadbankId,
+    }).populate("components");
 
     if (!loadbank) {
       return res.status(404).json({ message: "Loadbank not found" });

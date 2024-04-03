@@ -70,6 +70,9 @@ const Allocate = () => {
       console.log("Entered");
       const isPanelPattern = /^PANEL\d{6}$/.test(subAssemblyInputValue);
       const isLoadbankPattern = /^LB\d{6}-P$/.test(subAssemblyInputValue);
+      const isLoadbankCatcherPattern = /^LB\d{6}-C$/.test(
+        subAssemblyInputValue
+      );
 
       if (isPanelPattern) {
         setShowSubAssemblyInput(subAssemblyInputValue);
@@ -79,6 +82,10 @@ const Allocate = () => {
         setShowSubAssemblyInput(subAssemblyInputValue);
         setDetectedType("Loadbank (Primary)");
         setWrongSubAssemblyError(false);
+      } else if (isLoadbankCatcherPattern) {
+        setShowSubAssemblyInput(subAssemblyInputValue);
+        setDetectedType("Loadbank (Catcher)");
+        setWrongSubAssemblyError(false);
       } else {
         try {
           const parsedInput = JSON.parse(subAssemblyInputValue);
@@ -87,10 +94,15 @@ const Allocate = () => {
             setSubAssemblyInputValue(parsedInput.panelId);
             setDetectedType("Panel");
             setWrongSubAssemblyError(false);
-          } else if (parsedInput.loadbankId) {
+          } else if (parsedInput.loadbankPrimaryId) {
             console.log("Loadbank Detected");
-            setSubAssemblyInputValue(parsedInput.loadbankId);
+            setSubAssemblyInputValue(parsedInput.loadbankPrimaryId);
             setDetectedType("Loadbank (Primary)");
+            setWrongSubAssemblyError(false);
+          } else if (parsedInput.loadbankCatcherId) {
+            console.log("Loadbank Detected");
+            setSubAssemblyInputValue(parsedInput.loadbankCatcherId);
+            setDetectedType("Loadbank (Catcher)");
             setWrongSubAssemblyError(false);
           } else {
             setWrongSubAssemblyError(true);

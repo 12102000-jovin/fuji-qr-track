@@ -1,11 +1,13 @@
 import React, { useState, useRef } from "react";
 import PanelComponentForm from "../../components/ComponentForms/PanelComponentForm";
 import LoadbankComponentForm from "../../components/ComponentForms/LoadbankComponentForm";
+import LoadbankCatcherComponentForm from "../../components/ComponentForms/LoadbankCatcherComponentForm";
 
 const AllocateComponents = () => {
   const [inputSubAssemblyValue, setInputSubAssemblyValue] = useState("");
   const [showPanelForm, setShowPanelForm] = useState(false);
   const [showLoadbankForm, setShowLoadbankForm] = useState(false);
+  const [showLoadbankCatcherForm, setShowLoadbankCatcherForm] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const subAssemblyInputRef = useRef(null);
@@ -19,6 +21,9 @@ const AllocateComponents = () => {
     if (event.key === "Enter") {
       const isPanelPattern = /^PANEL\d{6}$/.test(inputSubAssemblyValue);
       const isLoadbankPattern = /^LB\d{6}-P$/.test(inputSubAssemblyValue);
+      const isLoadbankCatcherPattern = /^LB\d{6}-C$/.test(
+        inputSubAssemblyValue
+      );
 
       if (isPanelPattern) {
         setShowPanelForm(true);
@@ -27,6 +32,10 @@ const AllocateComponents = () => {
       } else if (isLoadbankPattern) {
         setShowPanelForm(false);
         setShowLoadbankForm(true);
+        setErrorMessage("");
+      } else if (isLoadbankCatcherPattern) {
+        setShowPanelForm(false);
+        setShowLoadbankCatcherForm(true);
         setErrorMessage("");
       } else {
         try {
@@ -37,12 +46,20 @@ const AllocateComponents = () => {
             setShowLoadbankForm(false);
             setErrorMessage("");
           } else if (
-            parsedInput.loadbankId &&
-            /^LB\d{6}-P$/.test(parsedInput.loadbankId)
+            parsedInput.loadbankPrimaryId &&
+            /^LB\d{6}-P$/.test(parsedInput.loadbankPrimaryId)
           ) {
-            setInputSubAssemblyValue(parsedInput.loadbankId);
+            setInputSubAssemblyValue(parsedInput.loadbankPrimaryId);
             setShowPanelForm(false);
             setShowLoadbankForm(true);
+            setErrorMessage("");
+          } else if (
+            parsedInput.loadbankCatcherId &&
+            /^LB\d{6}-C$/.test(parsedInput.loadbankCatcherId)
+          ) {
+            setInputSubAssemblyValue(parsedInput.loadbankCatcherId);
+            setShowPanelForm(false);
+            setShowLoadbankCatcherForm(true);
             setErrorMessage("");
           } else {
             setErrorMessage("Invalid Sub-Assembly QR");
@@ -61,6 +78,7 @@ const AllocateComponents = () => {
       setInputSubAssemblyValue("");
       setShowPanelForm("");
       setShowLoadbankForm("");
+      setShowLoadbankCatcherForm("");
       setErrorMessage("");
     }
   };
@@ -70,6 +88,7 @@ const AllocateComponents = () => {
     setInputSubAssemblyValue("");
     setShowPanelForm("");
     setShowLoadbankForm("");
+    setShowLoadbankCatcherForm("");
     setErrorMessage("");
   };
 
@@ -100,7 +119,9 @@ const AllocateComponents = () => {
                 autoFocus
                 ref={subAssemblyInputRef}
                 className="border w-full px-2 py-4 rounded-md focus:outline-none focus:ring-3 focus:border-gray-600 text-black"
-                disabled={showPanelForm || showLoadbankForm}
+                disabled={
+                  showPanelForm || showLoadbankForm || showLoadbankCatcherForm
+                }
                 placeholder="Enter Sub-Assembly"
               />
               <button
@@ -133,6 +154,9 @@ const AllocateComponents = () => {
           )}
           {showLoadbankForm && (
             <LoadbankComponentForm loadbankId={inputSubAssemblyValue} />
+          )}
+          {showLoadbankCatcherForm && (
+            <LoadbankCatcherComponentForm loadbankId={inputSubAssemblyValue} />
           )}
         </div>
       </div>
