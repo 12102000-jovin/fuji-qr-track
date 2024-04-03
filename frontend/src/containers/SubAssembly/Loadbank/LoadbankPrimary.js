@@ -337,7 +337,12 @@ const LoadBank = () => {
       <div className="flex justify-center bg-background border-none">
         <div className="w-3/4 p-6 shadow-lg bg-white rounded-md my-5">
           <p className="text-4xl text-signature font-black mb-5 mt-3">
-            Loadbank
+            <div className="flex items-center justify-center">
+              <p>Loadbank</p>
+              <span className="text-xl text-white bg-red-500 py-2 px-3 font-black rounded-full ml-2">
+                Primary
+              </span>
+            </div>
           </p>
           <div className="flex items-center">
             <form className="p-1 flex-grow" onSubmit={handleFormSubmit}>
@@ -458,6 +463,17 @@ const LoadBank = () => {
                       fontSize: "1.10rem",
                     }}
                   >
+                    Status
+                  </TableCell>
+                  <TableCell
+                    align="center"
+                    style={{
+                      width: "20%",
+                      color: "white",
+                      fontWeight: "bold",
+                      fontSize: "1.10rem",
+                    }}
+                  >
                     Action
                   </TableCell>
                 </TableHead>
@@ -483,6 +499,20 @@ const LoadBank = () => {
                         {moment(row.generatedDate)
                           .tz("Australia/Sydney")
                           .format("DD MMMM YYYY")}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex justify-center">
+                          {row.isAllocated === false ? (
+                            <p className="text-xs px-3 py-1 bg-red-500 text-white font-black rounded-full">
+                              Not Allocated
+                            </p>
+                          ) : (
+                            <p className="text-xs px-3 py-1 bg-green-500 text-white font-black rounded-full">
+                              {" "}
+                              Allocated{" "}
+                            </p>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell align="center">
                         <IconButton
@@ -566,6 +596,10 @@ const LoadBank = () => {
                       }}
                     >
                       Loadbank ID: {modalLoadbankID}
+                      <span className="text-red-500 ml-1 mr-1 font-black">
+                        {" "}
+                        (Primary)
+                      </span>
                     </p>
                   </div>
                 </DialogContent>

@@ -15,6 +15,8 @@ const Allocate = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [successfulMessage, setSuccessfulMessage] = useState("");
 
+  const [selectedSide, setSelectedSide] = useState("");
+
   const pdcInputRef = useRef(null);
   const resetPDCRef = useRef(null);
 
@@ -25,6 +27,9 @@ const Allocate = () => {
 
   const AllocateSubAssembly_API =
     "http://localhost:3001/Allocate/AllocateSubAssembly";
+
+  const AllocateLoadbankSubAssembly_API =
+    "http://localhost:3001/Allocate/AllocateLoadbankSubAssembly";
 
   const handlePDCInputChange = (event) => {
     setInputPDCValue(event.target.value);
@@ -64,7 +69,7 @@ const Allocate = () => {
     if (event.key === "Enter") {
       console.log("Entered");
       const isPanelPattern = /^PANEL\d{6}$/.test(subAssemblyInputValue);
-      const isLoadbankPattern = /^LB\d{6}$/.test(subAssemblyInputValue);
+      const isLoadbankPattern = /^LB\d{6}-P$/.test(subAssemblyInputValue);
 
       if (isPanelPattern) {
         setShowSubAssemblyInput(subAssemblyInputValue);
@@ -72,7 +77,7 @@ const Allocate = () => {
         setWrongSubAssemblyError(false);
       } else if (isLoadbankPattern) {
         setShowSubAssemblyInput(subAssemblyInputValue);
-        setDetectedType("Loadbank");
+        setDetectedType("Loadbank (Primary)");
         setWrongSubAssemblyError(false);
       } else {
         try {
@@ -85,7 +90,7 @@ const Allocate = () => {
           } else if (parsedInput.loadbankId) {
             console.log("Loadbank Detected");
             setSubAssemblyInputValue(parsedInput.loadbankId);
-            setDetectedType("Loadbank");
+            setDetectedType("Loadbank (Primary)");
             setWrongSubAssemblyError(false);
           } else {
             setWrongSubAssemblyError(true);
@@ -118,6 +123,7 @@ const Allocate = () => {
     setDetectedType("");
     setSuccessfulMessage("");
     setWrongSubAssemblyError("");
+    setSelectedSide("");
   };
 
   const handleKeyPress = (event) => {
@@ -148,13 +154,11 @@ const Allocate = () => {
         inputPDCValue,
         subAssemblyInputValue,
       });
-      // Handle the response
-      console.log(response.data);
 
       // Clear error message if successful
       setErrorMessage("");
       if (response.status === 200) {
-        setSuccessfulMessage("Sub-Assembly Allocated to PDC successfully");
+        setSuccessfulMessage(`${detectedType} Allocated to PDC successfully`);
         setIsAllocateLoading(false);
       }
     } catch (error) {
@@ -245,7 +249,7 @@ const Allocate = () => {
                 <div className="flex justify-start">
                   <label
                     htmlFor="subAssembly"
-                    className="block text-base font-black text-xl p-1 text-white "
+                    className="block text-base font-black text-xl p-1 text-white"
                   >
                     Select Sub-Assembly
                   </label>
@@ -261,6 +265,7 @@ const Allocate = () => {
                     value={subAssemblyInputValue}
                     className="border w-full px-2 py-4 rounded-md focus:outline-none focus:ring-3 focus:border-gray-600 text-black"
                     placeholder="Enter Sub-Assembly"
+                    disabled={detectedType}
                   />
                   <button
                     ref={resetSubAssemblyRef}

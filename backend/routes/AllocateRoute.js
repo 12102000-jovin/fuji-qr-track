@@ -83,7 +83,7 @@ router.post("/AllocateSubAssembly", async (req, res) => {
     const { inputPDCValue, subAssemblyInputValue } = req.body;
 
     const isPanelPattern = /^PANEL\d{6}$/.test(subAssemblyInputValue);
-    const isLoadbankPattern = /^LB\d{6}$/.test(subAssemblyInputValue);
+    const isLoadbankPattern = /^LB\d{6}-P$/.test(subAssemblyInputValue);
 
     const pdc = await PDCModel.findOne({
       pdcId: `${inputPDCValue}`,
@@ -117,6 +117,12 @@ router.post("/AllocateSubAssembly", async (req, res) => {
           });
         }
 
+        if (pdc.panels.length > 0) {
+          return res.status(400).json({
+            message: `A Panel already exists in the ${pdc.pdcId}`,
+          });
+        }
+
         // Set the allocated date for the panel
         panel.allocatedDate = new Date();
 
@@ -147,7 +153,7 @@ router.post("/AllocateSubAssembly", async (req, res) => {
           return res.status(404).json({ message: "Loadbank not found" });
         }
 
-        // Check if the panel already exists in the PDC
+        // Check if the loadbank already exists in the PDC
         if (
           pdc.loadbanks.some((loadbankId) => loadbankId.equals(loadbank._id))
         ) {

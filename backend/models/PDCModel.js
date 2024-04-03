@@ -30,6 +30,12 @@ const PDCSchema = new mongoose.Schema(
         ref: "LoadbankModel",
       },
     ],
+    catcherLoadbanks: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "LoadbankModel",
+      },
+    ],
   },
   {
     collection: "pdc",

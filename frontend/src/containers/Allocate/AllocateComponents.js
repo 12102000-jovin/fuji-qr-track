@@ -18,7 +18,7 @@ const AllocateComponents = () => {
   const handleSubAssemblyKeyDown = (event) => {
     if (event.key === "Enter") {
       const isPanelPattern = /^PANEL\d{6}$/.test(inputSubAssemblyValue);
-      const isLoadbankPattern = /^LB\d{6}$/.test(inputSubAssemblyValue);
+      const isLoadbankPattern = /^LB\d{6}-P$/.test(inputSubAssemblyValue);
 
       if (isPanelPattern) {
         setShowPanelForm(true);
@@ -38,7 +38,7 @@ const AllocateComponents = () => {
             setErrorMessage("");
           } else if (
             parsedInput.loadbankId &&
-            /^LB\d{6}$/.test(parsedInput.loadbankId)
+            /^LB\d{6}-P$/.test(parsedInput.loadbankId)
           ) {
             setInputSubAssemblyValue(parsedInput.loadbankId);
             setShowPanelForm(false);

@@ -49,7 +49,7 @@ import DashboardLoadbank from "../../containers/Dashboard/DashboardLoadbank";
 import DashboardComponent from "../../containers/Dashboard/DashboardComponent";
 import AllocateComponents from "../../containers/Allocate/AllocateComponents";
 import Components from "../../containers/Component/Component";
-import Loadbank from "../../containers/SubAssembly/Loadbank/Loadbank";
+import LoadbankPrimary from "../../containers/SubAssembly/Loadbank/LoadbankPrimary";
 
 const drawerWidth = 200;
 
@@ -409,7 +409,10 @@ const NavBar = () => {
                 }}
               >
                 <DropdownMenuItem to="/Panel" primary="Panel" />
-                <DropdownMenuItem to="/Loadbank" primary="LoadBank" />
+                <DropdownMenuItem
+                  to="/LoadbankPrimary"
+                  primary="Loadbank (Primary)"
+                />
               </Menu>
 
               <ListItem disablePadding sx={{ display: "block" }}>
@@ -542,7 +545,7 @@ const NavBar = () => {
                 element={<AllocateComponents />}
               />
               <Route path="/Components" element={<Components />} />
-              <Route path="/Loadbank" element={<Loadbank />} />
+              <Route path="/LoadbankPrimary" element={<LoadbankPrimary />} />
             </Routes>
           </Box>
         </Box>

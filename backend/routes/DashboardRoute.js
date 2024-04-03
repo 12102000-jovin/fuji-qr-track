@@ -53,6 +53,10 @@ router.get("/:pdcId/showPDCDashboard", async (req, res) => {
       _id: { $in: pdc.loadbanks },
     });
 
+    const catcherLoadbanks = await LoadbankModel.find({
+      _id: { $in: pdc.catcherLoadbanks },
+    });
+
     // Find the first Work Order that references this PDC
     const workOrder = await WorkOrderModel.findOne({
       pdcs: pdc._id,
@@ -62,7 +66,7 @@ router.get("/:pdcId/showPDCDashboard", async (req, res) => {
     const workOrderId = workOrder ? workOrder.workOrderId : null;
 
     // Send an object with both panels and workOrderId
-    res.status(200).json({ panels, loadbanks, workOrderId });
+    res.status(200).json({ panels, loadbanks, catcherLoadbanks, workOrderId });
   } catch (error) {
     res.status(500).json({ message: `Error retrieving pdcs in ${pdcId}` });
   }
@@ -148,7 +152,7 @@ router.get("/:loadbankId/showLoadbankDashboard", async (req, res) => {
 
     // Find the PDC that contains the given loadbank
     const pdc = await PDCModel.findOne({
-      loadbanks: loadbank._id,
+      $or: [{ loadbanks: loadbank._id }, { catcherLoadbanks: loadbank._id }],
     }).populate("loadbanks");
 
     if (!pdc) {

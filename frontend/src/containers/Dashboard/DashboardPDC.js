@@ -73,30 +73,30 @@ const Dashboard = () => {
             <div className="flex justify-center flex-wrap">
               {/* ======================= P A N E L ======================= */}
               <div className="text-start mt-4 p-2 w-full md:w-1/2">
-                <div className="w-full p-5 pl-10 pr-10 bg-white rounded-md ">
+                <div className="w-full p-5 pl-10 pr-10 bg-white rounded-md min-h-40">
                   <p className="text-black font-black text-2xl mb-2">Panel</p>
                   {dashboardType === "PDC" ? (
                     dashboardData &&
                     dashboardData.panels &&
                     dashboardData.panels.length > 0 ? (
                       dashboardData.panels.map((panel) => (
-                        <div
-                          key={panel._id}
-                          className="flex justify-start items-center space-x-4"
-                        >
+                        <div key={panel._id} className="flex flex-col ">
                           <div className="font-normal">
                             <button
                               onClick={() => window.open(panel.link, "_blank")}
-                              className="text-blue-500 hover:underline focus:outline-none"
+                              className="text-blue-500 font-bold hover:underline focus:outline-none"
                             >
                               {panel.panelId}
                             </button>
                           </div>
-                          <div className="text-gray-500">
-                            {moment(panel.allocatedDate).format(
-                              "DD MMMM YYYY HH:mm:ss"
-                            )}
-                          </div>
+                          <p className="text-black flex flex-col mt-5">
+                            <p className="text-xs text-start">Allocated Date</p>
+                            <p className="text-xs text-start font-bold">
+                              {moment(panel.allocatedDate).format(
+                                "DD MMM YYYY HH:mm:ss"
+                              )}
+                            </p>
+                          </p>
                         </div>
                       ))
                     ) : (
@@ -111,36 +111,36 @@ const Dashboard = () => {
                   )}
                 </div>
               </div>
-              {/* ======================= L O A D B A N K======================= */}
+              {/* ======================= L O A D B A N K ======================= */}
               <div className="text-start mt-4 p-2 w-full md:w-1/2">
-                <div className="w-full p-5 pl-10 pr-10 bg-white rounded-md ">
+                <div className="w-full p-5 pl-10 pr-10 bg-white rounded-md min-h-40">
                   <p className="text-black font-black text-2xl mb-2">
-                    Loadbank
+                    Loadbank (Primary)
                   </p>
                   {dashboardType === "PDC" ? (
                     dashboardData &&
                     dashboardData.loadbanks &&
                     dashboardData.loadbanks.length > 0 ? (
                       dashboardData.loadbanks.map((loadbank) => (
-                        <div
-                          key={loadbank._id}
-                          className="flex justify-start items-center space-x-4"
-                        >
+                        <div key={loadbank._id} className="flex flex-col">
                           <div className="font-normal">
                             <button
                               onClick={() =>
                                 window.open(loadbank.link, "_blank")
                               }
-                              className="text-blue-500 hover:underline focus:outline-none"
+                              className="text-blue-500 font-bold hover:underline focus:outline-none"
                             >
                               {loadbank.loadbankId}
                             </button>
                           </div>
-                          <div className="text-gray-500">
-                            {moment(loadbank.allocatedDate).format(
-                              "DD MMMM YYYY HH:mm:ss"
-                            )}
-                          </div>
+                          <p className="text-black flex flex-col mt-6">
+                            <p className="text-xs text-start">Allocated Date</p>
+                            <p className="text-xs text-start font-bold">
+                              {moment(loadbank.allocatedDate).format(
+                                "DD MMM YYYY HH:mm:ss"
+                              )}
+                            </p>
+                          </p>
                         </div>
                       ))
                     ) : (
@@ -155,7 +155,50 @@ const Dashboard = () => {
                   )}
                 </div>
               </div>
-              {/* Other Sub-Assembly Section */}
+              {/* ======================= L O A D B A N K ( C A T C H E R ) ======================= */}
+              <div className="text-start mt-4 p-2 w-full md:w-1/2">
+                <div className="w-full p-5 pl-10 pr-10 bg-white rounded-md min-h-40">
+                  <p className="text-black font-black text-2xl mb-2">
+                    Loadbank (Catcher)
+                  </p>
+                  {dashboardType === "PDC" ? (
+                    dashboardData &&
+                    dashboardData.catcherLoadbanks &&
+                    dashboardData.catcherLoadbanks.length > 0 ? (
+                      dashboardData.catcherLoadbanks.map((loadbank) => (
+                        <div key={loadbank._id} className="flex flex-col">
+                          <div className="font-normal">
+                            <button
+                              onClick={() =>
+                                window.open(loadbank.link, "_blank")
+                              }
+                              className="text-blue-500 font-bold hover:underline focus:outline-none"
+                            >
+                              {loadbank.loadbankId}
+                            </button>
+                          </div>
+                          <p className="text-black flex flex-col mt-6">
+                            <p className="text-xs text-start">Allocated Date</p>
+                            <p className="text-xs text-start font-bold">
+                              {moment(loadbank.allocatedDate).format(
+                                "DD MMM YYYY HH:mm:ss"
+                              )}
+                            </p>
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <span className="bg-red-500 text-white p-1 pl-2 pr-2 font-black rounded-full text-xs inline-block">
+                        No Loadbank found
+                      </span>
+                    )
+                  ) : (
+                    <span className="text-white p-1 rounded-full text-xs inline-block ">
+                      none
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>

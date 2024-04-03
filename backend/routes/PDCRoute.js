@@ -111,7 +111,11 @@ router.delete("/deletePDC/:pdcId", async (req, res) => {
     );
 
     await LoadbankModel.updateMany(
-      { _id: { $in: pdcToDelete.loadbanks } },
+      {
+        _id: {
+          $in: [...pdcToDelete.loadbanks, ...pdcToDelete.catcherLoadbanks],
+        },
+      },
       { $set: { isAllocated: false, allocatedDate: null } }
     );
 

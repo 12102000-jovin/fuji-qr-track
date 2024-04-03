@@ -78,8 +78,18 @@ router.delete("/Loadbank/deleteLoadbank/:loadbankId", async (req, res) => {
     const deletedLoadbankObjectId = loadbankToDelete._id;
 
     await PDCModel.updateMany(
-      { loadbanks: deletedLoadbankObjectId },
-      { $pull: { loadbanks: deletedLoadbankObjectId } }
+      {
+        $or: [
+          { loadbanks: deletedLoadbankObjectId },
+          { catcherLoadbanks: deletedLoadbankObjectId },
+        ],
+      },
+      {
+        $pull: {
+          loadbanks: deletedLoadbankObjectId,
+          catcherLoadbanks: deletedLoadbankObjectId,
+        },
+      }
     );
 
     console.log(loadbankToDelete);

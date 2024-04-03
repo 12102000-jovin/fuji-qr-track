@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import "animate.css";
 import moment from "moment";
-import LaunchIcon from "@mui/icons-material/Launch";
 
 const Dashboard = () => {
   const { workOrderId } = useParams();
@@ -51,53 +50,41 @@ const Dashboard = () => {
           </div>
           <div className="p-5 bg-signature rounded-md mt-2 text-white">
             <div className="text-start">
-              <p className="text-2xl font-bold mb-4">PDC</p>
+              <p className="text-3xl font-bold mb-4">PDC</p>
             </div>
-            {dashboardType === "WorkOrder" ? (
-              dashboardData.length > 0 ? (
-                <div className="p-5 bg-white rounded-md">
-                  <table className="table-auto w-full">
-                    <thead>
-                      <tr>
-                        <th></th>
-                        <th className="font-black px-4 py-2 text-start text-black">
-                          Allocated Date
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {dashboardData.map((workOrder) => (
-                        <tr key={workOrder._id}>
-                          <td className="px-4 py-2 text-start">
-                            <button
-                              onClick={() =>
-                                window.open(workOrder.link, "_blank")
-                              }
-                              className="text-blue-500 hover:underline focus:outline-none"
-                            >
-                              <span className="flex justify-center items-center">
-                                {workOrder.pdcId}
-                              </span>
-                            </button>
-                          </td>
-                          <td className="px-4 py-2 text-gray-500 text-start">
-                            {moment(workOrder.allocatedDate).format(
-                              "DD MMM YYYY HH:mm:ss"
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className="flex justify-start">
-                  <p className="bg-red-500 font-black  p-1 pr-2 pl-2 rounded-full text-xs">
-                    No PDC Found
-                  </p>
-                </div>
-              )
-            ) : null}
+
+            {dashboardType === "WorkOrder" && dashboardData.length > 0 ? (
+              <div className="flex flex-wrap justify-center items-center w-full">
+                {dashboardData.map((workOrder) => (
+                  <div className="bg-white m-3 rounded-md p-8 w-6/7  md:w-8/9 lg:w-96">
+                    <div className=" flex text-black font-black ">
+                      <button
+                        onClick={() => window.open(workOrder.link, "_blank")}
+                        className="text-blue-500 text-xl hover:underline focus:outline-none mb-5"
+                      >
+                        <span className="flex justify-center items-center">
+                          {workOrder.pdcId}
+                        </span>
+                      </button>
+                    </div>
+                    <p className="text-black flex flex-col">
+                      <p className="text-xs text-start">Allocated Date</p>
+                      <p className="text-xs text-start font-bold">
+                        {moment(workOrder.allocatedDate).format(
+                          "DD MMM YYYY HH:mm:ss"
+                        )}
+                      </p>
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex justify-start">
+                <p className="bg-red-500 font-black  p-1 pr-2 pl-2 rounded-full text-xs">
+                  No PDC Found
+                </p>
+              </div>
+            )}
           </div>
 
           {/* <div className="w-full flex flex-col justify-start p-5 bg-signature mt-2 rounded-md">

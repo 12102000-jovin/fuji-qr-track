@@ -70,13 +70,13 @@ const SubAssemblyQRGenerator = () => {
   useEffect(() => {
     if (numQR === "1") {
       setExpectedLoadbankRange(
-        `Expected Output: LB${formatId(Number(startNum))}`
+        `Expected Output: LB${formatId(Number(startNum))}-P`
       );
     } else if (numQR > 1 && numQR !== "1") {
       setExpectedLoadbankRange(
-        ` Expected Output: LB${formatId(Number(startNum))} - LB${formatId(
+        ` Expected Output: LB${formatId(Number(startNum))}-P - LB${formatId(
           Number(startNum) + Number(numQR) - 1
-        )}`
+        )}-P`
       );
     } else {
       setExpectedLoadbankRange("");
@@ -146,15 +146,15 @@ const SubAssemblyQRGenerator = () => {
         setDuplicateError("Duplicate Panel Found");
         setEmptyInputError(false);
       }
-    } else if (selectedSubAssemblyType === "Loadbank") {
+    } else if (selectedSubAssemblyType === "LoadbankPrimary") {
       const Loadbanks = Array.from({ length: numQR }, (_, index) => {
         const newLoadbankId = formatId(Number(startNum) + index);
         return {
-          link: `${linkFormat}${applicationPortNumber}/Dashboard/Loadbank/LB${newLoadbankId}`,
+          link: `${linkFormat}${applicationPortNumber}/Dashboard/Loadbank/LB${newLoadbankId}-P`,
           generatedDate: moment()
             .tz("Australia/Sydney")
             .format("YYYY-MM-DD HH:mm:ss"),
-          loadbankId: `LB${newLoadbankId}`,
+          loadbankId: `LB${newLoadbankId}-P`,
         };
       });
 
@@ -165,7 +165,7 @@ const SubAssemblyQRGenerator = () => {
         setQRcode(() => {
           const newQRCodes = response.data.map((qrcode, index) => ({
             ...qrcode,
-            loadbankId: `LB${formatId(Number(startNum) + index)}`,
+            loadbankId: `LB${formatId(Number(startNum) + index)}-P`,
           }));
           return newQRCodes;
         });
@@ -243,9 +243,9 @@ const SubAssemblyQRGenerator = () => {
     if (currentUrl.includes("Panel")) {
       // Set the selected value of the dropdown to "Panel"
       setSelectedSubAssemblyType("Panel");
-    } else if (currentUrl.includes("Loadbank")) {
+    } else if (currentUrl.includes("LoadbankPrimary")) {
       // Set the selected value of the dropdown to "Loadbank"
-      setSelectedSubAssemblyType("Loadbank");
+      setSelectedSubAssemblyType("LoadbankPrimary");
     }
   }, []);
 
@@ -289,7 +289,7 @@ const SubAssemblyQRGenerator = () => {
               </option>
 
               <option value="Panel">Panel</option>
-              <option>Loadbank</option>
+              <option value="LoadbankPrimary">Loadbank (Primary)</option>
             </select>
             {selectedSubAssemblyType && (
               <div className="mt-5">
@@ -298,7 +298,11 @@ const SubAssemblyQRGenerator = () => {
                     htmlFor="startNum"
                     className="block text-base mb-2 flex justify-start font-bold text-xl"
                   >
-                    Starting {selectedSubAssemblyType} Number
+                    Starting{" "}
+                    {selectedSubAssemblyType === "Panel"
+                      ? "Panel"
+                      : " Loadbank (Primary) "}
+                    Number
                   </label>
                   <input
                     type="number"
@@ -313,7 +317,11 @@ const SubAssemblyQRGenerator = () => {
                     htmlFor="numQR"
                     className="block text-base mb-2 flex justify-start font-bold text-xl"
                   >
-                    Number of {selectedSubAssemblyType} QR
+                    Number of{" "}
+                    {selectedSubAssemblyType === "Panel"
+                      ? "Panel"
+                      : " Loadbank (Primary) "}{" "}
+                    QR
                   </label>
                   <input
                     type="number"
@@ -334,7 +342,7 @@ const SubAssemblyQRGenerator = () => {
                     </div>
                   )}
 
-                {selectedSubAssemblyType === "Loadbank" &&
+                {selectedSubAssemblyType === "LoadbankPrimary" &&
                   showExpectedLoadbankRange &&
                   expectedLoadbankRange && (
                     <div className="flex jsutify-start">
@@ -421,7 +429,7 @@ const SubAssemblyQRGenerator = () => {
             </div>
           )}
 
-          {selectedSubAssemblyType === "Loadbank" && (
+          {selectedSubAssemblyType === "LoadbankPrimary" && (
             <div className="flex justify-center flex-wrap mt-5 rounded-xl">
               {qrCode.map((code, index) => (
                 <div
@@ -449,7 +457,13 @@ const SubAssemblyQRGenerator = () => {
                         height: 35,
                       }}
                     />
-                    <div className="mb-5">Loadbank ID: {code.loadbankId}</div>
+                    <div className="mb-5 flex items-center justify-center">
+                      Loadbank ID : {code.loadbankId}{" "}
+                      <span className="text-red-500 ml-1 mr-1 px-2 font-black">
+                        {" "}
+                        (Primary)
+                      </span>
+                    </div>
                   </div>
                   <img
                     src={imageData[code.loadbankId]}
