@@ -105,6 +105,41 @@ const LoadbankCatcherSchema = new mongoose.Schema(
   }
 );
 
+const PrimaryMCCBSchema = new mongoose.Schema(
+  {
+    link: {
+      required: true,
+      type: String,
+      unique: true,
+    },
+    generatedDate: {
+      type: String,
+      // required: true,
+    },
+    MCCBId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    allocatedDate: {
+      type: String,
+    },
+    isAllocated: {
+      type: Boolean,
+      default: false,
+    },
+    components: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ComponentModel",
+      },
+    ],
+  },
+  {
+    collection: "PrimaryMCCB",
+  }
+);
+
 // Export both models
 module.exports = {
   LoadbankModel: mongoose.model("LoadbankModel", LoadbankSchema),
@@ -113,4 +148,5 @@ module.exports = {
     LoadbankCatcherSchema
   ),
   PanelModel: mongoose.model("PanelModel", PanelSchema),
+  PrimaryMCCBModel: mongoose.model("PrimaryMCCBModel", PrimaryMCCBSchema),
 };

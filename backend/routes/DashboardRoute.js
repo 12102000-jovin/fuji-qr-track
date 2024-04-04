@@ -7,6 +7,7 @@ const {
   PanelModel,
   LoadbankModel,
   LoadbankCatcherModel,
+  PrimaryMCCBModel,
 } = require("../models/SubAssemblyModel");
 const WorkOrderModel = require("../models/WorkOrderModel");
 const ComponentModel = require("../models/ComponentModel");
@@ -61,6 +62,10 @@ router.get("/:pdcId/showPDCDashboard", async (req, res) => {
       _id: { $in: pdc.catcherLoadbanks },
     });
 
+    const primaryMCCBs = await PrimaryMCCBModel.find({
+      _id: { $in: pdc.primaryMCCBs },
+    });
+
     // Find the first Work Order that references this PDC
     const workOrder = await WorkOrderModel.findOne({
       pdcs: pdc._id,
@@ -70,7 +75,9 @@ router.get("/:pdcId/showPDCDashboard", async (req, res) => {
     const workOrderId = workOrder ? workOrder.workOrderId : null;
 
     // Send an object with both panels and workOrderId
-    res.status(200).json({ panels, loadbanks, catcherLoadbanks, workOrderId });
+    res
+      .status(200)
+      .json({ panels, loadbanks, catcherLoadbanks, workOrderId, primaryMCCBs });
   } catch (error) {
     res.status(500).json({ message: `Error retrieving pdcs in ${pdcId}` });
   }
@@ -130,7 +137,7 @@ router.get("/:panelId/showPanelDashboard", async (req, res) => {
   }
 });
 
-// L O A D B A N K ( P R I M A R Y)
+// L O A D B A N K (P R I M A R Y)
 router.get("/:loadbankId/showLoadbankDashboard", async (req, res) => {
   try {
     const { loadbankId } = req.params;
@@ -153,6 +160,7 @@ router.get("/:loadbankId/showLoadbankDashboard", async (req, res) => {
     const componentData = components.map((component) => ({
       componentType: component.componentType,
       componentSerialNumber: component.componentSerialNumber,
+      allocatedDate: component.allocatedDate,
     }));
 
     // Find the PDC that contains the given loadbank
@@ -183,7 +191,7 @@ router.get("/:loadbankId/showLoadbankDashboard", async (req, res) => {
   }
 });
 
-// L O A D B A N K ( C A T C H E R)
+// L O A D B A N K (C A T C H E R)
 router.get("/:loadbankId/showLoadbankCatcherDashboard", async (req, res) => {
   try {
     const { loadbankId } = req.params;
@@ -206,6 +214,7 @@ router.get("/:loadbankId/showLoadbankCatcherDashboard", async (req, res) => {
     const componentData = components.map((component) => ({
       componentType: component.componentType,
       componentSerialNumber: component.componentSerialNumber,
+      allocatedDate: component.allocatedDate,
     }));
 
     // Find the PDC that contains the given loadbank
@@ -233,6 +242,62 @@ router.get("/:loadbankId/showLoadbankCatcherDashboard", async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: `Error retrieving PDCs for loadbank` });
+  }
+});
+
+// M C C B (P R I M A R Y)
+router.get("/:MCCBId/showMCCBPrimaryDashboard", async (req, res) => {
+  try {
+    const { MCCBId } = req.params;
+
+    // Find MCCB based on MCCBId
+    const MCCB = await PrimaryMCCBModel.findOne({ MCCBId });
+
+    console.log(MCCB);
+
+    if (!MCCB) {
+      return res.status(404).json({ message: "MCCB not found" });
+    }
+
+    // Extract the component _id referenced in the MCCB
+    const componentIds = MCCB.components.map((component) => component._id);
+
+    // Find components in the ComponentModel matching the extracted component _ids
+    const components = await ComponentModel.find({
+      _id: { $in: componentIds },
+    });
+
+    const componentData = components.map((component) => ({
+      componentType: component.componentType,
+      componentSerialNumber: component.componentSerialNumber,
+      allocatedDate: component.allocatedDate,
+    }));
+
+    // Find the PDC that contains the given MCCB
+    const pdc = await PDCModel.findOne({
+      primaryMCCBs: MCCB._id,
+    }).populate("primaryMCCBs");
+
+    if (!pdc) {
+      console.log("PDC not found for the given panel");
+    }
+
+    // Find the first Work Order that references this PDC
+    const workOrder = await WorkOrderModel.findOne({
+      pdcs: pdc ? pdc._id : null, // Pass null if pdc is not found
+    });
+    // Extracting workOrderId from the found work order
+    const workOrderId = workOrder ? workOrder.workOrderId : null;
+
+    // Respond with the pdcId of the found PDC along with the populated 'MCCBs'
+    res.status(200).json({
+      pdcId: pdc ? pdc.pdcId : null,
+      workOrderId,
+      MCCBs: pdc ? pdc.MCCBs : null,
+      componentData,
+    });
+  } catch (error) {
+    res.status(500).json({ message: `Error retrieving PDCs for MCCB` });
   }
 });
 

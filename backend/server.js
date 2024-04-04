@@ -50,6 +50,9 @@ app.use("/SubAssembly", panelSubAssembly);
 const loadbankSubAssembly = require("./routes/LoadbankRoute");
 app.use("/SubAssembly", loadbankSubAssembly);
 
+const MCCBRoute = require("./routes/MCCBRoute");
+app.use("/SubAssembly", MCCBRoute);
+
 const allocateRoute = require("./routes/AllocateRoute");
 app.use("/Allocate", allocateRoute);
 

@@ -5,6 +5,7 @@ const {
   PanelModel,
   LoadbankModel,
   LoadbankCatcherModel,
+  PrimaryMCCBModel,
 } = require("../models/SubAssemblyModel");
 const ComponentModel = require("../models/ComponentModel");
 
@@ -89,6 +90,7 @@ router.post("/AllocateSubAssembly", async (req, res) => {
     const isPanelPattern = /^PANEL\d{6}$/.test(subAssemblyInputValue);
     const isLoadbankPattern = /^LB\d{6}-P$/.test(subAssemblyInputValue);
     const isLoadbankCatcherPattern = /^LB\d{6}-C$/.test(subAssemblyInputValue);
+    const isMCCBPrimaryPattern = /^MCCB\d{6}-P$/.test(subAssemblyInputValue);
 
     const pdc = await PDCModel.findOne({
       pdcId: `${inputPDCValue}`,
@@ -230,6 +232,50 @@ router.post("/AllocateSubAssembly", async (req, res) => {
 
         // Save both the loadbank and the updated PDC document
         await loadbank.save();
+        await pdc.save();
+
+        //  Respond with success message and the updated PDC
+        const response = "Subassembly allocation successful";
+        return res.status(200).json({ message: response });
+      } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
+    } else if (isMCCBPrimaryPattern) {
+      try {
+        // Check if MCCB exists
+        const MCCB = await PrimaryMCCBModel.findOne({
+          MCCBId: subAssemblyInputValue,
+        });
+
+        if (!MCCB) {
+          return res.status(404).json({ message: "MCCB not found" });
+        }
+
+        // Check if the MCCB already exists in the PDC
+        if (pdc.primaryMCCBs.some((MCCBId) => MCCBId.equals(MCCB._id))) {
+          return res.status(400).json({
+            message: `The MCCB already exists in the ${pdc.pdcId}`,
+          });
+        }
+
+        if (MCCB.isAllocated === true) {
+          return res.status(404).json({
+            message: `${MCCB.MCCBId} has been allocated to other PDC`,
+          });
+        }
+
+        // Set the allocated date for the MCCB
+        MCCB.allocatedDate = new Date();
+
+        // Set the isAllocated Flag to true
+        MCCB.isAllocated = true;
+
+        // Associate the MCCB with the PDC by adding its ObjectId to the MCCBs array
+        pdc.primaryMCCBs.push(MCCB._id);
+
+        // Save both the MCCB and the updated PDC document
+        await MCCB.save();
         await pdc.save();
 
         //  Respond with success message and the updated PDC
@@ -424,6 +470,68 @@ router.post("/AllocateLoadbankCatcherComponent", async (req, res) => {
     return res
       .status(200)
       .json({ message: "Component allocated to the Loadbank successfully " });
+  } catch (error) {
+    console.error("Error in allocation:", error);
+    // Handle the error and send an appropriate response
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.post("/AllocateMCCBPrimaryComponent", async (req, res) => {
+  try {
+    const {
+      componentSerialNumber,
+      componentType,
+      componentDescription,
+      MCCBId,
+    } = req.body;
+
+    const existingComponent = await ComponentModel.findOne({
+      componentSerialNumber,
+    });
+
+    if (existingComponent) {
+      return res.status(409).json({
+        message:
+          "Component already allocated. Please select a different component.",
+      });
+    }
+
+    // Check if a component with the same type is already allocated to the MCCB
+    const MCCB = await PrimaryMCCBModel.findOne({ MCCBId }).populate(
+      "components"
+    );
+
+    if (!MCCB) {
+      return res.status(404).json({ message: "MCCB not found" });
+    }
+
+    const existingComponentType = MCCB.components.find(
+      (component) => component.componentType === componentType
+    );
+
+    if (existingComponentType) {
+      return res.status(409).json({
+        message: `${existingComponentType.componentType} with serial number [${existingComponentType.componentSerialNumber}] is already allocated to the MCCB. Please choose another component.`,
+      });
+    }
+
+    // If there are no existing components, proceed to insert new components
+    const component = new ComponentModel({
+      componentSerialNumber,
+      componentType,
+      componentDescription,
+      allocatedDate: new Date(),
+    });
+
+    await component.save();
+
+    MCCB.components.push(component._id);
+    await MCCB.save();
+
+    return res
+      .status(200)
+      .json({ message: "Component allocated to the MCCB successfully " });
   } catch (error) {
     console.error("Error in allocation:", error);
     // Handle the error and send an appropriate response

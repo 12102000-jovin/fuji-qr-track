@@ -36,6 +36,12 @@ const PDCSchema = new mongoose.Schema(
         ref: "LoadbankModel",
       },
     ],
+    primaryMCCBs: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "PrimaryMCCBModel",
+      },
+    ],
   },
   {
     collection: "pdc",

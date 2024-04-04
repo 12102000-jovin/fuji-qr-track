@@ -9,6 +9,8 @@ const {
 const PDCModel = require("../models/PDCModel");
 const ComponentModel = require("../models/ComponentModel");
 
+// ================================== L O A D B A N K (P R I M A R Y) ==================================
+
 router.post("/LoadbankPrimary/generateSubAssembly", async (req, res) => {
   const Loadbanks = req.body.Loadbanks;
 
@@ -33,7 +35,7 @@ router.post("/LoadbankPrimary/generateSubAssembly", async (req, res) => {
 
 router.get("/LoadbankPrimary/getLatestLoadbank", async (req, res) => {
   try {
-    // Find the document with the highet Loadbank Id
+    // Find the document with the highest Loadbank Id
     const latestLoadbank = await LoadbankModel.findOne()
       .sort({ loadbankId: -1 })
       .limit(1);
@@ -122,7 +124,7 @@ router.put("/Loadbank/editLoadbank/:pdcId/:loadbankId", async (req, res) => {
     });
 
     // console.log("Current PDC: ", currentPdc);
-    console.log("Future PDC: ", futurePdc);
+    // console.log("Future PDC: ", futurePdc);
     // console.log("Current Loadbank: ", currentLoadbank);
     // console.log("Future Loadbank: ", futureLoadbank);
 
@@ -146,7 +148,9 @@ router.put("/Loadbank/editLoadbank/:pdcId/:loadbankId", async (req, res) => {
         await futurePdc.save();
         await currentPdc.save();
       }
-      res.status(200).json({ message: "PDC moved successfully", futurePdc });
+      res
+        .status(200)
+        .json({ message: "Loadbank moved successfully", futurePdc });
     } else if (pdcId === pdcToEdit && loadbankId !== loadbankToEdit) {
       const updatedLoadbankId = await LoadbankModel.findOneAndUpdate(
         { loadbankId: loadbankId },
@@ -355,7 +359,9 @@ router.put(
           await futurePdc.save();
           await currentPdc.save();
         }
-        res.status(200).json({ message: "PDC moved successfully", futurePdc });
+        res
+          .status(200)
+          .json({ message: "Loadbank moved successfully", futurePdc });
       } else if (pdcId === pdcToEdit && loadbankId !== loadbankToEdit) {
         const updatedLoadbankId = await LoadbankCatcherModel.findOneAndUpdate(
           { loadbankId: loadbankId },
