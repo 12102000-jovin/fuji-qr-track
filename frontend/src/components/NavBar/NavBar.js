@@ -29,7 +29,6 @@ import {
 import Menu from "@mui/material/Menu";
 import { BiSolidComponent } from "react-icons/bi";
 import { RiArrowRightSFill } from "react-icons/ri";
-import Avatar from "@mui/material/Avatar";
 
 import logo from "../../Images/FE-logo.png";
 import Home from "../Home";
@@ -45,10 +44,12 @@ import DashboardPDC from "../../containers/Dashboard/DashboardPDC";
 import DashboardPanel from "../../containers/Dashboard/DashboardPanel";
 import DashboardLoadbank from "../../containers/Dashboard/DashboardLoadbank";
 import DashboardComponent from "../../containers/Dashboard/DashboardComponent";
+import DashboardMCCB from "../../containers/Dashboard/DashboardMCCB";
 import AllocateComponents from "../../containers/Allocate/AllocateComponents";
 import Components from "../../containers/Component/Component";
 import LoadbankPrimary from "../../containers/SubAssembly/Loadbank/LoadbankPrimary";
 import LoadbankCatcher from "../../containers/SubAssembly/Loadbank/LoadbankCatcher";
+import MCCBPrimary from "../../containers/SubAssembly/MCCB/MCCBPrimary";
 
 const drawerWidth = 200;
 
@@ -416,6 +417,8 @@ const NavBar = () => {
                   to="/LoadbankCatcher"
                   primary="Loadbank (Catcher)"
                 />
+
+                <DropdownMenuItem to="/MCCBPrimary" primary="MCCB (Primary)" />
               </Menu>
 
               <ListItem disablePadding sx={{ display: "block" }}>
@@ -530,6 +533,10 @@ const NavBar = () => {
                 path="/Dashboard/Loadbank/:loadbankId"
                 element={<DashboardLoadbank />}
               />
+              <Route
+                path="Dashboard/MCCB/:MCCBId"
+                element={<DashboardMCCB />}
+              />
               {/* <Route
                 path="/WorkOrderQRGenerator"
                 element={<WorkOrderGenerator />}
@@ -550,6 +557,7 @@ const NavBar = () => {
               <Route path="/Components" element={<Components />} />
               <Route path="/LoadbankPrimary" element={<LoadbankPrimary />} />
               <Route path="/LoadbankCatcher" element={<LoadbankCatcher />} />
+              <Route path="/MCCBPrimary" element={<MCCBPrimary />} />
             </Routes>
           </Box>
         </Box>

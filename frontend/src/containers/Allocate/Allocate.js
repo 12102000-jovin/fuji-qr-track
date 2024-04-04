@@ -15,8 +15,6 @@ const Allocate = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [successfulMessage, setSuccessfulMessage] = useState("");
 
-  const [selectedSide, setSelectedSide] = useState("");
-
   const pdcInputRef = useRef(null);
   const resetPDCRef = useRef(null);
 
@@ -27,9 +25,6 @@ const Allocate = () => {
 
   const AllocateSubAssembly_API =
     "http://localhost:3001/Allocate/AllocateSubAssembly";
-
-  const AllocateLoadbankSubAssembly_API =
-    "http://localhost:3001/Allocate/AllocateLoadbankSubAssembly";
 
   const handlePDCInputChange = (event) => {
     setInputPDCValue(event.target.value);
@@ -73,6 +68,7 @@ const Allocate = () => {
       const isLoadbankCatcherPattern = /^LB\d{6}-C$/.test(
         subAssemblyInputValue
       );
+      const isMCCBPrimaryPattern = /^MCCB\d{6}-P$/.test(subAssemblyInputValue);
 
       if (isPanelPattern) {
         setShowSubAssemblyInput(subAssemblyInputValue);
@@ -86,6 +82,10 @@ const Allocate = () => {
         setShowSubAssemblyInput(subAssemblyInputValue);
         setDetectedType("Loadbank (Catcher)");
         setWrongSubAssemblyError(false);
+      } else if (isMCCBPrimaryPattern) {
+        setShowSubAssemblyInput(subAssemblyInputValue);
+        setDetectedType("MCCB (Primary)");
+        setWrongSubAssemblyError(false);
       } else {
         try {
           const parsedInput = JSON.parse(subAssemblyInputValue);
@@ -95,14 +95,16 @@ const Allocate = () => {
             setDetectedType("Panel");
             setWrongSubAssemblyError(false);
           } else if (parsedInput.loadbankPrimaryId) {
-            console.log("Loadbank Detected");
             setSubAssemblyInputValue(parsedInput.loadbankPrimaryId);
             setDetectedType("Loadbank (Primary)");
             setWrongSubAssemblyError(false);
           } else if (parsedInput.loadbankCatcherId) {
-            console.log("Loadbank Detected");
             setSubAssemblyInputValue(parsedInput.loadbankCatcherId);
             setDetectedType("Loadbank (Catcher)");
+            setWrongSubAssemblyError(false);
+          } else if (parsedInput.MCCBPrimaryId) {
+            setSubAssemblyInputValue(parsedInput.MCCBPrimaryId);
+            setDetectedType("MCCB (Primary)");
             setWrongSubAssemblyError(false);
           } else {
             setWrongSubAssemblyError(true);
@@ -135,7 +137,6 @@ const Allocate = () => {
     setDetectedType("");
     setSuccessfulMessage("");
     setWrongSubAssemblyError("");
-    setSelectedSide("");
   };
 
   const handleKeyPress = (event) => {

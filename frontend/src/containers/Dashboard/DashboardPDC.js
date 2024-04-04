@@ -73,7 +73,7 @@ const Dashboard = () => {
             <div className="flex justify-center flex-wrap">
               {/* ======================= P A N E L ======================= */}
               <div className="text-start mt-4 p-2 w-full md:w-1/2">
-                <div className="w-full p-5 pl-10 pr-10 bg-white rounded-md min-h-40">
+                <div className="w-full p-5 bg-white rounded-md min-h-40">
                   <p className="text-black font-black text-2xl mb-2">Panel</p>
                   {dashboardType === "PDC" ? (
                     dashboardData &&
@@ -100,9 +100,11 @@ const Dashboard = () => {
                         </div>
                       ))
                     ) : (
-                      <span className="bg-red-500 text-white p-1 pl-2 pr-2 font-black rounded-full text-xs inline-block">
-                        No Panel found
-                      </span>
+                      <div className="flex item-center">
+                        <p className="text-sm font-black rounded-md text-gray-400">
+                          No Panel Found
+                        </p>
+                      </div>
                     )
                   ) : (
                     <span className="text-white p-1 rounded-full text-xs inline-block ">
@@ -111,11 +113,14 @@ const Dashboard = () => {
                   )}
                 </div>
               </div>
-              {/* ======================= L O A D B A N K ======================= */}
+              {/* ======================= L O A D B A N K ( P R I M A R Y )======================= */}
               <div className="text-start mt-4 p-2 w-full md:w-1/2">
-                <div className="w-full p-5 pl-10 pr-10 bg-white rounded-md min-h-40">
-                  <p className="text-black font-black text-2xl mb-2">
-                    Loadbank (Primary)
+                <div className="w-full p-5 bg-white rounded-md min-h-40">
+                  <p className="text-black font-black text-2xl mb-2 flex items-center">
+                    Loadbank{" "}
+                    <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
+                      Primary
+                    </span>
                   </p>
                   {dashboardType === "PDC" ? (
                     dashboardData &&
@@ -144,9 +149,11 @@ const Dashboard = () => {
                         </div>
                       ))
                     ) : (
-                      <span className="bg-red-500 text-white p-1 pl-2 pr-2 font-black rounded-full text-xs inline-block">
-                        No Loadbank found
-                      </span>
+                      <div className="flex item-center">
+                        <p className="text-sm font-black rounded-md text-gray-400">
+                          No Loadbank (Primary) Found
+                        </p>
+                      </div>
                     )
                   ) : (
                     <span className="text-white p-1 rounded-full text-xs inline-block ">
@@ -157,9 +164,12 @@ const Dashboard = () => {
               </div>
               {/* ======================= L O A D B A N K ( C A T C H E R ) ======================= */}
               <div className="text-start mt-4 p-2 w-full md:w-1/2">
-                <div className="w-full p-5 pl-10 pr-10 bg-white rounded-md min-h-40">
-                  <p className="text-black font-black text-2xl mb-2">
-                    Loadbank (Catcher)
+                <div className="w-full p-5 bg-white rounded-md min-h-40">
+                  <p className="text-black font-black text-2xl mb-2 flex items-center">
+                    Loadbank{" "}
+                    <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
+                      Catcher
+                    </span>
                   </p>
                   {dashboardType === "PDC" ? (
                     dashboardData &&
@@ -188,12 +198,61 @@ const Dashboard = () => {
                         </div>
                       ))
                     ) : (
-                      <span className="bg-red-500 text-white p-1 pl-2 pr-2 font-black rounded-full text-xs inline-block">
-                        No Loadbank found
-                      </span>
+                      <div className="flex item-center">
+                        <p className="text-sm font-black rounded-md text-gray-400">
+                          No Loadbank (Catcher) Found
+                        </p>
+                      </div>
                     )
                   ) : (
                     <span className="text-white p-1 rounded-full text-xs inline-block ">
+                      none
+                    </span>
+                  )}
+                </div>
+              </div>
+              {/* ======================= M C B B ( P R I M A R Y ) ======================= */}
+              <div className="text-start mt-4 p-2 w-full md:w-1/2">
+                <div className="w-full p-5 bg-white rounded-md min-h-40">
+                  <p className="text-black font-black text-2xl mb-2 flex items-center">
+                    MCCB{" "}
+                    <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
+                      Primary
+                    </span>
+                  </p>
+                  {dashboardType === "PDC" ? (
+                    dashboardData &&
+                    dashboardData.primaryMCCBs &&
+                    dashboardData.primaryMCCBs.length > 0 ? (
+                      dashboardData.primaryMCCBs.map((MCCB) => (
+                        <div key={MCCB._id} className="flex flex-col">
+                          <div className="font-normal">
+                            <button
+                              onClick={() => window.open(MCCB.link, "_blank")}
+                              className="text-blue-500 font-bold hover:underline focus:outline-none"
+                            >
+                              {MCCB.MCCBId}
+                            </button>
+                          </div>
+                          <p className="text-black flex flex-col mt-6">
+                            <p className="text-xs text-start">Allocated Date</p>
+                            <p className="text-xs text-start font-bold">
+                              {moment(MCCB.allocatedDate).format(
+                                "DD MMM YYYY HH:mm:ss"
+                              )}
+                            </p>
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="flex item-center">
+                        <p className="text-sm font-black rounded-md text-gray-400">
+                          No MCCB Found
+                        </p>
+                      </div>
+                    )
+                  ) : (
+                    <span className=" p-1 rounded-full text-xs inline-block text-black">
                       none
                     </span>
                   )}

@@ -93,7 +93,7 @@ const Dashboard = () => {
                         </span>
                         <span className="m-3">
                           {moment(dashboardData.component.allocatedDate).format(
-                            "DD MMM YYYY"
+                            "DD MMM YYYY HH:mm:ss"
                           )}
                         </span>
                       </div>

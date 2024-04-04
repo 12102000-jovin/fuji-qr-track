@@ -4,45 +4,45 @@ import axios from "axios";
 import "animate.css";
 import moment from "moment";
 
-const DashboardLoadbank = () => {
-  const { loadbankId } = useParams();
+const DashboardMCCB = () => {
+  const { MCCBId } = useParams();
   const [dashboardData, setDashboardData] = useState([]);
 
-  const fetchDashboardLoadbankData_API = `http://localhost:3001/Dashboard/${loadbankId}/showLoadbankDashboard`;
-  const fetchDashboardLoadbankCatcherData_API = `http://localhost:3001/Dashboard/${loadbankId}/showLoadbankCatcherDashboard`;
+  const fetchDashboardMCCBData_API = `http://localhost:3001/Dashboard/${MCCBId}/showMCCBPrimaryDashboard`;
+  const fetchDashboardMCCBCatcherData_API = `http://localhost:3001/Dashboard/${MCCBId}/showMCCBCatcherDashboard`;
 
   useEffect(() => {
-    const isLoadbankPrimaryPattern = /^LB\d{6}-P$/.test(loadbankId);
-    const isLoadbankCatcherPattern = /^LB\d{6}-C$/.test(loadbankId);
+    const isMCCBPrimaryPattern = /^MCCB\d{6}-P$/.test(MCCBId);
+    const isMCCBCatcherPattern = /^MCCB\d{6}-C$/.test(MCCBId);
 
-    if (isLoadbankPrimaryPattern) {
-      fetchDashboardLoadbankData();
-    } else if (isLoadbankCatcherPattern) {
-      fetchDashboardLoadbankCatcherData();
+    if (isMCCBPrimaryPattern) {
+      fetchDashboardMCCBData();
+    } else if (isMCCBCatcherPattern) {
+      fetchDashboardMCCBCatcherData();
     }
   }, []);
 
-  const fetchDashboardLoadbankData = () => {
+  const fetchDashboardMCCBData = () => {
     axios
-      .get(`${fetchDashboardLoadbankData_API}`)
+      .get(`${fetchDashboardMCCBData_API}`)
       .then((response) => {
         setDashboardData(response.data);
         console.log(response.data);
       })
       .catch((error) => {
-        console.error("Error fetching Loadbank data", error);
+        console.error("Error fetching MCCB data", error);
       });
   };
 
-  const fetchDashboardLoadbankCatcherData = () => {
+  const fetchDashboardMCCBCatcherData = () => {
     axios
-      .get(`${fetchDashboardLoadbankCatcherData_API}`)
+      .get(`${fetchDashboardMCCBCatcherData_API}`)
       .then((response) => {
         setDashboardData(response.data);
         console.log(response.data);
       })
       .catch((error) => {
-        console.error("Error fetching Loadbank data", error);
+        console.error("Error fetching MCCB data", error);
       });
   };
 
@@ -80,9 +80,9 @@ const DashboardLoadbank = () => {
                 </p>
               </div>
               <div className="flex flex-col items-start p-2">
-                <p className="text-3xl font-bold mb-1">Loadbank</p>
+                <p className="text-3xl font-bold mb-1">MCCB</p>
                 <p className="font-semibold text-white rounded-full inline-block">
-                  {loadbankId}
+                  {MCCBId}
                 </p>
               </div>
             </div>
@@ -133,4 +133,4 @@ const DashboardLoadbank = () => {
   );
 };
 
-export default DashboardLoadbank;
+export default DashboardMCCB;

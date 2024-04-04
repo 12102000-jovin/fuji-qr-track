@@ -2,12 +2,14 @@ import React, { useState, useRef } from "react";
 import PanelComponentForm from "../../components/ComponentForms/PanelComponentForm";
 import LoadbankComponentForm from "../../components/ComponentForms/LoadbankComponentForm";
 import LoadbankCatcherComponentForm from "../../components/ComponentForms/LoadbankCatcherComponentForm";
+import MCCBPrimaryComponentForm from "../../components/ComponentForms/MCCBPrimaryComponentForm";
 
 const AllocateComponents = () => {
   const [inputSubAssemblyValue, setInputSubAssemblyValue] = useState("");
   const [showPanelForm, setShowPanelForm] = useState(false);
   const [showLoadbankForm, setShowLoadbankForm] = useState(false);
   const [showLoadbankCatcherForm, setShowLoadbankCatcherForm] = useState(false);
+  const [showMCCBPrimaryForm, setShowMCCBPrimaryForm] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const subAssemblyInputRef = useRef(null);
@@ -24,6 +26,7 @@ const AllocateComponents = () => {
       const isLoadbankCatcherPattern = /^LB\d{6}-C$/.test(
         inputSubAssemblyValue
       );
+      const isMCCBPrimaryPattern = /^MCCB\d{6}-P$/.test(inputSubAssemblyValue);
 
       if (isPanelPattern) {
         setShowPanelForm(true);
@@ -36,6 +39,10 @@ const AllocateComponents = () => {
       } else if (isLoadbankCatcherPattern) {
         setShowPanelForm(false);
         setShowLoadbankCatcherForm(true);
+        setErrorMessage("");
+      } else if (isMCCBPrimaryPattern) {
+        setShowPanelForm(false);
+        setShowMCCBPrimaryForm(true);
         setErrorMessage("");
       } else {
         try {
@@ -60,6 +67,14 @@ const AllocateComponents = () => {
             setInputSubAssemblyValue(parsedInput.loadbankCatcherId);
             setShowPanelForm(false);
             setShowLoadbankCatcherForm(true);
+            setErrorMessage("");
+          } else if (
+            parsedInput.MCCBPrimaryId &&
+            /^MCCB\d{6}-P$/.test(parsedInput.MCCBPrimaryId)
+          ) {
+            setInputSubAssemblyValue(parsedInput.MCCBPrimaryId);
+            setShowPanelForm(false);
+            setShowMCCBPrimaryForm(true);
             setErrorMessage("");
           } else {
             setErrorMessage("Invalid Sub-Assembly QR");
@@ -120,7 +135,10 @@ const AllocateComponents = () => {
                 ref={subAssemblyInputRef}
                 className="border w-full px-2 py-4 rounded-md focus:outline-none focus:ring-3 focus:border-gray-600 text-black"
                 disabled={
-                  showPanelForm || showLoadbankForm || showLoadbankCatcherForm
+                  showPanelForm ||
+                  showLoadbankForm ||
+                  showLoadbankCatcherForm ||
+                  showMCCBPrimaryForm
                 }
                 placeholder="Enter Sub-Assembly"
               />
@@ -157,6 +175,9 @@ const AllocateComponents = () => {
           )}
           {showLoadbankCatcherForm && (
             <LoadbankCatcherComponentForm loadbankId={inputSubAssemblyValue} />
+          )}
+          {showMCCBPrimaryForm && (
+            <MCCBPrimaryComponentForm MCCBId={inputSubAssemblyValue} />
           )}
         </div>
       </div>

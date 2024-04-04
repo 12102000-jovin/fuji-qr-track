@@ -32,6 +32,10 @@ const SubAssemblyQRGenerator = () => {
     setShowExpectedLoadbankCatcherRange,
   ] = useState(true);
 
+  const [expectedMCCBPrimaryRange, setExpectedMCCBPrimaryRange] = useState("");
+  const [showExpectedMCCBPrimaryRange, setShowExpectedMCCBPrimaryRange] =
+    useState(true);
+
   const [selectedSubAssemblyType, setSelectedSubAssemblyType] = useState("");
 
   const linkFormat = "http://localhost:";
@@ -43,6 +47,8 @@ const SubAssemblyQRGenerator = () => {
     "http://localhost:3001/SubAssembly/LoadbankPrimary/generateSubAssembly";
   const generateLoadbankCatcher_API =
     "http://localhost:3001/SubAssembly/LoadbankCatcher/generateSubAssembly";
+  const generateMCCBPrimary_API =
+    "http://localhost:3001/SubAssembly/MCCBPrimary/generateSubAssembly";
 
   // ======================================= P A N E L =======================================
 
@@ -70,7 +76,7 @@ const SubAssemblyQRGenerator = () => {
     return number.toString().padStart(6, "0");
   };
 
-  // ==================================== L O A D B A N K =======================================
+  // ==================================== L O A D B A N K (P R I M A R Y) =======================================
 
   useEffect(() => {
     setShowExpectedLoadbankRange(true);
@@ -111,6 +117,28 @@ const SubAssemblyQRGenerator = () => {
       );
     } else {
       setExpectedLoadbankCatcherRange("");
+    }
+  }, [numQR, startNum]);
+
+  // ==================================== M C C B (P R I M A R Y) =======================================
+
+  useEffect(() => {
+    setShowExpectedMCCBPrimaryRange(true);
+  }, [numQR]);
+
+  useEffect(() => {
+    if (numQR === "1") {
+      setExpectedMCCBPrimaryRange(
+        `Expected Output: MCCB${formatId(Number(startNum))}-P`
+      );
+    } else if (numQR > 1 && numQR !== "1") {
+      setExpectedMCCBPrimaryRange(
+        ` Expected Output: MCCB${formatId(Number(startNum))}-P - MCCB${formatId(
+          Number(startNum) + Number(numQR) - 1
+        )}-P`
+      );
+    } else {
+      setExpectedMCCBPrimaryRange("");
     }
   }, [numQR, startNum]);
 
@@ -243,6 +271,40 @@ const SubAssemblyQRGenerator = () => {
         setDuplicateError("Duplicate Loadbank Found");
         setEmptyInputError(false);
       }
+    } else if (selectedSubAssemblyType === "MCCBPrimary") {
+      const MCCBs = Array.from({ length: numQR }, (_, index) => {
+        const newMCCBId = formatId(Number(startNum) + index);
+        return {
+          link: `${linkFormat}${applicationPortNumber}/Dashboard/MCCB/MCCB${newMCCBId}-P`,
+          generatedDate: moment()
+            .tz("Australia/Sydney")
+            .format("YYYY-MM-DD HH:mm:ss"),
+          MCCBId: `MCCB${newMCCBId}-P`,
+        };
+      });
+
+      try {
+        const response = await axios.post(generateMCCBPrimary_API, {
+          MCCBs,
+        });
+        console.log(response.data);
+
+        setQRcode(() => {
+          const newQRCodes = response.data.map((qrcode, index) => ({
+            ...qrcode,
+            MCCBId: `MCCB${formatId(Number(startNum) + index)}-P`,
+          }));
+          return newQRCodes;
+        });
+
+        setQRGeneratedStatus(true);
+        setShowExpectedMCCBPrimaryRange(false);
+        setEmptyInputError(false);
+      } catch (error) {
+        console.error("Error generating MCCB:", error.message);
+        setDuplicateError("Duplicate MCCB Found");
+        setEmptyInputError(false);
+      }
     } else {
       console.log("Unvalid Type");
     }
@@ -314,6 +376,9 @@ const SubAssemblyQRGenerator = () => {
     } else if (currentUrl.includes("LoadbankCatcher")) {
       // Set the selected value of the dropdown to "Loadbank"
       setSelectedSubAssemblyType("LoadbankCatcher");
+    } else if (currentUrl.includes("MCCBPrimary")) {
+      // Set the selected value of the dropdown to "Loadbank"
+      setSelectedSubAssemblyType("MCCBPrimary");
     }
   }, []);
 
@@ -359,6 +424,7 @@ const SubAssemblyQRGenerator = () => {
               <option value="Panel">Panel</option>
               <option value="LoadbankPrimary">Loadbank (Primary)</option>
               <option value="LoadbankCatcher">Loadbank (Catcher)</option>
+              <option value="MCCBPrimary">MCCB (Primary)</option>
             </select>
             {selectedSubAssemblyType && (
               <div className="mt-5">
@@ -369,10 +435,12 @@ const SubAssemblyQRGenerator = () => {
                   >
                     Starting{" "}
                     {selectedSubAssemblyType === "Panel"
-                      ? "Panel"
+                      ? "Panel "
                       : selectedSubAssemblyType === "LoadbankPrimary"
                       ? "Loadbank (Primary) "
-                      : "Loadbank (Catcher) "}
+                      : selectedSubAssemblyType === "LoadbankCatcher"
+                      ? "Loadbank (Catcher) "
+                      : "MCCB (Primary) "}
                     Number
                   </label>
                   <input
@@ -390,10 +458,12 @@ const SubAssemblyQRGenerator = () => {
                   >
                     Number of{" "}
                     {selectedSubAssemblyType === "Panel"
-                      ? "Panel"
+                      ? "Panel "
                       : selectedSubAssemblyType === "LoadbankPrimary"
                       ? "Loadbank (Primary) "
-                      : "Loadbank (Catcher) "}
+                      : selectedSubAssemblyType === "LoadbankCatcher"
+                      ? "Loadbank (Catcher)"
+                      : "MCCB (Primary) "}
                     QR
                   </label>
                   <input
@@ -431,6 +501,16 @@ const SubAssemblyQRGenerator = () => {
                     <div className="flex jsutify-start">
                       <p className="mt-2 font-black p-1 text-white bg-secondary text-xs rounded-full pl-2 pr-2">
                         {expectedLoadbankCatcherRange}
+                      </p>
+                    </div>
+                  )}
+
+                {selectedSubAssemblyType === "MCCBPrimary" &&
+                  showExpectedMCCBPrimaryRange &&
+                  expectedMCCBPrimaryRange && (
+                    <div className="flex jsutify-start">
+                      <p className="mt-2 font-black p-1 text-white bg-secondary text-xs rounded-full pl-2 pr-2">
+                        {expectedMCCBPrimaryRange}
                       </p>
                     </div>
                   )}
@@ -611,6 +691,60 @@ const SubAssemblyQRGenerator = () => {
                     <button
                       className="bg-signature hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded "
                       onClick={() => handleDownload(code.loadbankId)}
+                    >
+                      Download
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {selectedSubAssemblyType === "MCCBPrimary" && (
+            <div className="flex justify-center flex-wrap mt-5 rounded-xl">
+              {qrCode.map((code, index) => (
+                <div
+                  key={index}
+                  className="p-5 shadow-xl rounded-lg m-5 bg-white"
+                  style={{
+                    color: "#043f9d",
+                    fontFamily: "Avenir, sans-serif",
+                    fontSize: "20px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                  }}
+                >
+                  <div id={`qrcode-${code.MCCBId}`}>
+                    <ReactQRCode
+                      value={JSON.stringify({
+                        link: code.link,
+                        MCCBCatcherId: code.MCCBId,
+                      })}
+                      size={512}
+                      imageSettings={{
+                        src: logo,
+                        excavate: true,
+                        width: 60,
+                        height: 35,
+                      }}
+                    />
+                    <div className="mb-5 flex items-center justify-center">
+                      MCCB ID : {code.MCCBId}{" "}
+                      <span className="text-red-500 ml-1 mr-1 px-2 font-black">
+                        {" "}
+                        (Catcher)
+                      </span>
+                    </div>
+                  </div>
+                  <img
+                    src={imageData[code.MCCBId]}
+                    alt={`Converted ${code.MCCBId}`}
+                    style={{ display: "none", margin: "10px auto" }}
+                  />
+                  <div className="mt-5 flex items-center justify-center">
+                    <button
+                      className="bg-signature hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded "
+                      onClick={() => handleDownload(code.MCCBId)}
                     >
                       Download
                     </button>

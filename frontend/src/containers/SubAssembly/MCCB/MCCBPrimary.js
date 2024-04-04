@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+
 import axios from "axios";
 import moment from "moment-timezone";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -13,7 +14,7 @@ import ReactQRCode from "qrcode.react";
 import html2canvas from "html2canvas";
 import SubAssemblyQRGenerator from "../../../components/SubAssemblyQRGenerator/SubAssemblyQRGenerator";
 import SubAssemblyCustomQRGenerator from "../../../components/SubAssemblyQRGenerator/SubAssemblyCustomQRGenerator";
-import EditLoadbank from "./EditLoadbank";
+import EditMCCBPrimary from "./EditMCCBPrimary";
 import JSZip from "jszip";
 
 import {
@@ -33,13 +34,8 @@ import {
   Pagination,
 } from "@mui/material";
 
-const LoadBank = () => {
+const MCCBPrimary = () => {
   const [searchQuery, setSearchQuery] = useState("");
-
-  const [qrCodeData, setQrCodeData] = useState(null);
-  const [openQRModal, setOpenQRModal] = useState(false);
-
-  const [modalLoadbankID, setModalLoadbankID] = useState(null);
 
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
@@ -47,40 +43,152 @@ const LoadBank = () => {
   const [selectedRowsQRCodes, setSelectedRowsQRCodes] = useState([]);
   const [openSelectedQRModal, setOpenSelectedQRModal] = useState(false);
 
+  const [MCCBData, setMCCBData] = useState([]);
+
+  const [filteredMCCBs, setFilteredMCCBs] = useState([]);
+
+  const [qrCodeData, setQrCodeData] = useState(null);
+  const [openQRModal, setOpenQRModal] = useState(false);
+
+  const [modalMCCBID, setModalMCCBID] = useState(null);
+
   const [sortOrder, setSortOrder] = useState("DESC");
 
-  const [loadbankData, setLoadbankData] = useState([]);
+  const [deleteMCCBModalState, setDeleteMCCBModalState] = useState(false);
 
-  const [filteredLoadbanks, setFilteredLoadbanks] = useState([]);
+  const [editMCCBModalState, setEditMCCBModalState] = useState(false);
+  const [MCCBIdToEdit, setMCCBIdToEdit] = useState("");
 
-  const [openAddLoadbankModal, setOpenLoadbankModal] = useState(false);
+  const [openAddMCCBModal, setOpenMCCBModal] = useState(false);
 
-  const [showLoadbankCustomQRGenerator, setShowLoadbankCustomQRGenerator] =
+  const [showMCCBCustomQRGenerator, setShowMCCBCustomQRGenerator] =
     useState(false);
-
-  const [deleteLoadbankModalState, setDeleteLoadbankModalState] =
-    useState(false);
-
-  const [editLoadbankModalState, setEditLoadbankModalState] = useState(false);
-  const [loadbankIdToEdit, setLoadbankIdToEdit] = useState("");
 
   // Pagination
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   useEffect(() => {
-    fetchLoadbankData();
+    fetchMCCBData();
+  }, []);
+
+  useEffect(() => {
+    fetchMCCBData();
+  }, []);
+
+  useEffect(() => {
+    // Update filteredPDCs whenever MCCBData or searchQuery changes
+    const searchQueryWithoutSpaces = searchQuery
+      .replace(/\s/g, "")
+      .toLowerCase();
+
+    const words = searchQueryWithoutSpaces.split(/\s+/);
+
+    const filteredData = MCCBData.filter((row) => {
+      const MCCBIdWithoutSpaces = row.MCCBId.replace(/\s/g, "").toLowerCase();
+      const generatedDateWithoutSpaces = moment(row.generatedDate)
+        .tz("Australia/Sydney")
+        .format("DD MMMM YYYY")
+        .replace(/\s/g, "")
+        .toLowerCase();
+
+      const matchMCCBId = words.every((word) =>
+        MCCBIdWithoutSpaces.includes(word)
+      );
+
+      const matchGeneratedDate = words.every((word) =>
+        generatedDateWithoutSpaces.includes(word)
+      );
+
+      return matchMCCBId || matchGeneratedDate;
+    });
+
+    setFilteredMCCBs(filteredData);
+  }, [MCCBData, searchQuery]);
+
+  useEffect(() => {
+    fetchMCCBData();
   }, [page, rowsPerPage]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [rowsPerPage, searchQuery]);
+
+  const fetchMCCBData_API =
+    "http://localhost:3001/SubAssembly/MCCBPrimary/getAllMCCB";
+
+  const deleteMCCB_API =
+    "http://localhost:3001/SubAssembly/MCCBPrimary/deleteMCCB/";
+
+  const fetchMCCBData = () => {
+    axios.get(`${fetchMCCBData_API}`).then((response) => {
+      setMCCBData(response.data);
+    });
+  };
+
+  // Ref
+  const captureRef = useRef(null);
+
+  const handleFormSubmit = (event) => {
+    event.preventDefault();
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const handleDownloadSelectedRowQR = () => {
+    const qrCodes = selectedRows
+      .map((rowId) => {
+        const selectedRow = MCCBData.find((row) => row._id === rowId);
+        if (selectedRow) {
+          return {
+            MCCBId: selectedRow.MCCBId,
+            qrCodeData: JSON.stringify({
+              link: selectedRow.link,
+              workOrderId: selectedRow.workOrderId,
+            }),
+          };
+        }
+        return null;
+      })
+      .filter(Boolean);
+    setSelectedRowsQRCodes(qrCodes);
+    setOpenSelectedQRModal(true);
+  };
+
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedRows([]);
+    } else {
+      const allRowIds = filteredMCCBs.map((row) => row._id);
+      setSelectedRows(allRowIds);
+    }
+    setSelectAll(!selectAll);
+
+    // Update the selectedRowsCount state
+    setSelectedRowsCount(selectAll ? "" : filteredMCCBs.length);
+  };
+  const showQRCodes = (data, row) => {
+    setQrCodeData(
+      JSON.stringify({
+        link: data.link,
+        MCCBPrimaryId: data.MCCBId,
+      })
+    );
+    setModalMCCBID(data.MCCBId);
+    setOpenQRModal(true);
+  };
 
   const indexOfLastRow = page * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
 
   // Filtered and sorted data
-  const sortedData = filteredLoadbanks.sort((a, b) => {
+  const sortedData = filteredMCCBs.sort((a, b) => {
     if (sortOrder === "DESC") {
-      return b.loadbankId.localeCompare(a.loadbankId);
+      return b.MCCBId.localeCompare(a.MCCBId);
     } else {
-      return a.loadbankId.localeCompare(b.loadbankId);
+      return a.MCCBId.localeCompare(b.MCCBId);
     }
   });
   const currentRows = sortedData.slice(indexOfFirstRow, indexOfLastRow);
@@ -94,99 +202,9 @@ const LoadBank = () => {
     setPage(1);
   };
 
-  useEffect(() => {
-    setPage(1);
-  }, [rowsPerPage, searchQuery]);
-
-  // Ref
-  const captureRef = useRef(null);
-
-  const fetchLoadbankData_API =
-    "http://localhost:3001/SubAssembly/LoadbankPrimary/getAllLoadbank";
-
-  const deleteLoadbank_API =
-    "http://localhost:3001/SubAssembly/Loadbank/deleteLoadbank/";
-
-  useEffect(() => {
-    fetchLoadbankData();
-  }, []);
-
-  useEffect(() => {
-    // Update filteredPDCs whenever loadbankData or searchQuery changes
-    const searchQueryWithoutSpaces = searchQuery
-      .replace(/\s/g, "")
-      .toLowerCase();
-
-    const words = searchQueryWithoutSpaces.split(/\s+/);
-
-    const filteredData = loadbankData.filter((row) => {
-      const loadbankIdWithoutSpaces = row.loadbankId
-        .replace(/\s/g, "")
-        .toLowerCase();
-      const generatedDateWithoutSpaces = moment(row.generatedDate)
-        .tz("Australia/Sydney")
-        .format("DD MMMM YYYY")
-        .replace(/\s/g, "")
-        .toLowerCase();
-
-      const matchLoadbankId = words.every((word) =>
-        loadbankIdWithoutSpaces.includes(word)
-      );
-
-      const matchGeneratedDate = words.every((word) =>
-        generatedDateWithoutSpaces.includes(word)
-      );
-
-      return matchLoadbankId || matchGeneratedDate;
-    });
-
-    setFilteredLoadbanks(filteredData);
-  }, [loadbankData, searchQuery]);
-
-  const fetchLoadbankData = () => {
-    axios.get(`${fetchLoadbankData_API}`).then((response) => {
-      setLoadbankData(response.data);
-    });
-  };
-
-  const handleFormSubmit = (event) => {
-    event.preventDefault();
-  };
-
-  const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value);
-  };
-
-  const handleAddLoadbankCloseModal = () => {
-    setOpenLoadbankModal(false);
-    fetchLoadbankData();
-  };
-
-  const handleChangeComponent = () => {
-    setShowLoadbankCustomQRGenerator(!showLoadbankCustomQRGenerator);
-  };
-
-  const handleSelectAll = () => {
-    if (selectAll) {
-      setSelectedRows([]);
-    } else {
-      const allRowIds = filteredLoadbanks.map((row) => row._id);
-      setSelectedRows(allRowIds);
-    }
-    setSelectAll(!selectAll);
-
-    // Update the selectedRowsCount state
-    setSelectedRowsCount(selectAll ? "" : filteredLoadbanks.length);
-  };
-  const showQRCodes = (data, row) => {
-    setQrCodeData(
-      JSON.stringify({
-        link: data.link,
-        loadbankPrimaryId: data.loadbankId,
-      })
-    );
-    setModalLoadbankID(data.loadbankId);
-    setOpenQRModal(true);
+  const handleSortMCCBId = () => {
+    const newSortOder = sortOrder === "DESC" ? "ASC" : "DESC";
+    setSortOrder(newSortOder);
   };
 
   const handleSelectRow = (rowId) => {
@@ -201,11 +219,26 @@ const LoadBank = () => {
     );
   };
 
+  const handleOpenDeleteConfirmationModal = (MCCBId) => {
+    setDeleteMCCBModalState(true);
+    setModalMCCBID(MCCBId);
+  };
+
+  const handleOpenEditModal = (MCCBId) => {
+    setEditMCCBModalState(true);
+    setMCCBIdToEdit(MCCBId);
+    console.log(editMCCBModalState);
+  };
+
+  const handleMCCBDashboard = (MCCBId) => {
+    window.open(`http://localhost:3000/Dashboard/MCCB/${MCCBId}`, "_blank");
+  };
+
   const handleCloseQRModal = () => {
     setOpenQRModal(false);
   };
 
-  const handleDownload = (loadbankID) => {
+  const handleDownload = (MCCBID) => {
     const captureOptions = {
       width: 512,
       height: 565,
@@ -214,7 +247,7 @@ const LoadBank = () => {
     html2canvas(captureRef.current, captureOptions)
       .then((canvas) => {
         const imgData = canvas.toDataURL("image/png");
-        const fileName = `${loadbankID}.png`;
+        const fileName = `${MCCBID}.png`;
         const a = document.createElement("a");
         a.href = imgData;
         a.download = fileName;
@@ -225,68 +258,39 @@ const LoadBank = () => {
       });
   };
 
-  const handleAddLoadbankModal = () => {
-    setOpenLoadbankModal(true);
-    setShowLoadbankCustomQRGenerator(false);
+  const handleAddMCCBModal = () => {
+    setOpenMCCBModal(true);
+    setShowMCCBCustomQRGenerator(false);
   };
 
-  const handleLoadbankDashboard = (loadbankId) => {
-    window.open(
-      `http://localhost:3000/Dashboard/Loadbank/${loadbankId}`,
-      "_blank"
-    );
+  const handleAddMCCBCloseModal = () => {
+    setOpenMCCBModal(false);
+    fetchMCCBData();
   };
 
-  const handleCloseDeleteLoadbankModal = () => {
-    setDeleteLoadbankModalState(false);
+  const handleChangeComponent = () => {
+    setShowMCCBCustomQRGenerator(!showMCCBCustomQRGenerator);
   };
 
-  const handleOpenDeleteConfirmationModal = (loadbankId) => {
-    setDeleteLoadbankModalState(true);
-    setModalLoadbankID(loadbankId);
+  const handleCloseDeleteMCCBModal = () => {
+    setDeleteMCCBModalState(false);
   };
 
-  const handleDeleteLoadbank = async (loadbankId) => {
-    console.log(loadbankId);
+  const handleDeleteMCCB = async (MCCBId) => {
+    console.log(MCCBId);
     try {
-      const response = await axios.delete(`${deleteLoadbank_API}${loadbankId}`);
+      const response = await axios.delete(`${deleteMCCB_API}${MCCBId}`);
 
       if (response.status === 200) {
-        console.log("Loadbank Deleted Successfully");
-        fetchLoadbankData();
-        setDeleteLoadbankModalState(false);
+        console.log("MCCB Deleted Successfully");
+        fetchMCCBData();
+        setDeleteMCCBModalState(false);
       } else {
-        console.log("Error deleting loadbank:", response.data.message);
+        console.log("Error deleting MCCB:", response.data.message);
       }
     } catch (error) {
-      console.error("Error deleting loadbank", error);
+      console.error("Error deleting MCCB", error);
     }
-  };
-
-  const handleOpenEditModal = (loadbankId) => {
-    setEditLoadbankModalState(true);
-    setLoadbankIdToEdit(loadbankId);
-    console.log(editLoadbankModalState);
-  };
-
-  const handleDownloadSelectedRowQR = () => {
-    const qrCodes = selectedRows
-      .map((rowId) => {
-        const selectedRow = loadbankData.find((row) => row._id === rowId);
-        if (selectedRow) {
-          return {
-            loadbankId: selectedRow.loadbankId,
-            qrCodeData: JSON.stringify({
-              link: selectedRow.link,
-              workOrderId: selectedRow.workOrderId,
-            }),
-          };
-        }
-        return null;
-      })
-      .filter(Boolean);
-    setSelectedRowsQRCodes(qrCodes);
-    setOpenSelectedQRModal(true);
   };
 
   const handleDownloadAllSelectedQR = async () => {
@@ -294,7 +298,7 @@ const LoadBank = () => {
 
     const promises = selectedRowsQRCodes.map(async (code) => {
       const qrCodeElement = document.getElementById(
-        `selectedQRCode-${code.loadbankId}`
+        `selectedQRCode-${code.MCCBId}`
       );
       const qrCodeCanvas = await html2canvas(qrCodeElement, {
         width: 512,
@@ -302,7 +306,7 @@ const LoadBank = () => {
       });
 
       return {
-        name: `${code.loadbankId}.png`,
+        name: `${code.MCCBId}.png`,
         data: qrCodeCanvas
           .toDataURL("image/png")
           .replace(/^data:image\/(png|jpg);base64,/, ""),
@@ -319,17 +323,12 @@ const LoadBank = () => {
       const a = document.createElement("a");
       const url = URL.createObjectURL(content);
       a.href = url;
-      a.download = `Selected-Loadbank`;
+      a.download = `Selected-MCCB`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     });
-  };
-
-  const handleSortLoadbankId = () => {
-    const newSortOder = sortOrder === "DESC" ? "ASC" : "DESC";
-    setSortOrder(newSortOder);
   };
 
   return (
@@ -338,7 +337,7 @@ const LoadBank = () => {
         <div className="w-3/4 p-6 shadow-lg bg-white rounded-md my-5">
           <p className="text-4xl text-signature font-black mb-5 mt-3">
             <div className="flex items-center justify-center">
-              <p>Loadbank</p>
+              <p>MCCB</p>
               <span className="text-xl text-white bg-red-500 py-2 px-3 font-black rounded-full ml-2">
                 Primary
               </span>
@@ -367,7 +366,7 @@ const LoadBank = () => {
                   type="search"
                   id="default-search"
                   className="block h-12 p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 w-1/3"
-                  placeholder="Search Loadbank"
+                  placeholder="Search MCCB"
                   required
                   onChange={handleSearchChange}
                   value={searchQuery}
@@ -433,12 +432,12 @@ const LoadBank = () => {
                     }}
                   >
                     <div className="flex items-center justify-center">
-                      <p onClick={handleSortLoadbankId}> Loadbank ID</p>
+                      <p onClick={handleSortMCCBId}> MCCB ID</p>
                       <span>
                         <FaSort
                           fontSize="small"
                           className="m-2"
-                          onClick={handleSortLoadbankId}
+                          onClick={handleSortMCCBId}
                         />
                       </span>
                     </div>
@@ -493,7 +492,7 @@ const LoadBank = () => {
                           fontWeight: "bold",
                         }}
                       >
-                        {row.loadbankId}
+                        {row.MCCBId}
                       </TableCell>
                       <TableCell align="center">
                         {moment(row.generatedDate)
@@ -523,7 +522,7 @@ const LoadBank = () => {
                           <DeleteIcon
                             fontSize="small"
                             onClick={() => {
-                              handleOpenDeleteConfirmationModal(row.loadbankId);
+                              handleOpenDeleteConfirmationModal(row.MCCBId);
                             }}
                           />
                         </IconButton>
@@ -534,7 +533,7 @@ const LoadBank = () => {
                         >
                           <EditIcon
                             fontSize="small"
-                            onClick={() => handleOpenEditModal(row.loadbankId)}
+                            onClick={() => handleOpenEditModal(row.MCCBId)}
                           />
                         </IconButton>
                         <IconButton
@@ -552,9 +551,7 @@ const LoadBank = () => {
                         >
                           <LaunchIcon
                             fontSize="small"
-                            onClick={() =>
-                              handleLoadbankDashboard(row.loadbankId)
-                            }
+                            onClick={() => handleMCCBDashboard(row.MCCBId)}
                           />
                         </IconButton>
                       </TableCell>
@@ -595,7 +592,7 @@ const LoadBank = () => {
                         marginTop: "5px",
                       }}
                     >
-                      Loadbank ID: {modalLoadbankID}
+                      MCCB ID: {modalMCCBID}
                       <span className="text-red-500 ml-1 mr-1 font-black">
                         {" "}
                         (Primary)
@@ -606,7 +603,7 @@ const LoadBank = () => {
                 <DialogActions>
                   <button
                     className="bg-signature hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded "
-                    onClick={() => handleDownload(modalLoadbankID)}
+                    onClick={() => handleDownload(modalMCCBID)}
                   >
                     Download
                   </button>
@@ -622,7 +619,7 @@ const LoadBank = () => {
           </div>
           <div className="flex justify-center mt-5">
             <Pagination
-              count={Math.ceil(filteredLoadbanks.length / rowsPerPage)}
+              count={Math.ceil(filteredMCCBs.length / rowsPerPage)}
               page={page}
               onChange={handleChangePage}
               rowsPerPageOptions={[5, 10, 15]}
@@ -646,15 +643,15 @@ const LoadBank = () => {
               backgroundColor: "#6c757d",
             },
           }}
-          onClick={handleAddLoadbankModal}
+          onClick={handleAddMCCBModal}
         >
           <AddIcon sx={{ mr: 1 }} />
-          Generate Loadbank
+          Generate MCCB
         </Fab>
       </div>
       <Dialog
-        open={openAddLoadbankModal}
-        onClose={handleAddLoadbankCloseModal}
+        open={openAddMCCBModal}
+        onClose={handleAddMCCBCloseModal}
         PaperProps={{
           sx: {
             borderRadius: "12px",
@@ -669,18 +666,16 @@ const LoadBank = () => {
               className="text-xs text-white font-bold bg-blue-400 p-1 pl-2 pr-2 rounded-md hover:bg-secondary hover:text-white"
               onClick={handleChangeComponent}
             >
-              {showLoadbankCustomQRGenerator === true
-                ? "Increment"
-                : "Customise"}
+              {showMCCBCustomQRGenerator === true ? "Increment" : "Customise"}
             </button>
             <button
               className="bg-red-600 hover:bg-red-500 text-white font-semibold py-1 pl-2 pr-2 rounded generate-button"
-              onClick={handleAddLoadbankCloseModal}
+              onClick={handleAddMCCBCloseModal}
             >
               <CloseIcon style={{ fontSize: "small" }} />
             </button>
           </div>
-          {showLoadbankCustomQRGenerator ? (
+          {showMCCBCustomQRGenerator ? (
             <SubAssemblyCustomQRGenerator />
           ) : (
             <SubAssemblyQRGenerator />
@@ -689,8 +684,8 @@ const LoadBank = () => {
       </Dialog>
       <div>
         <Dialog
-          open={deleteLoadbankModalState}
-          onClose={handleCloseDeleteLoadbankModal}
+          open={deleteMCCBModalState}
+          onClose={handleCloseDeleteMCCBModal}
         >
           <DialogContent sx={{ padding: 0, minWidth: "500px" }}>
             <Divider className="h-1 bg-red-500" />
@@ -700,27 +695,26 @@ const LoadBank = () => {
               </p>
               <CloseIcon
                 className="m-2 hover:cursor-pointer hover:bg-gray-100 hover:rounded"
-                onClick={handleCloseDeleteLoadbankModal}
+                onClick={handleCloseDeleteMCCBModal}
               />
             </div>
             <Divider />
             <p className="px-5 py-10">
-              Are you sure you want to delete <strong>{modalLoadbankID}</strong>
-              ?
+              Are you sure you want to delete <strong>{modalMCCBID}</strong>?
             </p>
             <Divider />
             <DialogActions>
               <div className="flex justify-end">
                 <button
                   className="bg-secondary text-white rounded font-semibold py-1 px-2 m-1 focus:outline-none hover:bg-gray-600"
-                  onClick={handleCloseDeleteLoadbankModal}
+                  onClick={handleCloseDeleteMCCBModal}
                 >
                   Close
                 </button>
                 <button
                   className="bg-red-500 text-white rounded font-semibold py-1 px-2 m-1 focus:outline-none hover:bg-red-600"
                   onClick={() => {
-                    handleDeleteLoadbank(modalLoadbankID);
+                    handleDeleteMCCB(modalMCCBID);
                   }}
                 >
                   Delete
@@ -731,13 +725,13 @@ const LoadBank = () => {
         </Dialog>
       </div>
       <div>
-        <EditLoadbank
-          open={editLoadbankModalState}
+        <EditMCCBPrimary
+          open={editMCCBModalState}
           onClose={() => {
-            fetchLoadbankData();
-            setEditLoadbankModalState(false);
+            fetchMCCBData();
+            setEditMCCBModalState(false);
           }}
-          loadbankId={loadbankIdToEdit}
+          MCCBId={MCCBIdToEdit}
         />
       </div>
       <Dialog
@@ -759,10 +753,7 @@ const LoadBank = () => {
                 key={index}
               >
                 <div className="flex flex-col justify-center items-center">
-                  <div
-                    ref={captureRef}
-                    id={`selectedQRCode-${qrCode.loadbankId}`}
-                  >
+                  <div ref={captureRef} id={`selectedQRCode-${qrCode.MCCBId}`}>
                     <ReactQRCode
                       value={qrCode.qrCodeData}
                       size={512}
@@ -782,7 +773,7 @@ const LoadBank = () => {
                       }}
                       className="text-signature text-center"
                     >
-                      Loadbank ID: {qrCode.loadbankId}
+                      MCCB ID: {qrCode.MCCBId}
                       <span className="text-red-500 ml-1 mr-1 font-black">
                         {" "}
                         (Primary)
@@ -813,4 +804,4 @@ const LoadBank = () => {
   );
 };
 
-export default LoadBank;
+export default MCCBPrimary;

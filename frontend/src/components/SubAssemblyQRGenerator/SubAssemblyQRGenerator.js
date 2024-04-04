@@ -29,6 +29,11 @@ const SubAssemblyQRGenerator = () => {
     setShowExpectedLoadbankCatcherRange,
   ] = useState(true);
 
+  const [latestMCCBPrimaryId, setLatestMCCBPrimaryId] = useState("0");
+  const [expectedMCCBPrimaryRange, setExpectedMCCBPrimaryRange] = useState("");
+  const [showExpectedMCCBPrimaryRange, setShowExpectedMCCBPrimaryRange] =
+    useState(true);
+
   const [emptyInputError, setEmptyInputError] = useState(false);
   const [qrGeneratedStatus, setQRGeneratedStatus] = useState(false);
   const [qrCode, setQRcode] = useState([]);
@@ -39,16 +44,23 @@ const SubAssemblyQRGenerator = () => {
 
   const generatePanel_API =
     "http://localhost:3001/SubAssembly/Panel/generateSubAssembly";
-  const generateLoadbank_API =
-    "http://localhost:3001/SubAssembly/LoadbankPrimary/generateSubAssembly";
-  const generateLoadbankCatcher_API =
-    "http://localhost:3001/SubAssembly/LoadbankCatcher/generateSubAssembly";
   const getLatestPanel_API =
     "http://localhost:3001/SubAssembly/Panel/getLatestPanel";
+
+  const generateLoadbank_API =
+    "http://localhost:3001/SubAssembly/LoadbankPrimary/generateSubAssembly";
   const getLatestLoadbank_API =
     "http://localhost:3001/SubAssembly/LoadbankPrimary/getLatestLoadbank";
+
   const getLatestLoadbankCatcher_API =
     "http://localhost:3001/SubAssembly/LoadbankCatcher/getLatestLoadbank";
+  const generateLoadbankCatcher_API =
+    "http://localhost:3001/SubAssembly/LoadbankCatcher/generateSubAssembly";
+
+  const generateMCCBPrimary_API =
+    "http://localhost:3001/SubAssembly/MCCBPrimary/generateSubAssembly";
+  const getLatestMCCBPrimary_API =
+    "http://localhost:3001/SubAssembly/MCCBPrimary/getLatestMCCB";
 
   // ======================================= P A N E L =======================================
   useEffect(() => {
@@ -98,7 +110,7 @@ const SubAssemblyQRGenerator = () => {
     return number.toString().padStart(6, "0");
   };
 
-  // ==================================== L O A D B A N K =======================================
+  // ==================================== L O A D B A N K (P R I M A R Y)=======================================
 
   useEffect(() => {
     fetchLatestLoadbank();
@@ -181,6 +193,48 @@ const SubAssemblyQRGenerator = () => {
     // Remove "LB" prefix and "P" suffix from the loadbankString
     return loadbankString.replace("LB", "").replace("-C", "");
   };
+
+  // ==================================== L O A D B A N K (C A T C H E R) =======================================
+  useEffect(() => {
+    fetchLatestMCCBPrimary();
+  }, []);
+
+  useEffect(() => {
+    if (numQR === "1") {
+      setExpectedMCCBPrimaryRange(
+        `Expected Output: MCCB${formatId(Number(latestMCCBPrimaryId) + 1)}-P`
+      );
+    } else if (numQR > 1 && numQR !== "1") {
+      setExpectedMCCBPrimaryRange(
+        ` Expected Output: MCCB${formatId(
+          Number(latestMCCBPrimaryId) + 1
+        )}-P - MCCB${formatId(Number(latestMCCBPrimaryId) + Number(numQR))}-P`
+      );
+    } else {
+      setExpectedMCCBPrimaryRange("");
+    }
+  }, [numQR, latestMCCBPrimaryId]);
+
+  useEffect(() => {
+    setShowExpectedMCCBPrimaryRange(true);
+  }, [numQR]);
+
+  const fetchLatestMCCBPrimary = async () => {
+    try {
+      const response = await axios.get(getLatestMCCBPrimary_API);
+      const latestMCCB = response.data;
+      const latestMCCBId = extractMCCBPrimaryId(latestMCCB);
+      setLatestMCCBPrimaryId(Number(latestMCCBId));
+    } catch (error) {
+      console.error("Error fetching latest MCCB:", error.message);
+    }
+  };
+
+  const extractMCCBPrimaryId = (MCCBString) => {
+    // Remove "MCCB" prefix and "P" suffix from the MCCBString
+    return MCCBString.replace("MCCB", "").replace("-P", "");
+  };
+
   // ==================================== S U B M I T =======================================
 
   useEffect(() => {
@@ -301,6 +355,41 @@ const SubAssemblyQRGenerator = () => {
       } catch (error) {
         console.error("Error generating Loadbank:", error.message);
       }
+    } else if (selectedSubAssemblyType === "MCCBPrimary") {
+      const MCCBs = Array.from({ length: numQR }, (_, index) => {
+        const newMCCBId = formatId(Number(latestMCCBPrimaryId + 1) + index);
+        return {
+          link: `${linkFormat}${applicationPortNumber}/Dashboard/MCCB/MCCB${newMCCBId}-P`,
+          generatedDate: moment()
+            .tz("Australia/Sydney")
+            .format("YYYY-MM-DD HH:mm:ss"),
+          MCCBId: `MCCB${newMCCBId}-P`,
+        };
+      });
+
+      try {
+        const response = await axios.post(generateMCCBPrimary_API, {
+          MCCBs,
+        });
+        console.log(response.data);
+        fetchLatestMCCBPrimary();
+
+        setQRcode(() => {
+          const newQRCodes = response.data.map((qrcode, index) => ({
+            ...qrcode,
+            MCCBId: `MCCB${formatId(
+              Number(latestMCCBPrimaryId + 1) + index
+            )}-P`,
+          }));
+          return newQRCodes;
+        });
+
+        setQRGeneratedStatus(true);
+        setShowExpectedMCCBPrimaryRange(false);
+        setEmptyInputError(false);
+      } catch (error) {
+        console.error("Error generating MCCB:", error.message);
+      }
     } else {
       console.log("Unvalid Type");
     }
@@ -323,6 +412,10 @@ const SubAssemblyQRGenerator = () => {
       // Set the selected value of the dropdown to "Loadbank"
       setSelectedSubAssemblyType("LoadbankCatcher");
       fetchLatestLoadbankCatcher();
+    } else if (currentUrl.includes("MCCBPrimary")) {
+      // Set the selected value of the dropdown to "MCCB"
+      setSelectedSubAssemblyType("MCCBPrimary");
+      fetchLatestMCCBPrimary();
     }
   }, []);
 
@@ -413,6 +506,7 @@ const SubAssemblyQRGenerator = () => {
               <option value="Panel">Panel</option>
               <option value="LoadbankPrimary">Loadbank (Primary)</option>
               <option value="LoadbankCatcher">Loadbank (Catcher)</option>
+              <option value="MCCBPrimary">MCCB (Primary)</option>
             </select>
             {selectedSubAssemblyType && (
               <div className="mt-5">
@@ -422,10 +516,12 @@ const SubAssemblyQRGenerator = () => {
                 >
                   Number of{" "}
                   {selectedSubAssemblyType === "Panel"
-                    ? "Panel"
+                    ? "Panel "
                     : selectedSubAssemblyType === "LoadbankPrimary"
                     ? "Loadbank (Primary) "
-                    : "Loadbank (Catcher) "}
+                    : selectedSubAssemblyType === "LoadbankCatcher"
+                    ? "Loadbank (Catcher)"
+                    : "MCCB (Primary) "}
                   QR
                   <div className="flex items-center">
                     {selectedSubAssemblyType === "Panel" && (
@@ -443,6 +539,12 @@ const SubAssemblyQRGenerator = () => {
                       <span className="text-white p-1 pl-2 pr-2 ml-2  font-black rounded-full text-xs bg-green-700">
                         Latest Loadbank Id: LB
                         {formatId(Number(latestLoadbankCatcherId))}-C
+                      </span>
+                    )}
+                    {selectedSubAssemblyType === "MCCBPrimary" && (
+                      <span className="text-white p-1 pl-2 pr-2 ml-2  font-black rounded-full text-xs bg-green-700">
+                        Latest MCCB Id: MCCB
+                        {formatId(Number(latestMCCBPrimaryId))}-P
                       </span>
                     )}
                   </div>
@@ -478,6 +580,15 @@ const SubAssemblyQRGenerator = () => {
                     <div className="flex justify-start">
                       <p className="mt-2 font-black p-1 text-white bg-secondary text-xs rounded-full pl-2 pr-2">
                         {expectedLoadbankCatcherRange}
+                      </p>
+                    </div>
+                  )}
+                {selectedSubAssemblyType === "MCCBPrimary" &&
+                  showExpectedMCCBPrimaryRange &&
+                  expectedMCCBPrimaryRange && (
+                    <div className="flex justify-start">
+                      <p className="mt-2 font-black p-1 text-white bg-secondary text-xs rounded-full pl-2 pr-2">
+                        {expectedMCCBPrimaryRange}
                       </p>
                     </div>
                   )}
@@ -667,6 +778,64 @@ const SubAssemblyQRGenerator = () => {
                       <button
                         className="bg-signature hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded "
                         onClick={() => handleDownload(code.loadbankId)}
+                      >
+                        Download
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {selectedSubAssemblyType === "MCCBPrimary" && (
+            <div className="flex justify-center flex-wrap mt-5 rounded-xl">
+              {qrCode.map((code, index) => (
+                <div
+                  key={index}
+                  className="p-5 shadow-xl rounded-lg m-5 bg-white"
+                  style={{
+                    color: "#043f9d",
+                    fontFamily: "Avenir, sans-serif",
+                    fontSize: "20px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                  }}
+                >
+                  <div>
+                    <div id={`qrcode-${code.MCCBId}`}>
+                      <ReactQRCode
+                        value={JSON.stringify({
+                          link: code.link,
+                          MCCBPrimaryId: code.MCCBId,
+                        })}
+                        size={512}
+                        imageSettings={{
+                          src: logo,
+                          excavate: true,
+                          width: 60,
+                          height: 35,
+                        }}
+                      />
+                      <div className="mb-5">
+                        MCCB ID: {code.MCCBId}{" "}
+                        <span className="text-red-500 ml-1 mr-1 font-black">
+                          {" "}
+                          (Primary)
+                        </span>
+                      </div>
+                    </div>
+
+                    <img
+                      src={imageData[code.MCCBId]}
+                      alt={`Converted ${code.MCCBId}`}
+                      style={{ display: "none", margin: "10px auto" }}
+                    />
+
+                    <div className="mt-5 flex items-center justify-center">
+                      <button
+                        className="bg-signature hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded "
+                        onClick={() => handleDownload(code.MCCBId)}
                       >
                         Download
                       </button>
