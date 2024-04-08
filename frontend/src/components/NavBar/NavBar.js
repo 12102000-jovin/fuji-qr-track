@@ -50,6 +50,7 @@ import Components from "../../containers/Component/Component";
 import LoadbankPrimary from "../../containers/SubAssembly/Loadbank/LoadbankPrimary";
 import LoadbankCatcher from "../../containers/SubAssembly/Loadbank/LoadbankCatcher";
 import MCCBPrimary from "../../containers/SubAssembly/MCCB/MCCBPrimary";
+import MCCBCatcher from "../../containers/SubAssembly/MCCB/MCCBCatcher";
 
 const drawerWidth = 200;
 
@@ -419,6 +420,8 @@ const NavBar = () => {
                 />
 
                 <DropdownMenuItem to="/MCCBPrimary" primary="MCCB (Primary)" />
+
+                <DropdownMenuItem to="/MCCBCatcher" primary="MCCB (Catcher)" />
               </Menu>
 
               <ListItem disablePadding sx={{ display: "block" }}>
@@ -558,6 +561,7 @@ const NavBar = () => {
               <Route path="/LoadbankPrimary" element={<LoadbankPrimary />} />
               <Route path="/LoadbankCatcher" element={<LoadbankCatcher />} />
               <Route path="/MCCBPrimary" element={<MCCBPrimary />} />
+              <Route path="/MCCBCatcher" element={<MCCBCatcher />} />
             </Routes>
           </Box>
         </Box>

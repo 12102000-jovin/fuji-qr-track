@@ -132,9 +132,18 @@ router.put("/editPDC/:workOrderId/:pdcId", async (req, res) => {
     const { workOrderId, pdcId } = req.params;
     const { workOrderIdToEdit, pdcIdToEdit } = req.body;
 
-    console.log("This is workOrder: ", workOrderId);
-
     let currentWorkOrder;
+
+    if (pdcIdToEdit == null || pdcIdToEdit === "") {
+      return res.status(400).json({ error: "Please Enter PDC Id" });
+    }
+
+    const isPDCPattern = /^PDC\d{6}$/.test(pdcIdToEdit);
+    if (!isPDCPattern) {
+      return res
+        .status(400)
+        .json({ error: "Please Enter Correct PDC Id Format" });
+    }
 
     if (workOrderId) {
       // Find the current work order

@@ -8,6 +8,7 @@ const {
   LoadbankModel,
   LoadbankCatcherModel,
   PrimaryMCCBModel,
+  CatcherMCCBModel,
 } = require("../models/SubAssemblyModel");
 const WorkOrderModel = require("../models/WorkOrderModel");
 const ComponentModel = require("../models/ComponentModel");
@@ -66,6 +67,10 @@ router.get("/:pdcId/showPDCDashboard", async (req, res) => {
       _id: { $in: pdc.primaryMCCBs },
     });
 
+    const catcherMCCBs = await CatcherMCCBModel.find({
+      _id: { $in: pdc.catcherMCCBs },
+    });
+
     // Find the first Work Order that references this PDC
     const workOrder = await WorkOrderModel.findOne({
       pdcs: pdc._id,
@@ -75,9 +80,14 @@ router.get("/:pdcId/showPDCDashboard", async (req, res) => {
     const workOrderId = workOrder ? workOrder.workOrderId : null;
 
     // Send an object with both panels and workOrderId
-    res
-      .status(200)
-      .json({ panels, loadbanks, catcherLoadbanks, workOrderId, primaryMCCBs });
+    res.status(200).json({
+      panels,
+      loadbanks,
+      catcherLoadbanks,
+      workOrderId,
+      primaryMCCBs,
+      catcherMCCBs,
+    });
   } catch (error) {
     res.status(500).json({ message: `Error retrieving pdcs in ${pdcId}` });
   }
@@ -301,6 +311,62 @@ router.get("/:MCCBId/showMCCBPrimaryDashboard", async (req, res) => {
   }
 });
 
+// M C C B (C A T C H E R)
+router.get("/:MCCBId/showMCCBCatcherDashboard", async (req, res) => {
+  try {
+    const { MCCBId } = req.params;
+
+    // Find MCCB based on MCCBId
+    const MCCB = await CatcherMCCBModel.findOne({ MCCBId });
+
+    console.log(MCCB);
+
+    if (!MCCB) {
+      return res.status(404).json({ message: "MCCB not found" });
+    }
+
+    // Extract the component _id referenced in the MCCB
+    const componentIds = MCCB.components.map((component) => component._id);
+
+    // Find components in the ComponentModel matching the extracted component _ids
+    const components = await ComponentModel.find({
+      _id: { $in: componentIds },
+    });
+
+    const componentData = components.map((component) => ({
+      componentType: component.componentType,
+      componentSerialNumber: component.componentSerialNumber,
+      allocatedDate: component.allocatedDate,
+    }));
+
+    // Find the PDC that contains the given MCCB
+    const pdc = await PDCModel.findOne({
+      catcherMCCBs: MCCB._id,
+    }).populate("catcherMCCBs");
+
+    if (!pdc) {
+      console.log("PDC not found for the given panel");
+    }
+
+    // Find the first Work Order that references this PDC
+    const workOrder = await WorkOrderModel.findOne({
+      pdcs: pdc ? pdc._id : null, // Pass null if pdc is not found
+    });
+    // Extracting workOrderId from the found work order
+    const workOrderId = workOrder ? workOrder.workOrderId : null;
+
+    // Respond with the pdcId of the found PDC along with the populated 'MCCBs'
+    res.status(200).json({
+      pdcId: pdc ? pdc.pdcId : null,
+      workOrderId,
+      MCCBs: pdc ? pdc.MCCBs : null,
+      componentData,
+    });
+  } catch (error) {
+    res.status(500).json({ message: `Error retrieving PDCs for MCCB` });
+  }
+});
+
 router.get(
   "/:componentSerialNumber/showComponentDashboard",
   async (req, res) => {
@@ -328,6 +394,16 @@ router.get(
 
       // Find the Loadbank that contains the specified component
       const loadbankCatcher = await LoadbankCatcherModel.findOne({
+        components: componentObjectId,
+      }).populate("components");
+
+      // Find the MCCB that contains the specified component
+      const MCCBPrimary = await PrimaryMCCBModel.findOne({
+        components: componentObjectId,
+      }).populate("components");
+
+      // Find the MCCB that contains the specified component
+      const MCCBCatcher = await CatcherMCCBModel.findOne({
         components: componentObjectId,
       }).populate("components");
 
@@ -409,7 +485,6 @@ router.get(
           subAssemblyType,
         });
       } else if (loadbankCatcher) {
-        console.log("Iasdasf");
         // Include loadbankId in the response
         const loadbankId = loadbankCatcher.loadbankId;
         const subAssemblyType = "Loadbank";
@@ -447,10 +522,84 @@ router.get(
           workOrderId,
           subAssemblyType,
         });
+      } else if (MCCBPrimary) {
+        // Include MCCB Id in the response
+        const MCCBId = MCCBPrimary.MCCBId;
+        const subAssemblyType = "MCCB";
+
+        // Get the object id of the MCCB
+        const MCCBObjectId = MCCBPrimary._id;
+
+        // Find the PDC that contains the specified MCCB
+        const PDC = await PDCModel.findOne({
+          primaryMCCBs: MCCBObjectId,
+        }).populate("primaryMCCBs");
+
+        let pdcId = null;
+        let workOrderId = null;
+
+        // If PDC exists, get its properties
+        if (PDC) {
+          // Get the object id of the pdc
+          pdcId = PDC.pdcId;
+
+          // Get the object id of the pdc
+          const pdcObjectId = PDC._id;
+
+          const WorkOrder = await WorkOrderModel.findOne({
+            pdcs: pdcObjectId,
+          }).populate("pdcs");
+
+          workOrderId = WorkOrder.workOrderId;
+        }
+
+        res.json({
+          component,
+          MCCBId,
+          pdcId,
+          workOrderId,
+          subAssemblyType,
+        });
+      } else if (MCCBCatcher) {
+        // Include MCCB Id in the response
+        const MCCBId = MCCBCatcher.MCCBId;
+        const subAssemblyType = "MCCB";
+
+        // Get the object id of the MCCB
+        const MCCBObjectId = MCCBCatcher._id;
+
+        // Find the PDC that contains the specified MCCB
+        const PDC = await PDCModel.findOne({
+          catcherMCCBs: MCCBObjectId,
+        }).populate("catcherMCCBs");
+
+        let pdcId = null;
+        let workOrderId = null;
+
+        // If PDC exists, get its properties
+        if (PDC) {
+          // Get the object id of the pdc
+          pdcId = PDC.pdcId;
+
+          // Get the object id of the pdc
+          const pdcObjectId = PDC._id;
+
+          const WorkOrder = await WorkOrderModel.findOne({
+            pdcs: pdcObjectId,
+          }).populate("pdcs");
+
+          workOrderId = WorkOrder.workOrderId;
+        }
+
+        res.json({
+          component,
+          MCCBId,
+          pdcId,
+          workOrderId,
+          subAssemblyType,
+        });
       } else {
-        return res
-          .status(404)
-          .json({ message: "Panel or Loadbank not found for the component" });
+        return res.status(404).json({ message: "Not Found" });
       }
     } catch (error) {
       console.error("Error retrieving Component Data:", error);

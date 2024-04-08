@@ -112,6 +112,17 @@ router.put("/Panel/editPanel/:pdcId/:panelId", async (req, res) => {
     // Find the future panelId
     const futurePanel = await PanelModel.findOne({ panelId: panelToEdit });
 
+    if (panelToEdit == null || panelToEdit === "") {
+      return res.status(400).json({ error: "Please Enter Panel Id" });
+    }
+
+    const isPanelPattern = /^PANEL\d{6}$/.test(panelToEdit);
+    if (!isPanelPattern) {
+      return res
+        .status(400)
+        .json({ error: "Please Enter Correct Panel Id Format" });
+    }
+
     if (
       futurePanel &&
       currentPanel &&

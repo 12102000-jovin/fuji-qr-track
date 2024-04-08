@@ -128,6 +128,17 @@ router.put("/Loadbank/editLoadbank/:pdcId/:loadbankId", async (req, res) => {
     // console.log("Current Loadbank: ", currentLoadbank);
     // console.log("Future Loadbank: ", futureLoadbank);
 
+    if (loadbankToEdit == null || loadbankToEdit === "") {
+      return res.status(400).json({ error: "Please Enter Loadbank Id" });
+    }
+
+    const isLoadbankPattern = /^LB\d{6}-P$/.test(loadbankToEdit);
+    if (!isLoadbankPattern) {
+      return res
+        .status(400)
+        .json({ error: "Please Enter Correct Loadbank (Primary) Id  Format" });
+    }
+
     if (
       futureLoadbank &&
       currentLoadbank &&
@@ -335,9 +346,20 @@ router.put(
       });
 
       // console.log("Current PDC: ", currentPdc);
-      console.log("Future PDC: ", futurePdc);
+      // console.log("Future PDC: ", futurePdc);
       // console.log("Current Loadbank: ", currentLoadbank);
       // console.log("Future Loadbank: ", futureLoadbank);
+
+      if (loadbankToEdit == null || loadbankToEdit === "") {
+        return res.status(400).json({ error: "Please Enter Loadbank Id" });
+      }
+
+      const isLoadbankPattern = /^LB\d{6}-C$/.test(loadbankToEdit);
+      if (!isLoadbankPattern) {
+        return res
+          .status(400)
+          .json({ error: "Please Enter Correct Loadbank (Catcher) Id Format" });
+      }
 
       if (
         futureLoadbank &&

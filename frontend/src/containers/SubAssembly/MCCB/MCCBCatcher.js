@@ -14,7 +14,7 @@ import ReactQRCode from "qrcode.react";
 import html2canvas from "html2canvas";
 import SubAssemblyQRGenerator from "../../../components/SubAssemblyQRGenerator/SubAssemblyQRGenerator";
 import SubAssemblyCustomQRGenerator from "../../../components/SubAssemblyQRGenerator/SubAssemblyCustomQRGenerator";
-import EditMCCBPrimary from "./EditMCCBPrimary";
+import EditMCCBCatcher from "./EditMCCBCatcher";
 import JSZip from "jszip";
 
 import {
@@ -34,7 +34,7 @@ import {
   Pagination,
 } from "@mui/material";
 
-const MCCBPrimary = () => {
+const MCCBCatcher = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const [selectedRows, setSelectedRows] = useState([]);
@@ -111,10 +111,10 @@ const MCCBPrimary = () => {
   }, [rowsPerPage, searchQuery]);
 
   const fetchMCCBData_API =
-    "http://localhost:3001/SubAssembly/MCCBPrimary/getAllMCCB";
+    "http://localhost:3001/SubAssembly/MCCBCatcher/getAllMCCB";
 
   const deleteMCCB_API =
-    "http://localhost:3001/SubAssembly/MCCBPrimary/deleteMCCB/";
+    "http://localhost:3001/SubAssembly/MCCBCatcher/deleteMCCB/";
 
   const fetchMCCBData = () => {
     axios.get(`${fetchMCCBData_API}`).then((response) => {
@@ -169,7 +169,7 @@ const MCCBPrimary = () => {
     setQrCodeData(
       JSON.stringify({
         link: data.link,
-        MCCBPrimaryId: data.MCCBId,
+        MCCBCatcherId: data.MCCBId,
       })
     );
     setModalMCCBID(data.MCCBId);
@@ -335,7 +335,7 @@ const MCCBPrimary = () => {
             <div className="flex items-center justify-center">
               <p>MCCB</p>
               <span className="text-xl text-white bg-red-500 py-2 px-3 font-black rounded-full ml-2">
-                Primary
+                Catcher
               </span>
             </div>
           </p>
@@ -591,7 +591,7 @@ const MCCBPrimary = () => {
                       MCCB ID: {modalMCCBID}
                       <span className="text-red-500 ml-1 mr-1 font-black">
                         {" "}
-                        (Primary)
+                        (Catcher)
                       </span>
                     </p>
                   </div>
@@ -721,7 +721,7 @@ const MCCBPrimary = () => {
         </Dialog>
       </div>
       <div>
-        <EditMCCBPrimary
+        <EditMCCBCatcher
           open={editMCCBModalState}
           onClose={() => {
             fetchMCCBData();
@@ -772,7 +772,7 @@ const MCCBPrimary = () => {
                       MCCB ID: {qrCode.MCCBId}
                       <span className="text-red-500 ml-1 mr-1 font-black">
                         {" "}
-                        (Primary)
+                        (Catcher)
                       </span>
                     </p>
                   </div>
@@ -800,4 +800,4 @@ const MCCBPrimary = () => {
   );
 };
 
-export default MCCBPrimary;
+export default MCCBCatcher;

@@ -258,6 +258,54 @@ const Dashboard = () => {
                   )}
                 </div>
               </div>
+
+              {/* ======================= M C B B ( C A T C H E R  ) ======================= */}
+              <div className="text-start mt-4 p-2 w-full md:w-1/2">
+                <div className="w-full p-5 bg-white rounded-md min-h-40">
+                  <p className="text-black font-black text-2xl mb-2 flex items-center">
+                    MCCB{" "}
+                    <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
+                      Catcher
+                    </span>
+                  </p>
+                  {dashboardType === "PDC" ? (
+                    dashboardData &&
+                    dashboardData.catcherMCCBs &&
+                    dashboardData.catcherMCCBs.length > 0 ? (
+                      dashboardData.catcherMCCBs.map((MCCB) => (
+                        <div key={MCCB._id} className="flex flex-col">
+                          <div className="font-normal">
+                            <button
+                              onClick={() => window.open(MCCB.link, "_blank")}
+                              className="text-blue-500 font-bold hover:underline focus:outline-none"
+                            >
+                              {MCCB.MCCBId}
+                            </button>
+                          </div>
+                          <p className="text-black flex flex-col mt-6">
+                            <p className="text-xs text-start">Allocated Date</p>
+                            <p className="text-xs text-start font-bold">
+                              {moment(MCCB.allocatedDate).format(
+                                "DD MMM YYYY HH:mm:ss"
+                              )}
+                            </p>
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="flex item-center">
+                        <p className="text-sm font-black rounded-md text-gray-400">
+                          No MCCB Found
+                        </p>
+                      </div>
+                    )
+                  ) : (
+                    <span className=" p-1 rounded-full text-xs inline-block text-black">
+                      none
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>

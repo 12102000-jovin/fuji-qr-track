@@ -71,6 +71,9 @@ const Dashboard = () => {
                 {dashboardData && dashboardData.loadbankId && (
                   <p className="font-semibold">{dashboardData.loadbankId}</p>
                 )}
+                {dashboardData && dashboardData.MCCBId && (
+                  <p className="font-semibold">{dashboardData.MCCBId}</p>
+                )}
               </div>
             </div>
           </div>

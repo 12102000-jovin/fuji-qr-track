@@ -89,6 +89,28 @@ router.put("/editWorkOrder/:workOrderId", async (req, res) => {
     const workOrderId = req.params.workOrderId;
     const updatedWorkOrderId = req.body;
 
+    console.log("workOrderId: ", workOrderId);
+    console.log("updatedWorkOrderId: ", updatedWorkOrderId);
+
+    if (
+      updatedWorkOrderId.workOrderId == null ||
+      updatedWorkOrderId.workOrderId === ""
+    ) {
+      return res.status(404).json({
+        error: "Please Enter Work Order",
+      });
+    }
+
+    const isValidWorkOrderFormat = /^WO2\d{2}\d{4}$/.test(
+      updatedWorkOrderId.workOrderId
+    );
+
+    if (!isValidWorkOrderFormat) {
+      return res.status(404).json({
+        error: "Please Enter Correct Work Order Format",
+      });
+    }
+
     const existingWorkOrder = await WorkOrderModel.findOne({
       workOrderId: workOrderId,
     });

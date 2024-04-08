@@ -42,6 +42,12 @@ const PDCSchema = new mongoose.Schema(
         ref: "PrimaryMCCBModel",
       },
     ],
+    catcherMCCBs: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "CatcherMCCBModel",
+      },
+    ],
   },
   {
     collection: "pdc",

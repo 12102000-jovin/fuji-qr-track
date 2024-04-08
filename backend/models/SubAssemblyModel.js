@@ -136,7 +136,42 @@ const PrimaryMCCBSchema = new mongoose.Schema(
     ],
   },
   {
-    collection: "PrimaryMCCB",
+    collection: "primaryMCCB",
+  }
+);
+
+const CatcherMCCBSchema = new mongoose.Schema(
+  {
+    link: {
+      required: true,
+      type: String,
+      unique: true,
+    },
+    generatedDate: {
+      type: String,
+      // required: true,
+    },
+    MCCBId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    allocatedDate: {
+      type: String,
+    },
+    isAllocated: {
+      type: Boolean,
+      default: false,
+    },
+    components: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ComponentModel",
+      },
+    ],
+  },
+  {
+    collection: "catcherMCCB",
   }
 );
 
@@ -149,4 +184,5 @@ module.exports = {
   ),
   PanelModel: mongoose.model("PanelModel", PanelSchema),
   PrimaryMCCBModel: mongoose.model("PrimaryMCCBModel", PrimaryMCCBSchema),
+  CatcherMCCBModel: mongoose.model("CatcherMCCBModel", CatcherMCCBSchema),
 };

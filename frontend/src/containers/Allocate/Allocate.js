@@ -69,6 +69,7 @@ const Allocate = () => {
         subAssemblyInputValue
       );
       const isMCCBPrimaryPattern = /^MCCB\d{6}-P$/.test(subAssemblyInputValue);
+      const isMCCBCatcherPattern = /^MCCB\d{6}-C$/.test(subAssemblyInputValue);
 
       if (isPanelPattern) {
         setShowSubAssemblyInput(subAssemblyInputValue);
@@ -85,6 +86,10 @@ const Allocate = () => {
       } else if (isMCCBPrimaryPattern) {
         setShowSubAssemblyInput(subAssemblyInputValue);
         setDetectedType("MCCB (Primary)");
+        setWrongSubAssemblyError(false);
+      } else if (isMCCBCatcherPattern) {
+        setShowSubAssemblyInput(subAssemblyInputValue);
+        setDetectedType("MCCB (Catcher)");
         setWrongSubAssemblyError(false);
       } else {
         try {
@@ -105,6 +110,10 @@ const Allocate = () => {
           } else if (parsedInput.MCCBPrimaryId) {
             setSubAssemblyInputValue(parsedInput.MCCBPrimaryId);
             setDetectedType("MCCB (Primary)");
+            setWrongSubAssemblyError(false);
+          } else if (parsedInput.MCCBCatcherId) {
+            setSubAssemblyInputValue(parsedInput.MCCBCatcherId);
+            setDetectedType("MCCB (Catcher)");
             setWrongSubAssemblyError(false);
           } else {
             setWrongSubAssemblyError(true);
