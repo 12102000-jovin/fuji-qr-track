@@ -49,7 +49,7 @@ const MCCBPrimaryComponentForm = (MCCBId) => {
       if (response.status === 200) {
         // Clear error message if successful
         setErrorMessage("");
-        setSuccessfulMessage("Component Allocated to MCCB successfully");
+        setSuccessfulMessage("Component Allocated to MCCB Panel successfully");
         setIsAllocateLoading(false);
       }
     } catch (error) {
@@ -69,7 +69,7 @@ const MCCBPrimaryComponentForm = (MCCBId) => {
     <div>
       <div className="p-5 bg-signature text-white font-bold rounded-md">
         <div className="flex justify-start text-2xl font-black mb-5">
-          MCCB (Primary) Components
+          MCCB Panel (Primary) Components
         </div>
         {errorMessage && (
           <span className="p-1 pl-2 pr-2 bg-red-500 text-xs rounded-full text-white font-bold mt-2">

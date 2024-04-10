@@ -65,10 +65,10 @@ const EditMCCBPrimary = ({ open, onClose, MCCBId }) => {
 
   const handleEditMCCB = async () => {
     console.log("Future PDC Id", selectedPDCId);
-    console.log("Future MCCB Id", MCCBIdToEdit);
+    console.log("Future MCCB Panel Id", MCCBIdToEdit);
 
     console.log("Current PDC Id", pdcId);
-    console.log("Current MCCB Id", MCCBId);
+    console.log("Current MCCB Panel Id", MCCBId);
 
     setGeneralError("");
 
@@ -79,7 +79,7 @@ const EditMCCBPrimary = ({ open, onClose, MCCBId }) => {
       });
 
       if (response.status === 200) {
-        console.log("MCCB Edited Successfully");
+        console.log("MCCB Panel Edited Successfully");
         onClose();
       }
     } catch (error) {
@@ -109,7 +109,7 @@ const EditMCCBPrimary = ({ open, onClose, MCCBId }) => {
         </div>
 
         <p className="block mb-5 flex justify-center text-signature font-bold text-3xl">
-          Edit MCCB
+          Edit MCCB Panel
         </p>
 
         {generalError && (
@@ -130,7 +130,7 @@ const EditMCCBPrimary = ({ open, onClose, MCCBId }) => {
               <span className="flex items-center">
                 <div className="flex">
                   <p className="text-xs text-white px-2 bg-red-500 rounded-full ml-3">
-                    MCCB has not been allocated to any PDC.{" "}
+                    MCCB Panel has not been allocated to any PDC.{" "}
                   </p>
                   <a
                     href="/allocateComponents"
@@ -180,7 +180,7 @@ const EditMCCBPrimary = ({ open, onClose, MCCBId }) => {
             htmlFor="MCCBId"
             className="block mb-2 flex justify-start font-bold text-xl"
           >
-            MCCB Id
+            MCCB Panel Id
           </label>
           <div className="flex items-center">
             <div className="relative w-full">
@@ -208,7 +208,7 @@ const EditMCCBPrimary = ({ open, onClose, MCCBId }) => {
               className="bg-signature hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md"
               onClick={() => handleEditMCCB()}
             >
-              Edit MCCB
+              Edit MCCB Panel
             </button>
           </div>
         </div>

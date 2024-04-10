@@ -409,7 +409,7 @@ const NavBar = () => {
                   horizontal: "right",
                 }}
               >
-                <DropdownMenuItem to="/Panel" primary="Panel" />
+                <DropdownMenuItem to="/ControlPanel" primary="Control Panel" />
                 <DropdownMenuItem
                   to="/LoadbankPrimary"
                   primary="Loadbank (Primary)"
@@ -419,9 +419,15 @@ const NavBar = () => {
                   primary="Loadbank (Catcher)"
                 />
 
-                <DropdownMenuItem to="/MCCBPrimary" primary="MCCB (Primary)" />
+                <DropdownMenuItem
+                  to="/MCCBPrimary"
+                  primary="MCCB Panel (Primary)"
+                />
 
-                <DropdownMenuItem to="/MCCBCatcher" primary="MCCB (Catcher)" />
+                <DropdownMenuItem
+                  to="/MCCBCatcher"
+                  primary="MCCB Panel (Catcher)"
+                />
               </Menu>
 
               <ListItem disablePadding sx={{ display: "block" }}>
@@ -517,7 +523,7 @@ const NavBar = () => {
                 element={<SubAssemblyQRGenerator />}
               />
               <Route path="/PDC" element={<PDC />} />
-              <Route path="/Panel" element={<Panel />} />
+              <Route path="/ControlPanel" element={<Panel />} />
               <Route path="/Allocate" element={<Allocate />} />
               <Route
                 path="/Dashboard/WorkOrder/:workOrderId"
@@ -525,7 +531,7 @@ const NavBar = () => {
               />
               <Route path="/Dashboard/PDC/:pdcId" element={<DashboardPDC />} />
               <Route
-                path="/Dashboard/PANEL/:panelId"
+                path="/Dashboard/ControlPanel/:panelId"
                 element={<DashboardPanel />}
               />
               <Route

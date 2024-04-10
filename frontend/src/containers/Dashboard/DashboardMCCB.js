@@ -12,8 +12,8 @@ const DashboardMCCB = () => {
   const fetchDashboardMCCBCatcherData_API = `http://localhost:3001/Dashboard/${MCCBId}/showMCCBCatcherDashboard`;
 
   useEffect(() => {
-    const isMCCBPrimaryPattern = /^MCCB\d{6}-P$/.test(MCCBId);
-    const isMCCBCatcherPattern = /^MCCB\d{6}-C$/.test(MCCBId);
+    const isMCCBPrimaryPattern = /^MCCBPAN\d{6}-P$/.test(MCCBId);
+    const isMCCBCatcherPattern = /^MCCBPAN\d{6}-C$/.test(MCCBId);
 
     if (isMCCBPrimaryPattern) {
       fetchDashboardMCCBData();
@@ -30,7 +30,7 @@ const DashboardMCCB = () => {
         console.log(response.data);
       })
       .catch((error) => {
-        console.error("Error fetching MCCB data", error);
+        console.error("Error fetching MCCB Panel data", error);
       });
   };
 
@@ -42,7 +42,7 @@ const DashboardMCCB = () => {
         console.log(response.data);
       })
       .catch((error) => {
-        console.error("Error fetching MCCB data", error);
+        console.error("Error fetching MCCB Panel data", error);
       });
   };
 
@@ -80,7 +80,7 @@ const DashboardMCCB = () => {
                 </p>
               </div>
               <div className="flex flex-col items-start p-2">
-                <p className="text-3xl font-bold mb-1">MCCB</p>
+                <p className="text-3xl font-bold mb-1">MCCB Panel</p>
                 <p className="font-semibold text-white rounded-full inline-block">
                   {MCCBId}
                 </p>

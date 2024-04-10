@@ -65,10 +65,10 @@ const EditMCCBCatcher = ({ open, onClose, MCCBId }) => {
 
   const handleEditMCCB = async () => {
     console.log("Future PDC Id", selectedPDCId);
-    console.log("Future MCCB Id", MCCBIdToEdit);
+    console.log("Future MCCB Panel Id", MCCBIdToEdit);
 
     console.log("Current PDC Id", pdcId);
-    console.log("Current MCCB Id", MCCBId);
+    console.log("Current MCCB Panel Id", MCCBId);
 
     setGeneralError("");
 
@@ -79,7 +79,7 @@ const EditMCCBCatcher = ({ open, onClose, MCCBId }) => {
       });
 
       if (response.status === 200) {
-        console.log("MCCB Edited Successfully");
+        console.log("MCCB Panel Edited Successfully");
         onClose();
       }
     } catch (error) {
@@ -130,7 +130,7 @@ const EditMCCBCatcher = ({ open, onClose, MCCBId }) => {
               <span className="flex items-center">
                 <div className="flex">
                   <p className="text-xs text-white px-2 bg-red-500 rounded-full ml-3">
-                    MCCB has not been allocated to any PDC.{" "}
+                    MCCB Panel has not been allocated to any PDC.{" "}
                   </p>
                   <a
                     href="/allocateComponents"
@@ -180,7 +180,7 @@ const EditMCCBCatcher = ({ open, onClose, MCCBId }) => {
             htmlFor="MCCBId"
             className="block mb-2 flex justify-start font-bold text-xl"
           >
-            MCCB Id
+            MCCB Panel Id
           </label>
           <div className="flex items-center">
             <div className="relative w-full">

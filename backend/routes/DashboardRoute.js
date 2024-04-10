@@ -260,13 +260,13 @@ router.get("/:MCCBId/showMCCBPrimaryDashboard", async (req, res) => {
   try {
     const { MCCBId } = req.params;
 
-    // Find MCCB based on MCCBId
+    // Find MCCB Panel based on MCCBId
     const MCCB = await PrimaryMCCBModel.findOne({ MCCBId });
 
     console.log(MCCB);
 
     if (!MCCB) {
-      return res.status(404).json({ message: "MCCB not found" });
+      return res.status(404).json({ message: "MCCB Panel not found" });
     }
 
     // Extract the component _id referenced in the MCCB
@@ -307,7 +307,7 @@ router.get("/:MCCBId/showMCCBPrimaryDashboard", async (req, res) => {
       componentData,
     });
   } catch (error) {
-    res.status(500).json({ message: `Error retrieving PDCs for MCCB` });
+    res.status(500).json({ message: `Error retrieving PDCs for MCCB Panel` });
   }
 });
 
@@ -316,13 +316,13 @@ router.get("/:MCCBId/showMCCBCatcherDashboard", async (req, res) => {
   try {
     const { MCCBId } = req.params;
 
-    // Find MCCB based on MCCBId
+    // Find MCCB Panel based on MCCBId
     const MCCB = await CatcherMCCBModel.findOne({ MCCBId });
 
     console.log(MCCB);
 
     if (!MCCB) {
-      return res.status(404).json({ message: "MCCB not found" });
+      return res.status(404).json({ message: "MCCB Panel not found" });
     }
 
     // Extract the component _id referenced in the MCCB
@@ -397,12 +397,12 @@ router.get(
         components: componentObjectId,
       }).populate("components");
 
-      // Find the MCCB that contains the specified component
+      // Find the MCCB Panel that contains the specified component
       const MCCBPrimary = await PrimaryMCCBModel.findOne({
         components: componentObjectId,
       }).populate("components");
 
-      // Find the MCCB that contains the specified component
+      // Find the MCCB Panel that contains the specified component
       const MCCBCatcher = await CatcherMCCBModel.findOne({
         components: componentObjectId,
       }).populate("components");
@@ -523,9 +523,9 @@ router.get(
           subAssemblyType,
         });
       } else if (MCCBPrimary) {
-        // Include MCCB Id in the response
+        // Include MCCB Panel Id in the response
         const MCCBId = MCCBPrimary.MCCBId;
-        const subAssemblyType = "MCCB";
+        const subAssemblyType = "MCCB Panel";
 
         // Get the object id of the MCCB
         const MCCBObjectId = MCCBPrimary._id;
@@ -563,7 +563,7 @@ router.get(
       } else if (MCCBCatcher) {
         // Include MCCB Id in the response
         const MCCBId = MCCBCatcher.MCCBId;
-        const subAssemblyType = "MCCB";
+        const subAssemblyType = "MCCB Panel";
 
         // Get the object id of the MCCB
         const MCCBObjectId = MCCBCatcher._id;

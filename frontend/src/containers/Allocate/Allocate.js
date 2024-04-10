@@ -63,13 +63,17 @@ const Allocate = () => {
   const handleSubAssemblyKeyDown = (event) => {
     if (event.key === "Enter") {
       console.log("Entered");
-      const isPanelPattern = /^PANEL\d{6}$/.test(subAssemblyInputValue);
+      const isPanelPattern = /^CPAN\d{6}$/.test(subAssemblyInputValue);
       const isLoadbankPattern = /^LB\d{6}-P$/.test(subAssemblyInputValue);
       const isLoadbankCatcherPattern = /^LB\d{6}-C$/.test(
         subAssemblyInputValue
       );
-      const isMCCBPrimaryPattern = /^MCCB\d{6}-P$/.test(subAssemblyInputValue);
-      const isMCCBCatcherPattern = /^MCCB\d{6}-C$/.test(subAssemblyInputValue);
+      const isMCCBPrimaryPattern = /^MCCBPAN\d{6}-P$/.test(
+        subAssemblyInputValue
+      );
+      const isMCCBCatcherPattern = /^MCCBPAN\d{6}-C$/.test(
+        subAssemblyInputValue
+      );
 
       if (isPanelPattern) {
         setShowSubAssemblyInput(subAssemblyInputValue);
@@ -85,11 +89,11 @@ const Allocate = () => {
         setWrongSubAssemblyError(false);
       } else if (isMCCBPrimaryPattern) {
         setShowSubAssemblyInput(subAssemblyInputValue);
-        setDetectedType("MCCB (Primary)");
+        setDetectedType("MCCB Panel (Primary)");
         setWrongSubAssemblyError(false);
       } else if (isMCCBCatcherPattern) {
         setShowSubAssemblyInput(subAssemblyInputValue);
-        setDetectedType("MCCB (Catcher)");
+        setDetectedType("MCCB Panel (Catcher)");
         setWrongSubAssemblyError(false);
       } else {
         try {
@@ -109,11 +113,11 @@ const Allocate = () => {
             setWrongSubAssemblyError(false);
           } else if (parsedInput.MCCBPrimaryId) {
             setSubAssemblyInputValue(parsedInput.MCCBPrimaryId);
-            setDetectedType("MCCB (Primary)");
+            setDetectedType("MCCB Panel (Primary)");
             setWrongSubAssemblyError(false);
           } else if (parsedInput.MCCBCatcherId) {
             setSubAssemblyInputValue(parsedInput.MCCBCatcherId);
-            setDetectedType("MCCB (Catcher)");
+            setDetectedType("MCCB Panel (Catcher)");
             setWrongSubAssemblyError(false);
           } else {
             setWrongSubAssemblyError(true);

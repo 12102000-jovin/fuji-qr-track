@@ -278,14 +278,14 @@ const MCCBPrimary = () => {
       const response = await axios.delete(`${deleteMCCB_API}${MCCBId}`);
 
       if (response.status === 200) {
-        console.log("MCCB Deleted Successfully");
+        console.log("MCCB Panel Deleted Successfully");
         fetchMCCBData();
         setDeleteMCCBModalState(false);
       } else {
-        console.log("Error deleting MCCB:", response.data.message);
+        console.log("Error deleting MCCB Panel:", response.data.message);
       }
     } catch (error) {
-      console.error("Error deleting MCCB", error);
+      console.error("Error deleting MCCB Panel", error);
     }
   };
 
@@ -333,7 +333,7 @@ const MCCBPrimary = () => {
         <div className="w-3/4 p-6 shadow-lg bg-white rounded-md my-5">
           <p className="text-4xl text-signature font-black mb-5 mt-3">
             <div className="flex items-center justify-center">
-              <p>MCCB</p>
+              <p>MCCB Panel</p>
               <span className="text-xl text-white bg-red-500 py-2 px-3 font-black rounded-full ml-2">
                 Primary
               </span>
@@ -428,7 +428,7 @@ const MCCBPrimary = () => {
                     }}
                   >
                     <div className="flex items-center justify-center">
-                      <p onClick={handleSortMCCBId}> MCCB ID</p>
+                      <p onClick={handleSortMCCBId}> MCCB Panel ID</p>
                       <span>
                         <FaSort
                           fontSize="small"
@@ -588,7 +588,7 @@ const MCCBPrimary = () => {
                         marginTop: "5px",
                       }}
                     >
-                      MCCB ID: {modalMCCBID}
+                      MCCB Panel ID: {modalMCCBID}
                       <span className="text-red-500 ml-1 mr-1 font-black">
                         {" "}
                         (Primary)
@@ -769,7 +769,7 @@ const MCCBPrimary = () => {
                       }}
                       className="text-signature text-center"
                     >
-                      MCCB ID: {qrCode.MCCBId}
+                      MCCB Panel ID: {qrCode.MCCBId}
                       <span className="text-red-500 ml-1 mr-1 font-black">
                         {" "}
                         (Primary)

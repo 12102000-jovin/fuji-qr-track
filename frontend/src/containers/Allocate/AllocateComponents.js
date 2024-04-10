@@ -23,13 +23,17 @@ const AllocateComponents = () => {
 
   const handleSubAssemblyKeyDown = (event) => {
     if (event.key === "Enter") {
-      const isPanelPattern = /^PANEL\d{6}$/.test(inputSubAssemblyValue);
+      const isPanelPattern = /^CPAN\d{6}$/.test(inputSubAssemblyValue);
       const isLoadbankPattern = /^LB\d{6}-P$/.test(inputSubAssemblyValue);
       const isLoadbankCatcherPattern = /^LB\d{6}-C$/.test(
         inputSubAssemblyValue
       );
-      const isMCCBPrimaryPattern = /^MCCB\d{6}-P$/.test(inputSubAssemblyValue);
-      const isMCCBCatcherPattern = /^MCCB\d{6}-C$/.test(inputSubAssemblyValue);
+      const isMCCBPrimaryPattern = /^MCCBPAN\d{6}-P$/.test(
+        inputSubAssemblyValue
+      );
+      const isMCCBCatcherPattern = /^MCCBPAN\d{6}-C$/.test(
+        inputSubAssemblyValue
+      );
 
       if (isPanelPattern) {
         setShowPanelForm(true);
@@ -54,7 +58,7 @@ const AllocateComponents = () => {
       } else {
         try {
           const parsedInput = JSON.parse(inputSubAssemblyValue);
-          if (parsedInput.panelId && /^PANEL\d{6}$/.test(parsedInput.panelId)) {
+          if (parsedInput.panelId && /^CPAN\d{6}$/.test(parsedInput.panelId)) {
             setInputSubAssemblyValue(parsedInput.panelId);
             setShowPanelForm(true);
             setShowLoadbankForm(false);
@@ -77,7 +81,7 @@ const AllocateComponents = () => {
             setErrorMessage("");
           } else if (
             parsedInput.MCCBPrimaryId &&
-            /^MCCB\d{6}-P$/.test(parsedInput.MCCBPrimaryId)
+            /^MCCBPAN\d{6}-P$/.test(parsedInput.MCCBPrimaryId)
           ) {
             setInputSubAssemblyValue(parsedInput.MCCBPrimaryId);
             setShowPanelForm(false);
@@ -85,7 +89,7 @@ const AllocateComponents = () => {
             setErrorMessage("");
           } else if (
             parsedInput.MCCBCatcherId &&
-            /^MCCB\d{6}-C$/.test(parsedInput.MCCBCatcherId)
+            /^MCCBPAN\d{6}-C$/.test(parsedInput.MCCBCatcherId)
           ) {
             setInputSubAssemblyValue(parsedInput.MCCBCatcherId);
             setShowPanelForm(false);

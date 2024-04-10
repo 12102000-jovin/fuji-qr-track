@@ -74,7 +74,9 @@ const Dashboard = () => {
               {/* ======================= P A N E L ======================= */}
               <div className="text-start mt-4 p-2 w-full md:w-1/2">
                 <div className="w-full p-5 bg-white rounded-md min-h-40">
-                  <p className="text-black font-black text-2xl mb-2">Panel</p>
+                  <p className="text-black font-black text-2xl mb-2">
+                    Control Panel
+                  </p>
                   {dashboardType === "PDC" ? (
                     dashboardData &&
                     dashboardData.panels &&
@@ -247,7 +249,7 @@ const Dashboard = () => {
                     ) : (
                       <div className="flex item-center">
                         <p className="text-sm font-black rounded-md text-gray-400">
-                          No MCCB Found
+                          No MCCB Panel Found
                         </p>
                       </div>
                     )
@@ -295,7 +297,7 @@ const Dashboard = () => {
                     ) : (
                       <div className="flex item-center">
                         <p className="text-sm font-black rounded-md text-gray-400">
-                          No MCCB Found
+                          No MCCB Panel Found
                         </p>
                       </div>
                     )

@@ -20,7 +20,7 @@ router.post("/MCCBPrimary/generateSubAssembly", async (req, res) => {
   });
 
   if (existingMCCBs.length > 0) {
-    return res.status(409).json("Duplicate MCCB found");
+    return res.status(409).json("Duplicate Panel found");
   }
 
   // Create an array of MCCBs documents
@@ -36,7 +36,7 @@ router.post("/MCCBPrimary/generateSubAssembly", async (req, res) => {
 
 router.get("/MCCBPrimary/getLatestMCCB", async (req, res) => {
   try {
-    // Find the document with the highest MCCB Id
+    // Find the document with the highest MCCB Panel Id
     const latestMCCB = await PrimaryMCCBModel.findOne()
       .sort({ MCCBId: -1 })
       .limit(1);
@@ -44,10 +44,10 @@ router.get("/MCCBPrimary/getLatestMCCB", async (req, res) => {
     if (latestMCCB) {
       res.json(latestMCCB.MCCBId);
     } else {
-      res.json(null); // No MCCB Found
+      res.json(null); // No MCCB Panel Found
     }
   } catch (error) {
-    console.error("Error fetching latest MCCB ID:", error);
+    console.error("Error fetching latest MCCB Panel ID:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -70,7 +70,7 @@ router.delete("/MCCBPrimary/deleteMCCB/:MCCBId", async (req, res) => {
     });
 
     if (!MCCBToDelete) {
-      res.status(404).json({ message: "MCCB not found!" });
+      res.status(404).json({ message: "MCCB Panel not found!" });
     }
 
     const componentIds = MCCBToDelete.components;
@@ -97,7 +97,7 @@ router.delete("/MCCBPrimary/deleteMCCB/:MCCBId", async (req, res) => {
     );
 
     console.log(MCCBToDelete);
-    res.status(200).json({ message: "MCCB deleted successfully" });
+    res.status(200).json({ message: "MCCB Panel deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" });
   }
@@ -121,17 +121,17 @@ router.put("/MCCBPrimary/editMCCB/:pdcId/:MCCBId", async (req, res) => {
     const futureMCCB = await PrimaryMCCBModel.findOne({ MCCBId: MCCBToEdit });
 
     if (MCCBToEdit == null || MCCBToEdit === "") {
-      return res.status(400).json({ error: "Please Enter MCCB Id" });
+      return res.status(400).json({ error: "Please Enter MCCB Panel Id" });
     }
 
-    const isMCCBPattern = /^MCCB\d{6}-P$/.test(MCCBToEdit);
+    const isMCCBPattern = /^MCCBPAN\d{6}-P$/.test(MCCBToEdit);
     if (!isMCCBPattern) {
       return res
         .status(400)
-        .json({ error: "Please Enter Correct MCCB (Primary) Id Format" });
+        .json({ error: "Please Enter Correct MCCB Panel (Primary) Id Format" });
     }
 
-    // Check whether the future MCCB exist or not
+    // Check whether the future MCCB Panel exist or not
     if (futureMCCB && currentMCCB && futureMCCB.MCCBId !== currentMCCB.MCCBId) {
       return res.status(409).json({
         error: "MCCBs already exists. Please choose a different one",
@@ -139,7 +139,7 @@ router.put("/MCCBPrimary/editMCCB/:pdcId/:MCCBId", async (req, res) => {
     }
 
     if (pdcId !== pdcToEdit && MCCBId === MCCBToEdit) {
-      // Add the MCCB to the future MCCB and remove it from the current pdc
+      // Add the MCCB Panel to the future MCCB Panel and remove it from the current pdc
       if (futurePdc && currentPdc && currentPdc.primaryMCCBs) {
         futurePdc.primaryMCCBs.push(currentMCCB._id);
         currentPdc.primaryMCCBs.pull(currentMCCB._id);
@@ -148,7 +148,9 @@ router.put("/MCCBPrimary/editMCCB/:pdcId/:MCCBId", async (req, res) => {
         await futurePdc.save();
         await currentPdc.save();
       }
-      res.status(200).json({ message: "MCCB moved successfully", futureMCCB });
+      res
+        .status(200)
+        .json({ message: "MCCB Panel moved successfully", futureMCCB });
     } else if (pdcId === pdcToEdit && MCCBId !== MCCBToEdit) {
       const updatedMCCBId = await PrimaryMCCBModel.findOneAndUpdate(
         {
@@ -165,13 +167,13 @@ router.put("/MCCBPrimary/editMCCB/:pdcId/:MCCBId", async (req, res) => {
 
       if (!updatedMCCBId) {
         return res.status(404).json({
-          message: "MCCB not found",
+          message: "MCCB Panel not found",
         });
       }
 
       res
         .status(200)
-        .json({ message: "MCCB updated successfully", updatedMCCBId });
+        .json({ message: "MCCB Panel updated successfully", updatedMCCBId });
     } else if (pdcId !== pdcToEdit && MCCBId !== MCCBToEdit) {
       const updatedMCCBId = await PrimaryMCCBModel.findOneAndUpdate(
         { MCCBId: MCCBId },
@@ -184,7 +186,7 @@ router.put("/MCCBPrimary/editMCCB/:pdcId/:MCCBId", async (req, res) => {
         { new: true }
       );
 
-      // Add the MCCB to the future pdc and remove it from the current pdc
+      // Add the MCCB Panel to the future pdc and remove it from the current pdc
       if (futurePdc && currentPdc && currentPdc.primaryMCCBs) {
         futurePdc.primaryMCCBs.push(currentMCCB._id);
         currentPdc.primaryMCCBs.pull(currentMCCB._id);
@@ -195,7 +197,7 @@ router.put("/MCCBPrimary/editMCCB/:pdcId/:MCCBId", async (req, res) => {
       }
 
       res.status(200).json({
-        message: "MCCB moved and updated successfully",
+        message: "MCCB Panel moved and updated successfully",
         futurePdc,
         updatedMCCBId,
       });
@@ -221,7 +223,7 @@ router.post("/MCCBCatcher/generateSubAssembly", async (req, res) => {
   });
 
   if (existingMCCBs.length > 0) {
-    return res.status(409).json("Duplicate MCCB found");
+    return res.status(409).json("Duplicate MCCB Panel found");
   }
 
   // Create an array of MCCBs documents
@@ -237,7 +239,7 @@ router.post("/MCCBCatcher/generateSubAssembly", async (req, res) => {
 
 router.get("/MCCBCatcher/getLatestMCCB", async (req, res) => {
   try {
-    // Find the document with the highest MCCB Id
+    // Find the document with the highest MCCB Panel Id
     const latestMCCB = await CatcherMCCBModel.findOne()
       .sort({ MCCBId: -1 })
       .limit(1);
@@ -245,10 +247,10 @@ router.get("/MCCBCatcher/getLatestMCCB", async (req, res) => {
     if (latestMCCB) {
       res.json(latestMCCB.MCCBId);
     } else {
-      res.json(null); // No MCCB Found
+      res.json(null); // No MCCB Panel Found
     }
   } catch (error) {
-    console.error("Error fetching latest MCCB ID:", error);
+    console.error("Error fetching latest MCCB Panel ID:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -271,7 +273,7 @@ router.delete("/MCCBCatcher/deleteMCCB/:MCCBId", async (req, res) => {
     });
 
     if (!MCCBToDelete) {
-      res.status(404).json({ message: "MCCB not found!" });
+      res.status(404).json({ message: "MCCB Panel not found!" });
     }
 
     const componentIds = MCCBToDelete.components;
@@ -298,7 +300,7 @@ router.delete("/MCCBCatcher/deleteMCCB/:MCCBId", async (req, res) => {
     );
 
     console.log(MCCBToDelete);
-    res.status(200).json({ message: "MCCB deleted successfully" });
+    res.status(200).json({ message: "MCCB Panel deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" });
   }
@@ -322,17 +324,17 @@ router.put("/MCCBCatcher/editMCCB/:pdcId/:MCCBId", async (req, res) => {
     const futureMCCB = await CatcherMCCBModel.findOne({ MCCBId: MCCBToEdit });
 
     if (MCCBToEdit == null || MCCBToEdit === "") {
-      return res.status(400).json({ error: "Please Enter MCCB Id" });
+      return res.status(400).json({ error: "Please Enter MCCB Panel Id" });
     }
 
-    const isMCCBPattern = /^MCCB\d{6}-C$/.test(MCCBToEdit);
+    const isMCCBPattern = /^MCCBPAN\d{6}-C$/.test(MCCBToEdit);
     if (!isMCCBPattern) {
       return res
         .status(400)
-        .json({ error: "Please Enter Correct MCCB (Primary) Id Format" });
+        .json({ error: "Please Enter Correct MCCB Panel (Primary) Id Format" });
     }
 
-    // Check whether the future MCCB exist or not
+    // Check whether the future MCCB Panel exist or not
     if (futureMCCB && currentMCCB && futureMCCB.MCCBId !== currentMCCB.MCCBId) {
       return res.status(409).json({
         error: "MCCBs already exists. Please choose a different one",
@@ -349,7 +351,9 @@ router.put("/MCCBCatcher/editMCCB/:pdcId/:MCCBId", async (req, res) => {
         await futurePdc.save();
         await currentPdc.save();
       }
-      res.status(200).json({ message: "MCCB moved successfully", futureMCCB });
+      res
+        .status(200)
+        .json({ message: "MCCB Panel moved successfully", futureMCCB });
     } else if (pdcId === pdcToEdit && MCCBId !== MCCBToEdit) {
       const updatedMCCBId = await CatcherMCCBModel.findOneAndUpdate(
         {
@@ -366,13 +370,13 @@ router.put("/MCCBCatcher/editMCCB/:pdcId/:MCCBId", async (req, res) => {
 
       if (!updatedMCCBId) {
         return res.status(404).json({
-          message: "MCCB not found",
+          message: "MCCB Panel not found",
         });
       }
 
       res
         .status(200)
-        .json({ message: "MCCB updated successfully", updatedMCCBId });
+        .json({ message: "MCCB Panel updated successfully", updatedMCCBId });
     } else if (pdcId !== pdcToEdit && MCCBId !== MCCBToEdit) {
       const updatedMCCBId = await CatcherMCCBModel.findOneAndUpdate(
         { MCCBId: MCCBId },
@@ -385,7 +389,7 @@ router.put("/MCCBCatcher/editMCCB/:pdcId/:MCCBId", async (req, res) => {
         { new: true }
       );
 
-      // Add the MCCB to the future pdc and remove it from the current pdc
+      // Add the MCCB Panel to the future pdc and remove it from the current pdc
       if (futurePdc && currentPdc && currentPdc.catcherMCCBs) {
         futurePdc.catcherMCCBs.push(currentMCCB._id);
         currentPdc.catcherMCCBs.pull(currentMCCB._id);
@@ -396,7 +400,7 @@ router.put("/MCCBCatcher/editMCCB/:pdcId/:MCCBId", async (req, res) => {
       }
 
       res.status(200).json({
-        message: "MCCB moved and updated successfully",
+        message: "MCCB Panel moved and updated successfully",
         futurePdc,
         updatedMCCBId,
       });

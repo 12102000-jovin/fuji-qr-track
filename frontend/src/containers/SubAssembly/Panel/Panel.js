@@ -226,7 +226,10 @@ const Panel = () => {
   };
 
   const handlePanelDashboard = (panelId) => {
-    window.open(`http://localhost:3000/Dashboard/Panel/${panelId}`, "_blank");
+    window.open(
+      `http://localhost:3000/Dashboard/ControlPanel/${panelId}`,
+      "_blank"
+    );
   };
 
   // To prevent submission when search query
@@ -331,7 +334,9 @@ const Panel = () => {
     <div>
       <div className="flex justify-center bg-background border-none">
         <div className="w-3/4 p-6 shadow-lg bg-white rounded-md my-5">
-          <p className="text-4xl text-signature font-black mb-5 mt-3">Panel</p>
+          <p className="text-4xl text-signature font-black mb-5 mt-3">
+            Control Panel
+          </p>
           <div className="flex items-center">
             <form className="p-1 flex-grow" onSubmit={handleFormSubmit}>
               <div className="relative">
@@ -421,7 +426,7 @@ const Panel = () => {
                     }}
                   >
                     <div className="flex items-center justify-center">
-                      <p onClick={handleSortPanelId}> PDC ID </p>
+                      <p onClick={handleSortPanelId}> Panel ID </p>
                       <span>
                         <FaSort
                           fontSize="small"
@@ -441,6 +446,17 @@ const Panel = () => {
                     }}
                   >
                     Generated Date
+                  </TableCell>
+                  <TableCell
+                    align="center"
+                    style={{
+                      width: "20%",
+                      color: "white",
+                      fontWeight: "bold",
+                      fontSize: "1.10rem",
+                    }}
+                  >
+                    Status
                   </TableCell>
                   <TableCell
                     align="center"
@@ -477,6 +493,20 @@ const Panel = () => {
                         {moment(row.generatedDate)
                           .tz("Australia/Sydney")
                           .format("DD MMMM YYYY")}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex justify-center">
+                          {row.isAllocated === false ? (
+                            <p className="text-xs px-3 py-1 bg-red-500 text-white font-black rounded-full">
+                              Not Allocated
+                            </p>
+                          ) : (
+                            <p className="text-xs px-3 py-1 bg-green-500 text-white font-black rounded-full">
+                              {" "}
+                              Allocated{" "}
+                            </p>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell align="center">
                         <IconButton

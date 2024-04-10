@@ -88,15 +88,15 @@ router.post("/AllocateSubAssembly", async (req, res) => {
   try {
     const { inputPDCValue, subAssemblyInputValue } = req.body;
 
-    const isPanelPattern = /^PANEL\d{6}$/.test(subAssemblyInputValue);
+    const isPanelPattern = /^CPAN\d{6}$/.test(subAssemblyInputValue);
     const isLoadbankPattern = /^LB\d{6}-P$/.test(subAssemblyInputValue);
     const isLoadbankCatcherPattern = /^LB\d{6}-C$/.test(subAssemblyInputValue);
-    const isMCCBPrimaryPattern = /^MCCB\d{6}-P$/.test(subAssemblyInputValue);
-    const isMCCBCatcherPattern = /^MCCB\d{6}-C$/.test(subAssemblyInputValue);
+    const isMCCBPrimaryPattern = /^MCCBPAN\d{6}-P$/.test(subAssemblyInputValue);
+    const isMCCBCatcherPattern = /^MCCBPAN\d{6}-C$/.test(subAssemblyInputValue);
 
     const pdc = await PDCModel.findOne({
       pdcId: `${inputPDCValue}`,
-    }).populate("panels");
+    });
 
     if (!pdc) {
       return res.status(404).json({ message: "PDC not found" });
@@ -110,25 +110,25 @@ router.post("/AllocateSubAssembly", async (req, res) => {
         });
 
         if (!panel) {
-          return res.status(404).json({ message: "Panel not found" });
+          return res.status(404).json({ message: "Control Panel not found" });
         }
 
         // Check if the panel already exists in the PDC
         if (pdc.panels.some((panelId) => panelId.equals(panel._id))) {
-          return res
-            .status(400)
-            .json({ message: `The Panel already exists in ${pdc.pdcId}` });
+          return res.status(400).json({
+            message: `The Control Panel already exists in ${pdc.pdcId}`,
+          });
         }
 
         if (panel.isAllocated === true) {
           return res.status(404).json({
-            message: `${panel.panelId} has been allocated to other PDC`,
+            message: `${panel.panelId} Control Panel has been allocated to other PDC`,
           });
         }
 
         if (pdc.panels.length > 0) {
           return res.status(400).json({
-            message: `A Panel already exists in the ${pdc.pdcId}`,
+            message: `Other Control Panel already exists in the ${pdc.pdcId}`,
           });
         }
 
@@ -145,7 +145,7 @@ router.post("/AllocateSubAssembly", async (req, res) => {
         await panel.save();
         await pdc.save();
 
-        const response = "Subassembly allocation successful";
+        const response = "Sub-Assembly allocation successful";
         return res.status(200).json({ message: response });
       } catch (error) {
         console.error(error);
@@ -171,9 +171,15 @@ router.post("/AllocateSubAssembly", async (req, res) => {
           });
         }
 
+        if (pdc.loadbanks.length > 0) {
+          return res.status(400).json({
+            message: `Other Loadbank (Primary) already exists in the ${pdc.pdcId}`,
+          });
+        }
+
         if (loadbank.isAllocated === true) {
           return res.status(404).json({
-            message: `${loadbank.loadbankId} has been allocated to other PDC`,
+            message: `${loadbank.loadbankId} Loadbank (Primary) has been allocated to other PDC`,
           });
         }
 
@@ -191,7 +197,7 @@ router.post("/AllocateSubAssembly", async (req, res) => {
         await pdc.save();
 
         //  Respond with success message and the updated PDC
-        const response = "Subassembly allocation successful";
+        const response = "Sub-Assembly allocation successful";
         return res.status(200).json({ message: response });
       } catch (error) {
         console.error(error);
@@ -210,16 +216,24 @@ router.post("/AllocateSubAssembly", async (req, res) => {
 
         // Check if the loadbank already exists in the PDC
         if (
-          pdc.loadbanks.some((loadbankId) => loadbankId.equals(loadbank._id))
+          pdc.catcherLoadbanks.some((loadbankId) =>
+            loadbankId.equals(loadbank._id)
+          )
         ) {
           return res.status(400).json({
-            message: `The Loadbank already exists in the ${pdc.pdcId}`,
+            message: `The Loadbank (Catcher) already exists in the ${pdc.pdcId}`,
+          });
+        }
+
+        if (pdc.catcherLoadbanks.length > 0) {
+          return res.status(400).json({
+            message: `Other Loadbank (Catcher) already exists in the ${pdc.pdcId}`,
           });
         }
 
         if (loadbank.isAllocated === true) {
           return res.status(404).json({
-            message: `${loadbank.loadbankId} has been allocated to other PDC`,
+            message: `${loadbank.loadbankId} Loadbank (Catcher) has been allocated to other PDC`,
           });
         }
 
@@ -237,7 +251,7 @@ router.post("/AllocateSubAssembly", async (req, res) => {
         await pdc.save();
 
         //  Respond with success message and the updated PDC
-        const response = "Subassembly allocation successful";
+        const response = "Sub-Assembly allocation successful";
         return res.status(200).json({ message: response });
       } catch (error) {
         console.error(error);
@@ -251,19 +265,25 @@ router.post("/AllocateSubAssembly", async (req, res) => {
         });
 
         if (!MCCB) {
-          return res.status(404).json({ message: "MCCB not found" });
+          return res.status(404).json({ message: "MCCB Panel not found" });
         }
 
         // Check if the MCCB already exists in the PDC
         if (pdc.primaryMCCBs.some((MCCBId) => MCCBId.equals(MCCB._id))) {
           return res.status(400).json({
-            message: `The MCCB already exists in the ${pdc.pdcId}`,
+            message: `The MCCB Panel already exists in the ${pdc.pdcId}`,
+          });
+        }
+
+        if (pdc.primaryMCCBs.length > 0) {
+          return res.status(400).json({
+            message: `Other MCCB Panel (Primary) already exists in the ${pdc.pdcId}`,
           });
         }
 
         if (MCCB.isAllocated === true) {
           return res.status(404).json({
-            message: `${MCCB.MCCBId} has been allocated to other PDC`,
+            message: `${MCCB.MCCBId} MCCB Panel (Primary) has been allocated to other PDC`,
           });
         }
 
@@ -273,15 +293,15 @@ router.post("/AllocateSubAssembly", async (req, res) => {
         // Set the isAllocated Flag to true
         MCCB.isAllocated = true;
 
-        // Associate the MCCB with the PDC by adding its ObjectId to the MCCBs array
+        // Associate the MCCB Panel with the PDC by adding its ObjectId to the MCCBs array
         pdc.primaryMCCBs.push(MCCB._id);
 
-        // Save both the MCCB and the updated PDC document
+        // Save both the MCCB Panel and the updated PDC document
         await MCCB.save();
         await pdc.save();
 
         //  Respond with success message and the updated PDC
-        const response = "Subassembly allocation successful";
+        const response = "Sub-Assembly allocation successful";
         return res.status(200).json({ message: response });
       } catch (error) {
         console.error(error);
@@ -289,25 +309,31 @@ router.post("/AllocateSubAssembly", async (req, res) => {
       }
     } else if (isMCCBCatcherPattern) {
       try {
-        // Check if MCCB exists
+        // Check if MCCB Panel exists
         const MCCB = await CatcherMCCBModel.findOne({
           MCCBId: subAssemblyInputValue,
         });
 
         if (!MCCB) {
-          return res.status(404).json({ message: "MCCB not found" });
+          return res.status(404).json({ message: "MCCB Panel not found" });
         }
 
         // Check if the MCCB already exists in the PDC
         if (pdc.catcherMCCBs.some((MCCBId) => MCCBId.equals(MCCB._id))) {
           return res.status(400).json({
-            message: `The MCCB already exists in the ${pdc.pdcId}`,
+            message: `The MCCB Panel already exists in the ${pdc.pdcId}`,
+          });
+        }
+
+        if (pdc.catcherMCCBs.length > 0) {
+          return res.status(400).json({
+            message: `Other MCCB Panel (Catcher) already exists in the ${pdc.pdcId}`,
           });
         }
 
         if (MCCB.isAllocated === true) {
           return res.status(404).json({
-            message: `${MCCB.MCCBId} has been allocated to other PDC`,
+            message: `${MCCB.MCCBId} MCCB Panel (Catcher) has been allocated to other PDC`,
           });
         }
 
@@ -317,15 +343,15 @@ router.post("/AllocateSubAssembly", async (req, res) => {
         // Set the isAllocated Flag to true
         MCCB.isAllocated = true;
 
-        // Associate the MCCB with the PDC by adding its ObjectId to the MCCBs array
+        // Associate the MCCB Panel with the PDC by adding its ObjectId to the MCCBs array
         pdc.catcherMCCBs.push(MCCB._id);
 
-        // Save both the MCCB and the updated PDC document
+        // Save both the MCCB Paneland the updated PDC document
         await MCCB.save();
         await pdc.save();
 
         //  Respond with success message and the updated PDC
-        const response = "Subassembly allocation successful";
+        const response = "Sub-Assembly allocation successful";
         return res.status(200).json({ message: response });
       } catch (error) {
         console.error(error);
@@ -549,7 +575,7 @@ router.post("/AllocateMCCBPrimaryComponent", async (req, res) => {
     );
 
     if (!MCCB) {
-      return res.status(404).json({ message: "MCCB not found" });
+      return res.status(404).json({ message: "Panel not found" });
     }
 
     const existingComponentType = MCCB.components.find(
@@ -577,7 +603,7 @@ router.post("/AllocateMCCBPrimaryComponent", async (req, res) => {
 
     return res
       .status(200)
-      .json({ message: "Component allocated to the MCCB successfully " });
+      .json({ message: "Component allocated to the MCCB Panel successfully " });
   } catch (error) {
     console.error("Error in allocation:", error);
     // Handle the error and send an appropriate response
@@ -611,7 +637,7 @@ router.post("/AllocateMCCBCatcherComponent", async (req, res) => {
     );
 
     if (!MCCB) {
-      return res.status(404).json({ message: "MCCB not found" });
+      return res.status(404).json({ message: "MCCB Panel not found" });
     }
 
     const existingComponentType = MCCB.components.find(
@@ -639,7 +665,7 @@ router.post("/AllocateMCCBCatcherComponent", async (req, res) => {
 
     return res
       .status(200)
-      .json({ message: "Component allocated to the MCCB successfully " });
+      .json({ message: "Component allocated to the MCCB Panel successfully " });
   } catch (error) {
     console.error("Error in allocation:", error);
     // Handle the error and send an appropriate response

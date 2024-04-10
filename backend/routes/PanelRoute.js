@@ -116,7 +116,7 @@ router.put("/Panel/editPanel/:pdcId/:panelId", async (req, res) => {
       return res.status(400).json({ error: "Please Enter Panel Id" });
     }
 
-    const isPanelPattern = /^PANEL\d{6}$/.test(panelToEdit);
+    const isPanelPattern = /^CPAN\d{6}$/.test(panelToEdit);
     if (!isPanelPattern) {
       return res
         .status(400)
@@ -157,7 +157,7 @@ router.put("/Panel/editPanel/:pdcId/:panelId", async (req, res) => {
         {
           $set: {
             panelId: panelToEdit,
-            link: `http://localhost:3000/Dashboard/PANEL/${panelToEdit}`,
+            link: `http://localhost:3000/Dashboard/CPAN/${panelToEdit}`,
           },
         },
         { new: true } // This option returns the modified document rather than the original
@@ -177,7 +177,7 @@ router.put("/Panel/editPanel/:pdcId/:panelId", async (req, res) => {
         {
           $set: {
             panelId: panelToEdit,
-            link: `http://localhost:3000/Dashboard/PANEL/${panelToEdit}`,
+            link: `http://localhost:3000/Dashboard/CPAN/${panelToEdit}`,
           },
         },
         { new: true }

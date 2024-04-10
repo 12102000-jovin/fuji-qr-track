@@ -6,7 +6,13 @@ const PDCModel = require("../models/PDCModel");
 
 const WorkOrderModel = require("../models/WorkOrderModel");
 
-const { PanelModel, LoadbankModel } = require("../models/SubAssemblyModel");
+const {
+  PanelModel,
+  LoadbankModel,
+  LoadbankCatcherModel,
+  PrimaryMCCBModel,
+  CatcherMCCBModel,
+} = require("../models/SubAssemblyModel");
 
 // Generate PDC API
 router.post("/generatePDC", async (req, res) => {
@@ -113,7 +119,34 @@ router.delete("/deletePDC/:pdcId", async (req, res) => {
     await LoadbankModel.updateMany(
       {
         _id: {
-          $in: [...pdcToDelete.loadbanks, ...pdcToDelete.catcherLoadbanks],
+          $in: [...pdcToDelete.loadbanks],
+        },
+      },
+      { $set: { isAllocated: false, allocatedDate: null } }
+    );
+
+    await LoadbankCatcherModel.updateMany(
+      {
+        _id: {
+          $in: [...pdcToDelete.catcherLoadbanks],
+        },
+      },
+      { $set: { isAllocated: false, allocatedDate: null } }
+    );
+
+    await PrimaryMCCBModel.updateMany(
+      {
+        _id: {
+          $in: [...pdcToDelete.primaryMCCBs],
+        },
+      },
+      { $set: { isAllocated: false, allocatedDate: null } }
+    );
+
+    await CatcherMCCBModel.updateMany(
+      {
+        _id: {
+          $in: [...pdcToDelete.catcherMCCBs],
         },
       },
       { $set: { isAllocated: false, allocatedDate: null } }
