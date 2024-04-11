@@ -53,6 +53,9 @@ app.use("/SubAssembly", loadbankSubAssembly);
 const MCCBRoute = require("./routes/MCCBRoute");
 app.use("/SubAssembly", MCCBRoute);
 
+const CTInterfaceRoute = require("./routes/CTInterfaceRoute");
+app.use("/SubAssembly", CTInterfaceRoute);
+
 const allocateRoute = require("./routes/AllocateRoute");
 app.use("/Allocate", allocateRoute);
 

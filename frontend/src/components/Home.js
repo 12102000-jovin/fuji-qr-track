@@ -53,6 +53,12 @@ const Home = () => {
       });
   };
 
+  const handleComponentDashboard = (componentSerialNumber) => {
+    window.open(
+      `http://localhost:3000/Dashboard/Component/${componentSerialNumber}`
+    );
+  };
+
   return (
     <div class="">
       <div class="flex justify-center">
@@ -177,7 +183,9 @@ const Home = () => {
                   .map((row) => (
                     <div className="flex flex-col ">
                       <a
-                        href={row.link}
+                        onClick={() => {
+                          handleComponentDashboard(row.componentSerialNumber);
+                        }}
                         className="flex justify-start inline-block text-gray-600 text-center mb-3 text-blue-800 hover:bg-blue-200 hover:underline transition-all duration-300 rounded px-2 py-1"
                       >
                         {row.componentSerialNumber}

@@ -3,7 +3,14 @@ const express = require("express");
 const router = express.Router();
 
 const ComponentModel = require("../models/ComponentModel");
-const { PanelModel, LoadbankModel } = require("../models/SubAssemblyModel");
+const {
+  PanelModel,
+  LoadbankModel,
+  LoadbankCatcherModel,
+  PrimaryMCCBModel,
+  CatcherMCCBModel,
+  CTInterfaceLeftModel,
+} = require("../models/SubAssemblyModel");
 
 router.get("/getAllComponents", async (req, res) => {
   try {
@@ -37,6 +44,30 @@ router.delete("/deleteComponent/:componentSerialNumber", async (req, res) => {
 
     // Extract the _id field of the deleted component
     await LoadbankModel.updateMany(
+      { components: deletedComponentObjectId },
+      { $pull: { components: deletedComponentObjectId } }
+    );
+
+    // Extract the _id field of the deleted component
+    await LoadbankCatcherModel.updateMany(
+      { components: deletedComponentObjectId },
+      { $pull: { components: deletedComponentObjectId } }
+    );
+
+    // Extract the _id field of the deleted component
+    await PrimaryMCCBModel.updateMany(
+      { components: deletedComponentObjectId },
+      { $pull: { components: deletedComponentObjectId } }
+    );
+
+    // Extract the _id field of the deleted component
+    await CatcherMCCBModel.updateMany(
+      { components: deletedComponentObjectId },
+      { $pull: { components: deletedComponentObjectId } }
+    );
+
+    // Extract the _id field of the deleted component
+    await CTInterfaceLeftModel.updateMany(
       { components: deletedComponentObjectId },
       { $pull: { components: deletedComponentObjectId } }
     );

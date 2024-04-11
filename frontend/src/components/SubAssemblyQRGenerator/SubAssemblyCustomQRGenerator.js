@@ -40,6 +40,13 @@ const SubAssemblyQRGenerator = () => {
   const [showExpectedMCCBCatcherRange, setShowExpectedMCCBCatcherRange] =
     useState(true);
 
+  const [expectedLeftCTInterfaceRange, setExpectedLeftCTInterfaceRange] =
+    useState("");
+  const [
+    showExpectedLeftCTInterfaceRange,
+    setShowExpectedLeftCTInterfaceRange,
+  ] = useState(true);
+
   const [selectedSubAssemblyType, setSelectedSubAssemblyType] = useState("");
 
   const linkFormat = "http://localhost:";
@@ -55,6 +62,8 @@ const SubAssemblyQRGenerator = () => {
     "http://localhost:3001/SubAssembly/MCCBPrimary/generateSubAssembly";
   const generateMCCBCatcher_API =
     "http://localhost:3001/SubAssembly/MCCBCatcher/generateSubAssembly";
+  const generateLeftCTInterface_API =
+    "http://localhost:3001/SubAssembly/CTInterfaceLeft/generateSubAssembly";
 
   // ======================================= P A N E L =======================================
 
@@ -170,6 +179,28 @@ const SubAssemblyQRGenerator = () => {
     }
   }, [numQR, startNum]);
 
+  // ==================================== C T I N T E R F A C E (L E F T) =======================================
+
+  useEffect(() => {
+    setShowExpectedLeftCTInterfaceRange(true);
+  }, [numQR]);
+
+  useEffect(() => {
+    if (numQR === "1") {
+      setExpectedLeftCTInterfaceRange(
+        `Expected Output: CT${formatId(Number(startNum))}L-P`
+      );
+    } else if (numQR > 1 && numQR !== "1") {
+      setExpectedLeftCTInterfaceRange(
+        ` Expected Output: CT${formatId(Number(startNum))}L-P - CT${formatId(
+          Number(startNum) + Number(numQR) - 1
+        )}L-P`
+      );
+    } else {
+      setExpectedLeftCTInterfaceRange("");
+    }
+  }, [numQR, startNum]);
+
   // ==================================== S U B M I T =======================================
 
   useEffect(() => {
@@ -200,6 +231,7 @@ const SubAssemblyQRGenerator = () => {
       return;
     }
 
+    // ======================================= P A N E L =======================================
     if (selectedSubAssemblyType === "Panel") {
       const Panels = Array.from({ length: numQR }, (_, index) => {
         const newPanelId = formatId(Number(startNum) + index);
@@ -233,6 +265,7 @@ const SubAssemblyQRGenerator = () => {
         setDuplicateError("Duplicate Panel Found");
         setEmptyInputError(false);
       }
+      // ======================================= L O A D B A N K (P R I M A R Y) =======================================
     } else if (selectedSubAssemblyType === "LoadbankPrimary") {
       const Loadbanks = Array.from({ length: numQR }, (_, index) => {
         const newLoadbankId = formatId(Number(startNum) + index);
@@ -265,6 +298,7 @@ const SubAssemblyQRGenerator = () => {
         setDuplicateError("Duplicate Loadbank Found");
         setEmptyInputError(false);
       }
+      // ======================================= L O A D B A N K (C A T C H E R) =======================================
     } else if (selectedSubAssemblyType === "LoadbankCatcher") {
       const Loadbanks = Array.from({ length: numQR }, (_, index) => {
         const newLoadbankId = formatId(Number(startNum) + index);
@@ -299,6 +333,7 @@ const SubAssemblyQRGenerator = () => {
         setDuplicateError("Duplicate Loadbank Found");
         setEmptyInputError(false);
       }
+      // ======================================= M C C B (P R I M A R Y) =======================================
     } else if (selectedSubAssemblyType === "MCCBPrimary") {
       const MCCBs = Array.from({ length: numQR }, (_, index) => {
         const newMCCBId = formatId(Number(startNum) + index);
@@ -333,6 +368,7 @@ const SubAssemblyQRGenerator = () => {
         setDuplicateError("Duplicate MCCB Panel Found");
         setEmptyInputError(false);
       }
+      // ======================================= M C C B (C A T C H E R) =======================================
     } else if (selectedSubAssemblyType === "MCCBCatcher") {
       const MCCBs = Array.from({ length: numQR }, (_, index) => {
         const newMCCBId = formatId(Number(startNum) + index);
@@ -355,6 +391,41 @@ const SubAssemblyQRGenerator = () => {
           const newQRCodes = response.data.map((qrcode, index) => ({
             ...qrcode,
             MCCBId: `MCCBPAN${formatId(Number(startNum) + index)}-C`,
+          }));
+          return newQRCodes;
+        });
+
+        setQRGeneratedStatus(true);
+        setShowExpectedMCCBCatcherRange(false);
+        setEmptyInputError(false);
+      } catch (error) {
+        console.error("Error generating MCCB:", error.message);
+        setDuplicateError("Duplicate MCCB Panel Found");
+        setEmptyInputError(false);
+      }
+      // ======================================= C T I N T E R F A C E (L E F T) =======================================
+    } else if (selectedSubAssemblyType === "LeftCTInterface") {
+      const LeftCTInterfaces = Array.from({ length: numQR }, (_, index) => {
+        const newCTInterfaceId = formatId(Number(startNum) + index);
+        return {
+          link: `${linkFormat}${applicationPortNumber}/Dashboard/CTInterface/CT${newCTInterfaceId}L-P`,
+          generatedDate: moment()
+            .tz("Australia/Sydney")
+            .format("YYYY-MM-DD HH:mm:ss"),
+          CTId: `CT${newCTInterfaceId}L-P`,
+        };
+      });
+
+      try {
+        const response = await axios.post(generateLeftCTInterface_API, {
+          LeftCTInterfaces,
+        });
+        console.log(response.data);
+
+        setQRcode(() => {
+          const newQRCodes = response.data.map((qrcode, index) => ({
+            ...qrcode,
+            CTId: `CT${formatId(Number(startNum) + index)}L-P`,
           }));
           return newQRCodes;
         });
@@ -399,7 +470,11 @@ const SubAssemblyQRGenerator = () => {
           ? code.loadbankId
           : selectedSubAssemblyType === "MCCBPrimary"
           ? code.MCCBId
-          : code.MCCBId;
+          : selectedSubAssemblyType === "MCCBCatcher"
+          ? code.MCCBId
+          : selectedSubAssemblyType === "LeftCTInterface"
+          ? code.CTId
+          : code.CTId;
       const qrCodeElement = document.getElementById(`qrcode-${id}`);
       const qrCodeCanvas = await html2canvas(qrCodeElement, {
         width: 512,
@@ -426,14 +501,16 @@ const SubAssemblyQRGenerator = () => {
       a.href = url;
       a.download =
         selectedSubAssemblyType === "Panel"
-          ? "Panel"
+          ? "Panel "
           : selectedSubAssemblyType === "LoadbankPrimary"
-          ? "Loadbank (Primary)"
+          ? "Loadbank (Primary) "
           : selectedSubAssemblyType === "LoadbankCatcher"
-          ? "Loadbank (Catcher)"
+          ? "Loadbank (Catcher) "
           : selectedSubAssemblyType === "MCCBPrimary"
-          ? "MCCB Panel (Primary)"
-          : "MCCB Panel (Catcher)";
+          ? "MCCB Panel (Primary) "
+          : selectedSubAssemblyType === "MCCBCatcher"
+          ? "MCCB Panel (Catcher) "
+          : "CT Interface (Left)";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -461,6 +538,9 @@ const SubAssemblyQRGenerator = () => {
     } else if (currentUrl.includes("MCCBCatcher")) {
       // Set the selected value of the dropdown to "Loadbank"
       setSelectedSubAssemblyType("MCCBCatcher");
+    } else if (currentUrl.includes("CTInterfaceLeft")) {
+      // Set the selected value of the dropdown to "LeftCTInterface"
+      setSelectedSubAssemblyType("LeftCTInterface");
     }
   }, []);
 
@@ -508,6 +588,7 @@ const SubAssemblyQRGenerator = () => {
               <option value="LoadbankCatcher">Loadbank (Catcher)</option>
               <option value="MCCBPrimary">MCCB Panel (Primary)</option>
               <option value="MCCBCatcher">MCCB Panel (Catcher)</option>
+              <option value="LeftCTInterface">CT Interface (Left)</option>
             </select>
             {selectedSubAssemblyType && (
               <div className="mt-5">
@@ -525,7 +606,9 @@ const SubAssemblyQRGenerator = () => {
                       ? "Loadbank (Catcher) "
                       : selectedSubAssemblyType === "MCCBPrimary"
                       ? "MCCB Panel (Primary) "
-                      : "MCCB Panel (Catcher) "}
+                      : selectedSubAssemblyType === "MCCBCatcher"
+                      ? "MCCB Panel (Catcher) "
+                      : "CT Interface (Left) "}
                     Number
                   </label>
                   <input
@@ -547,8 +630,12 @@ const SubAssemblyQRGenerator = () => {
                       : selectedSubAssemblyType === "LoadbankPrimary"
                       ? "Loadbank (Primary) "
                       : selectedSubAssemblyType === "LoadbankCatcher"
-                      ? "Loadbank (Catcher)"
-                      : "MCCB Panel (Primary) "}
+                      ? "Loadbank (Catcher) "
+                      : selectedSubAssemblyType === "MCCBPrimary"
+                      ? "MCCB Panel (Primary) "
+                      : selectedSubAssemblyType === "MCCBCatcher"
+                      ? "MCCB Panel (Catcher) "
+                      : "CT Interface (Left) "}
                     QR
                   </label>
                   <input
@@ -608,6 +695,15 @@ const SubAssemblyQRGenerator = () => {
                       </p>
                     </div>
                   )}
+                {selectedSubAssemblyType === "LeftCTInterface" &&
+                  showExpectedLeftCTInterfaceRange &&
+                  expectedLeftCTInterfaceRange && (
+                    <div className="flex justify-start">
+                      <p className="mt-2 font-black p-1 text-white bg-secondary text-xs rounded-full pl-2 pr-2">
+                        {expectedLeftCTInterfaceRange}
+                      </p>
+                    </div>
+                  )}
               </div>
             )}
 
@@ -638,6 +734,7 @@ const SubAssemblyQRGenerator = () => {
             </div>
           </div>
 
+          {/* ================================ P A N E L  ================================ */}
           {selectedSubAssemblyType === "Panel" && (
             <div className="flex justify-center flex-wrap mt-5 rounded-xl">
               {qrCode.map((code, index) => (
@@ -685,7 +782,7 @@ const SubAssemblyQRGenerator = () => {
               ))}
             </div>
           )}
-
+          {/* ================================ L O A D B A N K (P R I M A R Y)  ================================ */}
           {selectedSubAssemblyType === "LoadbankPrimary" && (
             <div className="flex justify-center flex-wrap mt-5 rounded-xl">
               {qrCode.map((code, index) => (
@@ -739,7 +836,7 @@ const SubAssemblyQRGenerator = () => {
               ))}
             </div>
           )}
-
+          {/* ================================ L O A D B A N K (C A T C H E R)  ================================ */}
           {selectedSubAssemblyType === "LoadbankCatcher" && (
             <div className="flex justify-center flex-wrap mt-5 rounded-xl">
               {qrCode.map((code, index) => (
@@ -793,7 +890,7 @@ const SubAssemblyQRGenerator = () => {
               ))}
             </div>
           )}
-
+          {/* ================================ M C C B (P R I M A R Y)  ================================ */}
           {selectedSubAssemblyType === "MCCBPrimary" && (
             <div className="flex justify-center flex-wrap mt-5 rounded-xl">
               {qrCode.map((code, index) => (
@@ -847,7 +944,7 @@ const SubAssemblyQRGenerator = () => {
               ))}
             </div>
           )}
-
+          {/* ================================ M C C B (C A T C H E R)  ================================ */}
           {selectedSubAssemblyType === "MCCBCatcher" && (
             <div className="flex justify-center flex-wrap mt-5 rounded-xl">
               {qrCode.map((code, index) => (
@@ -896,6 +993,64 @@ const SubAssemblyQRGenerator = () => {
                     >
                       Download
                     </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {/* ================================ C T I N T E R F A C E (L E F T)  ================================ */}
+          {selectedSubAssemblyType === "LeftCTInterface" && (
+            <div className="flex justify-center flex-wrap mt-5 rounded-xl">
+              {qrCode.map((code, index) => (
+                <div
+                  key={index}
+                  className="p-5 shadow-xl rounded-lg m-5 bg-white"
+                  style={{
+                    color: "#043f9d",
+                    fontFamily: "Avenir, sans-serif",
+                    fontSize: "20px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                  }}
+                >
+                  <div>
+                    <div id={`qrcode-${code.CTId}`}>
+                      <ReactQRCode
+                        value={JSON.stringify({
+                          link: code.link,
+                          LeftCTInterfaceId: code.CTId,
+                        })}
+                        size={512}
+                        imageSettings={{
+                          src: logo,
+                          excavate: true,
+                          width: 60,
+                          height: 35,
+                        }}
+                      />
+                      <div className="mb-5">
+                        CT Interface ID: {code.CTId}{" "}
+                        <span className="text-red-500 ml-1 mr-1 font-black">
+                          {" "}
+                          (Left)
+                        </span>
+                      </div>
+                    </div>
+
+                    <img
+                      src={imageData[code.CTId]}
+                      alt={`Converted ${code.CTId}`}
+                      style={{ display: "none", margin: "10px auto" }}
+                    />
+
+                    <div className="mt-5 flex items-center justify-center">
+                      <button
+                        className="bg-signature hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded "
+                        onClick={() => handleDownload(code.CTId)}
+                      >
+                        Download
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}

@@ -175,6 +175,41 @@ const CatcherMCCBSchema = new mongoose.Schema(
   }
 );
 
+const CTInterfaceLeftSchema = new mongoose.Schema(
+  {
+    link: {
+      required: true,
+      type: String,
+      unique: true,
+    },
+    generatedDate: {
+      type: String,
+      // required: true,
+    },
+    CTId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    allocatedDate: {
+      type: String,
+    },
+    isAllocated: {
+      type: Boolean,
+      default: false,
+    },
+    components: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ComponentModel",
+      },
+    ],
+  },
+  {
+    collection: "leftCTInterface",
+  }
+);
+
 // Export both models
 module.exports = {
   LoadbankModel: mongoose.model("LoadbankModel", LoadbankSchema),
@@ -185,4 +220,8 @@ module.exports = {
   PanelModel: mongoose.model("PanelModel", PanelSchema),
   PrimaryMCCBModel: mongoose.model("PrimaryMCCBModel", PrimaryMCCBSchema),
   CatcherMCCBModel: mongoose.model("CatcherMCCBModel", CatcherMCCBSchema),
+  CTInterfaceLeftModel: mongoose.model(
+    "LeftCTInterfaceModel",
+    CTInterfaceLeftSchema
+  ),
 };

@@ -45,12 +45,14 @@ import DashboardPanel from "../../containers/Dashboard/DashboardPanel";
 import DashboardLoadbank from "../../containers/Dashboard/DashboardLoadbank";
 import DashboardComponent from "../../containers/Dashboard/DashboardComponent";
 import DashboardMCCB from "../../containers/Dashboard/DashboardMCCB";
+import DashboardCTInterface from "../../containers/Dashboard/DashboardCTInterface";
 import AllocateComponents from "../../containers/Allocate/AllocateComponents";
 import Components from "../../containers/Component/Component";
 import LoadbankPrimary from "../../containers/SubAssembly/Loadbank/LoadbankPrimary";
 import LoadbankCatcher from "../../containers/SubAssembly/Loadbank/LoadbankCatcher";
 import MCCBPrimary from "../../containers/SubAssembly/MCCB/MCCBPrimary";
 import MCCBCatcher from "../../containers/SubAssembly/MCCB/MCCBCatcher";
+import CTInterfaceLeft from "../../containers/SubAssembly/CTInterface/CTInterfaceLeft";
 
 const drawerWidth = 200;
 
@@ -428,6 +430,11 @@ const NavBar = () => {
                   to="/MCCBCatcher"
                   primary="MCCB Panel (Catcher)"
                 />
+
+                <DropdownMenuItem
+                  to="/CTInterfaceLeft"
+                  primary="CT Interface Left"
+                />
               </Menu>
 
               <ListItem disablePadding sx={{ display: "block" }}>
@@ -546,6 +553,11 @@ const NavBar = () => {
                 path="Dashboard/MCCB/:MCCBId"
                 element={<DashboardMCCB />}
               />
+
+              <Route
+                path="Dashboard/CTInterface/:CTId"
+                element={<DashboardCTInterface />}
+              />
               {/* <Route
                 path="/WorkOrderQRGenerator"
                 element={<WorkOrderGenerator />}
@@ -568,6 +580,7 @@ const NavBar = () => {
               <Route path="/LoadbankCatcher" element={<LoadbankCatcher />} />
               <Route path="/MCCBPrimary" element={<MCCBPrimary />} />
               <Route path="/MCCBCatcher" element={<MCCBCatcher />} />
+              <Route path="/CTInterfaceLeft" element={<CTInterfaceLeft />} />
             </Routes>
           </Box>
         </Box>

@@ -75,6 +75,10 @@ const Allocate = () => {
         subAssemblyInputValue
       );
 
+      const isCTInterfaceLeftPattern = /^CT\d{6}L-P$/.test(
+        subAssemblyInputValue
+      );
+
       if (isPanelPattern) {
         setShowSubAssemblyInput(subAssemblyInputValue);
         setDetectedType("Panel");
@@ -94,6 +98,10 @@ const Allocate = () => {
       } else if (isMCCBCatcherPattern) {
         setShowSubAssemblyInput(subAssemblyInputValue);
         setDetectedType("MCCB Panel (Catcher)");
+        setWrongSubAssemblyError(false);
+      } else if (isCTInterfaceLeftPattern) {
+        setShowSubAssemblyInput(subAssemblyInputValue);
+        setDetectedType("CT Interface (Left)");
         setWrongSubAssemblyError(false);
       } else {
         try {
@@ -118,6 +126,10 @@ const Allocate = () => {
           } else if (parsedInput.MCCBCatcherId) {
             setSubAssemblyInputValue(parsedInput.MCCBCatcherId);
             setDetectedType("MCCB Panel (Catcher)");
+            setWrongSubAssemblyError(false);
+          } else if (parsedInput.leftCTInterfaceId) {
+            setSubAssemblyInputValue(parsedInput.leftCTInterfaceId);
+            setDetectedType("CT Interface (Left)");
             setWrongSubAssemblyError(false);
           } else {
             setWrongSubAssemblyError(true);

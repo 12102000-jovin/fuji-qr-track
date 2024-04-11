@@ -12,6 +12,7 @@ const {
   LoadbankCatcherModel,
   PrimaryMCCBModel,
   CatcherMCCBModel,
+  CTInterfaceLeftModel,
 } = require("../models/SubAssemblyModel");
 
 // Generate PDC API
@@ -147,6 +148,15 @@ router.delete("/deletePDC/:pdcId", async (req, res) => {
       {
         _id: {
           $in: [...pdcToDelete.catcherMCCBs],
+        },
+      },
+      { $set: { isAllocated: false, allocatedDate: null } }
+    );
+
+    await CTInterfaceLeftModel.updateMany(
+      {
+        _id: {
+          $in: [...pdcToDelete.leftCTInterfaces],
         },
       },
       { $set: { isAllocated: false, allocatedDate: null } }

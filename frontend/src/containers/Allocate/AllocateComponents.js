@@ -4,6 +4,7 @@ import LoadbankComponentForm from "../../components/ComponentForms/LoadbankCompo
 import LoadbankCatcherComponentForm from "../../components/ComponentForms/LoadbankCatcherComponentForm";
 import MCCBPrimaryComponentForm from "../../components/ComponentForms/MCCBPrimaryComponentForm";
 import MCCBCatcherComponentForm from "../../components/ComponentForms/MCCBCatcherComponentForm";
+import LeftCTInterfaceComponentForm from "../../components/ComponentForms/LeftCTInterfaceComponentForm";
 
 const AllocateComponents = () => {
   const [inputSubAssemblyValue, setInputSubAssemblyValue] = useState("");
@@ -12,6 +13,7 @@ const AllocateComponents = () => {
   const [showLoadbankCatcherForm, setShowLoadbankCatcherForm] = useState(false);
   const [showMCCBPrimaryForm, setShowMCCBPrimaryForm] = useState(false);
   const [showMCCBCatcherForm, setShowMCCBCatcherForm] = useState(false);
+  const [showLeftCTInterfaceForm, setShowLeftCTInterfaceForm] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const subAssemblyInputRef = useRef(null);
@@ -34,6 +36,9 @@ const AllocateComponents = () => {
       const isMCCBCatcherPattern = /^MCCBPAN\d{6}-C$/.test(
         inputSubAssemblyValue
       );
+      const isCTInterfaceLeftPattern = /^CT\d{6}L-P$/.test(
+        inputSubAssemblyValue
+      );
 
       if (isPanelPattern) {
         setShowPanelForm(true);
@@ -54,6 +59,10 @@ const AllocateComponents = () => {
       } else if (isMCCBCatcherPattern) {
         setShowPanelForm(false);
         setShowMCCBCatcherForm(true);
+        setErrorMessage("");
+      } else if (isCTInterfaceLeftPattern) {
+        setShowPanelForm(false);
+        setShowLeftCTInterfaceForm(true);
         setErrorMessage("");
       } else {
         try {
@@ -94,6 +103,14 @@ const AllocateComponents = () => {
             setInputSubAssemblyValue(parsedInput.MCCBCatcherId);
             setShowPanelForm(false);
             setShowMCCBCatcherForm(true);
+            setErrorMessage("");
+          } else if (
+            parsedInput.leftCTInterfaceId &&
+            /^CT\d{6}L-P$/.test(parsedInput.leftCTInterfaceId)
+          ) {
+            setInputSubAssemblyValue(parsedInput.leftCTInterfaceId);
+            setShowPanelForm(false);
+            setShowLeftCTInterfaceForm(true);
             setErrorMessage("");
           } else {
             setErrorMessage("Invalid Sub-Assembly QR");
@@ -202,6 +219,9 @@ const AllocateComponents = () => {
           )}
           {showMCCBCatcherForm && (
             <MCCBCatcherComponentForm MCCBId={inputSubAssemblyValue} />
+          )}
+          {showLeftCTInterfaceForm && (
+            <LeftCTInterfaceComponentForm CTId={inputSubAssemblyValue} />
           )}
         </div>
       </div>

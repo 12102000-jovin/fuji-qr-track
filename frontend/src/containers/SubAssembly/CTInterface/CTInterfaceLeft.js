@@ -13,7 +13,7 @@ import ReactQRCode from "qrcode.react";
 import html2canvas from "html2canvas";
 import SubAssemblyQRGenerator from "../../../components/SubAssemblyQRGenerator/SubAssemblyQRGenerator";
 import SubAssemblyCustomQRGenerator from "../../../components/SubAssemblyQRGenerator/SubAssemblyCustomQRGenerator";
-import EditLoadbank from "./EditLoadbank";
+import EditLeftCTInterface from "./EditLeftCTInterface";
 import JSZip from "jszip";
 
 import {
@@ -33,13 +33,18 @@ import {
   Pagination,
 } from "@mui/material";
 
-const LoadBank = () => {
+const CTInterfaceLeft = () => {
+  const fetchLeftCTInterfaceData_API =
+    "http://localhost:3001/SubAssembly/CTInterfaceLeft/getAllCTInterface";
+
+  const deleteCTInterface_API =
+    "http://localhost:3001/SubAssembly/CTInterfaceLeft/deleteCTInterfaceLeft/";
+
+  // Ref
+  const captureRef = useRef(null);
+
   const [searchQuery, setSearchQuery] = useState("");
-
-  const [qrCodeData, setQrCodeData] = useState(null);
-  const [openQRModal, setOpenQRModal] = useState(false);
-
-  const [modalLoadbankID, setModalLoadbankID] = useState(null);
+  const [leftCTInterfaceData, setLeftCTInterfaceData] = useState([]);
 
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
@@ -47,42 +52,97 @@ const LoadBank = () => {
   const [selectedRowsQRCodes, setSelectedRowsQRCodes] = useState([]);
   const [openSelectedQRModal, setOpenSelectedQRModal] = useState(false);
 
+  const [filteredCTInterfaces, setFilteredCTInterfaces] = useState([]);
+
   const [sortOrder, setSortOrder] = useState("DESC");
 
-  const [loadbankData, setLoadbankData] = useState([]);
+  const [qrCodeData, setQrCodeData] = useState(null);
+  const [openQRModal, setOpenQRModal] = useState(false);
+  const [modalCTID, setModalCTID] = useState(null);
 
-  const [filteredLoadbanks, setFilteredLoadbanks] = useState([]);
+  const [openAddCTInterfaceModal, setOpenCTInterfaceModal] = useState(false);
 
-  const [openAddLoadbankModal, setOpenLoadbankModal] = useState(false);
-
-  const [showLoadbankCustomQRGenerator, setShowLoadbankCustomQRGenerator] =
+  const [deleteCTInterfaceModalState, setDeleteCTInterfaceModalState] =
     useState(false);
 
-  const [deleteLoadbankModalState, setDeleteLoadbankModalState] =
+  const [editCTInterfaceModalState, setEditCTInterfaceModalState] =
     useState(false);
+  const [CTIdToEdit, setCTIdToEdit] = useState("");
 
-  const [editLoadbankModalState, setEditLoadbankModalState] = useState(false);
-  const [loadbankIdToEdit, setLoadbankIdToEdit] = useState("");
+  const [
+    showCTInterfaceCustomQRGenerator,
+    setShowCTInterfaceCustomQRGenerator,
+  ] = useState(false);
+
+  const handleFormSubmit = (event) => {
+    event.preventDefault();
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
 
   // Pagination
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   useEffect(() => {
-    fetchLoadbankData();
+    fetchLeftCTInterfaceData();
   }, [page, rowsPerPage]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [rowsPerPage, searchQuery]);
+
+  useEffect(() => {
+    fetchLeftCTInterfaceData();
+  }, []);
+
+  useEffect(() => {
+    // Update filteredPDCs whenever CT Interface Data or searchQuery changes
+    const searchQueryWithoutSpaces = searchQuery
+      .replace(/\s/g, "")
+      .toLowerCase();
+
+    const words = searchQueryWithoutSpaces.split(/\s+/);
+
+    const filteredData = leftCTInterfaceData.filter((row) => {
+      const leftCTInterfaceIdWithoutSpaces = row.CTId.replace(
+        /\s/g,
+        ""
+      ).toLowerCase();
+      const generatedDateWithoutSpaces = moment(row.generatedDate)
+        .tz("Australia/Sydney")
+        .format("DD MMMM YYYY")
+        .replace(/\s/g, "")
+        .toLowerCase();
+
+      const matchleftCTInterfaceId = words.every((word) =>
+        leftCTInterfaceIdWithoutSpaces.includes(word)
+      );
+
+      const matchGeneratedDate = words.every((word) =>
+        generatedDateWithoutSpaces.includes(word)
+      );
+
+      return matchleftCTInterfaceId || matchGeneratedDate;
+    });
+
+    setFilteredCTInterfaces(filteredData);
+  }, [leftCTInterfaceData, searchQuery]);
 
   const indexOfLastRow = page * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
 
   // Filtered and sorted data
-  const sortedData = filteredLoadbanks.sort((a, b) => {
+  const sortedData = filteredCTInterfaces.sort((a, b) => {
     if (sortOrder === "DESC") {
-      return b.loadbankId.localeCompare(a.loadbankId);
+      return b.CTId.localeCompare(a.CTId);
     } else {
-      return a.loadbankId.localeCompare(b.loadbankId);
+      return a.CTId.localeCompare(b.CTId);
     }
   });
+
   const currentRows = sortedData.slice(indexOfFirstRow, indexOfLastRow);
 
   const handleChangePage = (event, newPage) => {
@@ -94,100 +154,50 @@ const LoadBank = () => {
     setPage(1);
   };
 
-  useEffect(() => {
-    setPage(1);
-  }, [rowsPerPage, searchQuery]);
-
-  // Ref
-  const captureRef = useRef(null);
-
-  const fetchLoadbankData_API =
-    "http://localhost:3001/SubAssembly/LoadbankPrimary/getAllLoadbank";
-
-  const deleteLoadbank_API =
-    "http://localhost:3001/SubAssembly/Loadbank/deleteLoadbank/";
-
-  useEffect(() => {
-    fetchLoadbankData();
-  }, []);
-
-  useEffect(() => {
-    // Update filteredPDCs whenever loadbankData or searchQuery changes
-    const searchQueryWithoutSpaces = searchQuery
-      .replace(/\s/g, "")
-      .toLowerCase();
-
-    const words = searchQueryWithoutSpaces.split(/\s+/);
-
-    const filteredData = loadbankData.filter((row) => {
-      const loadbankIdWithoutSpaces = row.loadbankId
-        .replace(/\s/g, "")
-        .toLowerCase();
-      const generatedDateWithoutSpaces = moment(row.generatedDate)
-        .tz("Australia/Sydney")
-        .format("DD MMMM YYYY")
-        .replace(/\s/g, "")
-        .toLowerCase();
-
-      const matchLoadbankId = words.every((word) =>
-        loadbankIdWithoutSpaces.includes(word)
-      );
-
-      const matchGeneratedDate = words.every((word) =>
-        generatedDateWithoutSpaces.includes(word)
-      );
-
-      return matchLoadbankId || matchGeneratedDate;
-    });
-
-    setFilteredLoadbanks(filteredData);
-  }, [loadbankData, searchQuery]);
-
-  const fetchLoadbankData = () => {
-    axios.get(`${fetchLoadbankData_API}`).then((response) => {
-      setLoadbankData(response.data);
+  const fetchLeftCTInterfaceData = () => {
+    axios.get(`${fetchLeftCTInterfaceData_API}`).then((response) => {
+      setLeftCTInterfaceData(response.data);
     });
   };
 
-  const handleFormSubmit = (event) => {
-    event.preventDefault();
-  };
-
-  const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value);
-  };
-
-  const handleAddLoadbankCloseModal = () => {
-    setOpenLoadbankModal(false);
-    fetchLoadbankData();
-  };
-
-  const handleChangeComponent = () => {
-    setShowLoadbankCustomQRGenerator(!showLoadbankCustomQRGenerator);
+  const handleDownloadSelectedRowQR = () => {
+    const qrCodes = selectedRows
+      .map((rowId) => {
+        const selectedRow = leftCTInterfaceData.find(
+          (row) => row._id === rowId
+        );
+        if (selectedRow) {
+          return {
+            CTId: selectedRow.CTId,
+            qrCodeData: JSON.stringify({
+              link: selectedRow.link,
+              workOrderId: selectedRow.workOrderId,
+            }),
+          };
+        }
+        return null;
+      })
+      .filter(Boolean);
+    setSelectedRowsQRCodes(qrCodes);
+    setOpenSelectedQRModal(true);
   };
 
   const handleSelectAll = () => {
     if (selectAll) {
       setSelectedRows([]);
     } else {
-      const allRowIds = filteredLoadbanks.map((row) => row._id);
+      const allRowIds = filteredCTInterfaces.map((row) => row._id);
       setSelectedRows(allRowIds);
     }
     setSelectAll(!selectAll);
 
     // Update the selectedRowsCount state
-    setSelectedRowsCount(selectAll ? "" : filteredLoadbanks.length);
+    setSelectedRowsCount(selectAll ? "" : filteredCTInterfaces.length);
   };
 
-  const showQRCodes = (data, row) => {
-    setQrCodeData(
-      JSON.stringify({
-        link: data.link,
-        loadbankPrimaryId: data.loadbankId,
-      })
-    );
-    setModalLoadbankID(data.loadbankId);
-    setOpenQRModal(true);
+  const handleSortCTId = () => {
+    const newSortOder = sortOrder === "DESC" ? "ASC" : "DESC";
+    setSortOrder(newSortOder);
   };
 
   const handleSelectRow = (rowId) => {
@@ -202,11 +212,29 @@ const LoadBank = () => {
     );
   };
 
+  const showQRCodes = (data, row) => {
+    setQrCodeData(
+      JSON.stringify({
+        link: data.link,
+        leftCTInterfaceId: data.CTId,
+      })
+    );
+    setModalCTID(data.CTId);
+    setOpenQRModal(true);
+  };
+
+  const handleCTInterfaceDashboard = (CTId) => {
+    window.open(
+      `http://localhost:3000/Dashboard/CTInterface/${CTId}`,
+      "_blank"
+    );
+  };
+
   const handleCloseQRModal = () => {
     setOpenQRModal(false);
   };
 
-  const handleDownload = (loadbankID) => {
+  const handleDownload = (CTID) => {
     const captureOptions = {
       width: 512,
       height: 565,
@@ -215,7 +243,7 @@ const LoadBank = () => {
     html2canvas(captureRef.current, captureOptions)
       .then((canvas) => {
         const imgData = canvas.toDataURL("image/png");
-        const fileName = `${loadbankID}.png`;
+        const fileName = `${CTID}.png`;
         const a = document.createElement("a");
         a.href = imgData;
         a.download = fileName;
@@ -226,68 +254,49 @@ const LoadBank = () => {
       });
   };
 
-  const handleAddLoadbankModal = () => {
-    setOpenLoadbankModal(true);
-    setShowLoadbankCustomQRGenerator(false);
+  const handleAddCTInterfaceModal = () => {
+    setOpenCTInterfaceModal(true);
+    setShowCTInterfaceCustomQRGenerator(false);
   };
 
-  const handleLoadbankDashboard = (loadbankId) => {
-    window.open(
-      `http://localhost:3000/Dashboard/Loadbank/${loadbankId}`,
-      "_blank"
-    );
+  const handleAddCTInterfaceCloseModal = () => {
+    setOpenCTInterfaceModal(false);
+    fetchLeftCTInterfaceData();
   };
 
-  const handleCloseDeleteLoadbankModal = () => {
-    setDeleteLoadbankModalState(false);
+  const handleChangeComponent = () => {
+    setShowCTInterfaceCustomQRGenerator(!showCTInterfaceCustomQRGenerator);
   };
 
-  const handleOpenDeleteConfirmationModal = (loadbankId) => {
-    setDeleteLoadbankModalState(true);
-    setModalLoadbankID(loadbankId);
+  const handleCloseDeleteCTInterfaceModal = () => {
+    setDeleteCTInterfaceModalState(false);
   };
 
-  const handleDeleteLoadbank = async (loadbankId) => {
-    console.log(loadbankId);
+  const handleDeleteCTInterface = async (CTId) => {
+    console.log(CTId);
     try {
-      const response = await axios.delete(`${deleteLoadbank_API}${loadbankId}`);
+      const response = await axios.delete(`${deleteCTInterface_API}${CTId}`);
 
       if (response.status === 200) {
-        console.log("Loadbank Deleted Successfully");
-        fetchLoadbankData();
-        setDeleteLoadbankModalState(false);
+        console.log("CTInterface Deleted Successfully");
+        fetchLeftCTInterfaceData();
+        setDeleteCTInterfaceModalState(false);
       } else {
-        console.log("Error deleting loadbank:", response.data.message);
+        console.log("Error deleting CT Interface:", response.data.message);
       }
     } catch (error) {
-      console.error("Error deleting loadbank", error);
+      console.error("Error deleting CT Interface", error);
     }
   };
 
-  const handleOpenEditModal = (loadbankId) => {
-    setEditLoadbankModalState(true);
-    setLoadbankIdToEdit(loadbankId);
-    console.log(editLoadbankModalState);
+  const handleOpenDeleteConfirmationModal = (CTId) => {
+    setDeleteCTInterfaceModalState(true);
+    setModalCTID(CTId);
   };
 
-  const handleDownloadSelectedRowQR = () => {
-    const qrCodes = selectedRows
-      .map((rowId) => {
-        const selectedRow = loadbankData.find((row) => row._id === rowId);
-        if (selectedRow) {
-          return {
-            loadbankId: selectedRow.loadbankId,
-            qrCodeData: JSON.stringify({
-              link: selectedRow.link,
-              workOrderId: selectedRow.workOrderId,
-            }),
-          };
-        }
-        return null;
-      })
-      .filter(Boolean);
-    setSelectedRowsQRCodes(qrCodes);
-    setOpenSelectedQRModal(true);
+  const handleOpenEditModal = (CTId) => {
+    setEditCTInterfaceModalState(true);
+    setCTIdToEdit(CTId);
   };
 
   const handleDownloadAllSelectedQR = async () => {
@@ -295,7 +304,7 @@ const LoadBank = () => {
 
     const promises = selectedRowsQRCodes.map(async (code) => {
       const qrCodeElement = document.getElementById(
-        `selectedQRCode-${code.loadbankId}`
+        `selectedQRCode-${code.CTId}`
       );
       const qrCodeCanvas = await html2canvas(qrCodeElement, {
         width: 512,
@@ -303,7 +312,7 @@ const LoadBank = () => {
       });
 
       return {
-        name: `${code.loadbankId}.png`,
+        name: `${code.CTId}.png`,
         data: qrCodeCanvas
           .toDataURL("image/png")
           .replace(/^data:image\/(png|jpg);base64,/, ""),
@@ -319,7 +328,7 @@ const LoadBank = () => {
       const a = document.createElement("a");
       const url = URL.createObjectURL(content);
       a.href = url;
-      a.download = `Selected-Loadbank`;
+      a.download = `Selected-CTInterface(Left)`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -327,20 +336,16 @@ const LoadBank = () => {
     });
   };
 
-  const handleSortLoadbankId = () => {
-    const newSortOder = sortOrder === "DESC" ? "ASC" : "DESC";
-    setSortOrder(newSortOder);
-  };
-
   return (
     <div>
+      {" "}
       <div className="flex justify-center bg-background border-none">
         <div className="w-3/4 p-6 shadow-lg bg-white rounded-md my-5">
           <p className="text-4xl text-signature font-black mb-5 mt-3">
             <div className="flex items-center justify-center">
-              <p>Loadbank</p>
-              <span className="text-xl text-white bg-red-500 py-2 px-3 font-black rounded-full ml-2">
-                Primary
+              <p>CT Interface</p>
+              <span className="text-xl text-white bg-blue-400 py-2 px-3 font-black rounded-full ml-2">
+                Left
               </span>
             </div>
           </p>
@@ -367,7 +372,7 @@ const LoadBank = () => {
                   type="search"
                   id="default-search"
                   className="block h-12 p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 w-1/3"
-                  placeholder="Search Loadbank"
+                  placeholder="Search CT Interface"
                   required
                   onChange={handleSearchChange}
                   value={searchQuery}
@@ -433,12 +438,12 @@ const LoadBank = () => {
                     }}
                   >
                     <div className="flex items-center justify-center">
-                      <p onClick={handleSortLoadbankId}> Loadbank ID</p>
+                      <p onClick={handleSortCTId}> CT ID</p>
                       <span>
                         <FaSort
                           fontSize="small"
                           className="m-2"
-                          onClick={handleSortLoadbankId}
+                          onClick={handleSortCTId}
                         />
                       </span>
                     </div>
@@ -493,7 +498,7 @@ const LoadBank = () => {
                           fontWeight: "bold",
                         }}
                       >
-                        {row.loadbankId}
+                        {row.CTId}
                       </TableCell>
                       <TableCell align="center">
                         {moment(row.generatedDate)
@@ -523,7 +528,7 @@ const LoadBank = () => {
                           <DeleteIcon
                             fontSize="small"
                             onClick={() => {
-                              handleOpenDeleteConfirmationModal(row.loadbankId);
+                              handleOpenDeleteConfirmationModal(row.CTId);
                             }}
                           />
                         </IconButton>
@@ -534,7 +539,7 @@ const LoadBank = () => {
                         >
                           <EditIcon
                             fontSize="small"
-                            onClick={() => handleOpenEditModal(row.loadbankId)}
+                            onClick={() => handleOpenEditModal(row.CTId)}
                           />
                         </IconButton>
                         <IconButton
@@ -552,9 +557,7 @@ const LoadBank = () => {
                         >
                           <LaunchIcon
                             fontSize="small"
-                            onClick={() =>
-                              handleLoadbankDashboard(row.loadbankId)
-                            }
+                            onClick={() => handleCTInterfaceDashboard(row.CTId)}
                           />
                         </IconButton>
                       </TableCell>
@@ -595,10 +598,10 @@ const LoadBank = () => {
                         marginTop: "5px",
                       }}
                     >
-                      Loadbank ID: {modalLoadbankID}
+                      CT Interface ID: {modalCTID}
                       <span className="text-red-500 ml-1 mr-1 font-black">
                         {" "}
-                        (Primary)
+                        (Left)
                       </span>
                     </p>
                   </div>
@@ -606,7 +609,7 @@ const LoadBank = () => {
                 <DialogActions>
                   <button
                     className="bg-signature hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded "
-                    onClick={() => handleDownload(modalLoadbankID)}
+                    onClick={() => handleDownload(modalCTID)}
                   >
                     Download
                   </button>
@@ -622,7 +625,7 @@ const LoadBank = () => {
           </div>
           <div className="flex justify-center mt-5">
             <Pagination
-              count={Math.ceil(filteredLoadbanks.length / rowsPerPage)}
+              count={Math.ceil(filteredCTInterfaces.length / rowsPerPage)}
               page={page}
               onChange={handleChangePage}
               rowsPerPageOptions={[5, 10, 15]}
@@ -646,15 +649,15 @@ const LoadBank = () => {
               backgroundColor: "#6c757d",
             },
           }}
-          onClick={handleAddLoadbankModal}
+          onClick={handleAddCTInterfaceModal}
         >
           <AddIcon sx={{ mr: 1 }} />
-          Generate Loadbank
+          Generate CT Interface
         </Fab>
       </div>
       <Dialog
-        open={openAddLoadbankModal}
-        onClose={handleAddLoadbankCloseModal}
+        open={openAddCTInterfaceModal}
+        onClose={handleAddCTInterfaceCloseModal}
         PaperProps={{
           sx: {
             borderRadius: "12px",
@@ -669,18 +672,18 @@ const LoadBank = () => {
               className="text-xs text-white font-bold bg-blue-400 p-1 pl-2 pr-2 rounded-md hover:bg-secondary hover:text-white"
               onClick={handleChangeComponent}
             >
-              {showLoadbankCustomQRGenerator === true
+              {showCTInterfaceCustomQRGenerator === true
                 ? "Increment"
                 : "Customise"}
             </button>
             <button
               className="bg-red-600 hover:bg-red-500 text-white font-semibold py-1 pl-2 pr-2 rounded generate-button"
-              onClick={handleAddLoadbankCloseModal}
+              onClick={handleAddCTInterfaceCloseModal}
             >
               <CloseIcon style={{ fontSize: "small" }} />
             </button>
           </div>
-          {showLoadbankCustomQRGenerator ? (
+          {showCTInterfaceCustomQRGenerator ? (
             <SubAssemblyCustomQRGenerator />
           ) : (
             <SubAssemblyQRGenerator />
@@ -689,8 +692,8 @@ const LoadBank = () => {
       </Dialog>
       <div>
         <Dialog
-          open={deleteLoadbankModalState}
-          onClose={handleCloseDeleteLoadbankModal}
+          open={deleteCTInterfaceModalState}
+          onClose={handleCloseDeleteCTInterfaceModal}
         >
           <DialogContent sx={{ padding: 0, minWidth: "500px" }}>
             <Divider className="h-1 bg-red-500" />
@@ -700,27 +703,26 @@ const LoadBank = () => {
               </p>
               <CloseIcon
                 className="m-2 hover:cursor-pointer hover:bg-gray-100 hover:rounded"
-                onClick={handleCloseDeleteLoadbankModal}
+                onClick={handleCloseDeleteCTInterfaceModal}
               />
             </div>
             <Divider />
             <p className="px-5 py-10">
-              Are you sure you want to delete <strong>{modalLoadbankID}</strong>
-              ?
+              Are you sure you want to delete <strong>{modalCTID}</strong>?
             </p>
             <Divider />
             <DialogActions>
               <div className="flex justify-end">
                 <button
                   className="bg-secondary text-white rounded font-semibold py-1 px-2 m-1 focus:outline-none hover:bg-gray-600"
-                  onClick={handleCloseDeleteLoadbankModal}
+                  onClick={handleCloseDeleteCTInterfaceModal}
                 >
                   Close
                 </button>
                 <button
                   className="bg-red-500 text-white rounded font-semibold py-1 px-2 m-1 focus:outline-none hover:bg-red-600"
                   onClick={() => {
-                    handleDeleteLoadbank(modalLoadbankID);
+                    handleDeleteCTInterface(modalCTID);
                   }}
                 >
                   Delete
@@ -731,13 +733,13 @@ const LoadBank = () => {
         </Dialog>
       </div>
       <div>
-        <EditLoadbank
-          open={editLoadbankModalState}
+        <EditLeftCTInterface
+          open={editCTInterfaceModalState}
           onClose={() => {
-            fetchLoadbankData();
-            setEditLoadbankModalState(false);
+            fetchLeftCTInterfaceData();
+            setEditCTInterfaceModalState(false);
           }}
-          loadbankId={loadbankIdToEdit}
+          CTId={CTIdToEdit}
         />
       </div>
       <Dialog
@@ -759,10 +761,7 @@ const LoadBank = () => {
                 key={index}
               >
                 <div className="flex flex-col justify-center items-center">
-                  <div
-                    ref={captureRef}
-                    id={`selectedQRCode-${qrCode.loadbankId}`}
-                  >
+                  <div ref={captureRef} id={`selectedQRCode-${qrCode.CTId}`}>
                     <ReactQRCode
                       value={qrCode.qrCodeData}
                       size={512}
@@ -782,10 +781,10 @@ const LoadBank = () => {
                       }}
                       className="text-signature text-center"
                     >
-                      Loadbank ID: {qrCode.loadbankId}
+                      CT Interface ID: {qrCode.CTId}
                       <span className="text-red-500 ml-1 mr-1 font-black">
                         {" "}
-                        (Primary)
+                        (Left)
                       </span>
                     </p>
                   </div>
@@ -813,4 +812,4 @@ const LoadBank = () => {
   );
 };
 
-export default LoadBank;
+export default CTInterfaceLeft;
