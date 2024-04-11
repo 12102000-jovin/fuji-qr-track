@@ -74,8 +74,10 @@ const Allocate = () => {
       const isMCCBCatcherPattern = /^MCCBPAN\d{6}-C$/.test(
         subAssemblyInputValue
       );
-
       const isCTInterfaceLeftPattern = /^CT\d{6}L-P$/.test(
+        subAssemblyInputValue
+      );
+      const isCTInterfaceRightPattern = /^CT\d{6}R-P$/.test(
         subAssemblyInputValue
       );
 
@@ -102,6 +104,10 @@ const Allocate = () => {
       } else if (isCTInterfaceLeftPattern) {
         setShowSubAssemblyInput(subAssemblyInputValue);
         setDetectedType("CT Interface (Left)");
+        setWrongSubAssemblyError(false);
+      } else if (isCTInterfaceRightPattern) {
+        setShowSubAssemblyInput(subAssemblyInputValue);
+        setDetectedType("CT Interface (Right)");
         setWrongSubAssemblyError(false);
       } else {
         try {
@@ -130,6 +136,10 @@ const Allocate = () => {
           } else if (parsedInput.leftCTInterfaceId) {
             setSubAssemblyInputValue(parsedInput.leftCTInterfaceId);
             setDetectedType("CT Interface (Left)");
+            setWrongSubAssemblyError(false);
+          } else if (parsedInput.rightCTInterfaceId) {
+            setSubAssemblyInputValue(parsedInput.rightCTInterfaceId);
+            setDetectedType("CT Interface (Right)");
             setWrongSubAssemblyError(false);
           } else {
             setWrongSubAssemblyError(true);

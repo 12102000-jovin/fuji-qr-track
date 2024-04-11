@@ -47,6 +47,14 @@ const SubAssemblyQRGenerator = () => {
     setShowExpectedLeftCTInterfaceRange,
   ] = useState(true);
 
+  const [latestRightCTInterfaceId, setLatestRightCTInterfaceId] = useState("0");
+  const [expectedRightCTInterfaceRange, setExpectedRightCTInterfaceRange] =
+    useState("");
+  const [
+    showExpectedRightCTInterfaceRange,
+    setShowExpectedRightCTInterfaceRange,
+  ] = useState(true);
+
   const [emptyInputError, setEmptyInputError] = useState(false);
   const [qrGeneratedStatus, setQRGeneratedStatus] = useState(false);
   const [qrCode, setQRcode] = useState([]);
@@ -84,6 +92,11 @@ const SubAssemblyQRGenerator = () => {
     "http://localhost:3001/SubAssembly/CTInterfaceLeft/generateSubAssembly";
   const getLatestLeftCTInterface_API =
     "http://localhost:3001/SubAssembly/CTInterfaceLeft/getLatestCTInterface";
+
+  const generateRightCTInterface_API =
+    "http://localhost:3001/SubAssembly/CTInterfaceRight/generateSubAssembly";
+  const getLatestRightCTInterface_API =
+    "http://localhost:3001/SubAssembly/CTInterfaceRight/getLatestCTInterface";
 
   // ======================================= P A N E L =======================================
   useEffect(() => {
@@ -348,6 +361,53 @@ const SubAssemblyQRGenerator = () => {
     return MCCBString.replace("CT", "").replace("L-P", "");
   };
 
+  // ==================================== C T I N T E R F A C E (R I G H T) =======================================
+  useEffect(() => {
+    fetchLatestRightCTInterface();
+  }, []);
+
+  useEffect(() => {
+    if (numQR === "1") {
+      setExpectedRightCTInterfaceRange(
+        `Expected Output: CT${formatId(
+          Number(latestRightCTInterfaceId) + 1
+        )}R-P`
+      );
+    } else if (numQR > 1 && numQR !== "1") {
+      setExpectedRightCTInterfaceRange(
+        ` Expected Output: CT${formatId(
+          Number(latestRightCTInterfaceId) + 1
+        )}R-P - CT${formatId(
+          Number(latestRightCTInterfaceId) + Number(numQR)
+        )}R-P`
+      );
+    } else {
+      setExpectedRightCTInterfaceRange("");
+    }
+  }, [numQR, latestRightCTInterfaceId]);
+
+  useEffect(() => {
+    setShowExpectedRightCTInterfaceRange(true);
+  }, [numQR]);
+
+  const fetchLatestRightCTInterface = async () => {
+    try {
+      const response = await axios.get(getLatestRightCTInterface_API);
+      const latestRightCTInterface = response.data;
+      const latestRightCTInterfaceId = extractRightCTInterfaceId(
+        latestRightCTInterface
+      );
+      setLatestRightCTInterfaceId(Number(latestRightCTInterfaceId));
+    } catch (error) {
+      console.error("Error fetching latest MCCB:", error.message);
+    }
+  };
+
+  const extractRightCTInterfaceId = (MCCBString) => {
+    // Remove "MCCB" prefix and "P" suffix from the MCCBString
+    return MCCBString.replace("CT", "").replace("R-P", "");
+  };
+
   // ==================================== S U B M I T =======================================
 
   useEffect(() => {
@@ -581,6 +641,44 @@ const SubAssemblyQRGenerator = () => {
       } catch (error) {
         console.error("Error generating CT Interface:", error.message);
       }
+      // ==================================== C T I N T E R F A C E (R I G H T) =======================================
+    } else if (selectedSubAssemblyType === "RightCTInterface") {
+      const RightCTInterfaces = Array.from({ length: numQR }, (_, index) => {
+        const newCTInterfaceId = formatId(
+          Number(latestRightCTInterfaceId + 1) + index
+        );
+        return {
+          link: `${linkFormat}${applicationPortNumber}/Dashboard/CTInterface/CT${newCTInterfaceId}R-P`,
+          generatedDate: moment()
+            .tz("Australia/Sydney")
+            .format("YYYY-MM-DD HH:mm:ss"),
+          CTId: `CT${newCTInterfaceId}R-P`,
+        };
+      });
+
+      try {
+        const response = await axios.post(generateRightCTInterface_API, {
+          RightCTInterfaces,
+        });
+        console.log(response.data);
+        fetchLatestRightCTInterface();
+
+        setQRcode(() => {
+          const newQRCodes = response.data.map((qrcode, index) => ({
+            ...qrcode,
+            CTId: `CT${formatId(
+              Number(latestRightCTInterfaceId + 1) + index
+            )}R-P`,
+          }));
+          return newQRCodes;
+        });
+
+        setQRGeneratedStatus(true);
+        setShowExpectedRightCTInterfaceRange(false);
+        setEmptyInputError(false);
+      } catch (error) {
+        console.error("Error generating CT Interface:", error.message);
+      }
     } else {
       console.log("Unvalid Type");
     }
@@ -615,6 +713,10 @@ const SubAssemblyQRGenerator = () => {
       // Set the selected value of the dropdown to "LeftCTInterface"
       setSelectedSubAssemblyType("LeftCTInterface");
       fetchLatestLeftCTInterface();
+    } else if (currentUrl.includes("CTInterfaceRight")) {
+      // Set the selected value of the dropdown to "RightCTInterface"
+      setSelectedSubAssemblyType("RightCTInterface");
+      fetchLatestRightCTInterface();
     }
   }, []);
 
@@ -649,6 +751,8 @@ const SubAssemblyQRGenerator = () => {
           ? code.MCCBId
           : selectedSubAssemblyType === "LeftCTInterface"
           ? code.CTId
+          : selectedSubAssemblyType === "RightCTInterface"
+          ? code.CTId
           : code.CTId;
 
       const qrCodeElement = document.getElementById(`qrcode-${id}`);
@@ -679,14 +783,16 @@ const SubAssemblyQRGenerator = () => {
         selectedSubAssemblyType === "Panel"
           ? "Panel "
           : selectedSubAssemblyType === "LoadbankPrimary"
-          ? "Loadbank (Primary) "
+          ? "Loadbank (Primary)"
           : selectedSubAssemblyType === "LoadbankCatcher"
-          ? "Loadbank (Catcher) "
+          ? "Loadbank (Catcher)"
           : selectedSubAssemblyType === "MCCBPrimary"
-          ? "MCCB Panel (Primary) "
+          ? "MCCB Panel (Primary)"
           : selectedSubAssemblyType === "MCCBCatcher"
-          ? "MCCB Panel (Catcher) "
-          : "CT Interface (Left)";
+          ? "MCCB Panel (Catcher)"
+          : selectedSubAssemblyType === "LeftCTInterface"
+          ? "CT Interface (Left)"
+          : "CT Interface (Right)";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -732,6 +838,7 @@ const SubAssemblyQRGenerator = () => {
               <option value="MCCBPrimary">MCCB Panel (Primary)</option>
               <option value="MCCBCatcher">MCCB Panel (Catcher)</option>
               <option value="LeftCTInterface">CT Interface (Left)</option>
+              <option value="RightCTInterface">CT Interface (Right)</option>
             </select>
             {selectedSubAssemblyType && (
               <div className="mt-5">
@@ -750,7 +857,9 @@ const SubAssemblyQRGenerator = () => {
                     ? "MCCB Panel (Primary) "
                     : selectedSubAssemblyType === "MCCBCatcher"
                     ? "MCCB Panel (Catcher) "
-                    : "CT Interface (Left) "}
+                    : selectedSubAssemblyType === "LeftCTInterface"
+                    ? "CT Interface (Left) "
+                    : "CT Interface (Right) "}
                   QR
                   <div className="flex items-center">
                     {selectedSubAssemblyType === "Panel" && (
@@ -787,6 +896,12 @@ const SubAssemblyQRGenerator = () => {
                       <span className="text-white p-1 pl-2 pr-2 ml-2  font-black rounded-full text-xs bg-green-700">
                         Latest CT Interface (Left) Id: CT
                         {formatId(Number(latestLeftCTInterfaceId))}L-P
+                      </span>
+                    )}
+                    {selectedSubAssemblyType === "RightCTInterface" && (
+                      <span className="text-white p-1 pl-2 pr-2 ml-2  font-black rounded-full text-xs bg-green-700">
+                        Latest CT Interface (Right) Id: CT
+                        {formatId(Number(latestRightCTInterfaceId))}R-P
                       </span>
                     )}
                   </div>
@@ -855,6 +970,16 @@ const SubAssemblyQRGenerator = () => {
                     <div className="flex justify-start">
                       <p className="mt-2 font-black p-1 text-white bg-secondary text-xs rounded-full pl-2 pr-2">
                         {expectedLeftCTInterfaceRange}
+                      </p>
+                    </div>
+                  )}
+                {/* ================================ C T I N T E R F A C E (R I G H T)  ================================ */}
+                {selectedSubAssemblyType === "RightCTInterface" &&
+                  showExpectedRightCTInterfaceRange &&
+                  expectedRightCTInterfaceRange && (
+                    <div className="flex justify-start">
+                      <p className="mt-2 font-black p-1 text-white bg-secondary text-xs rounded-full pl-2 pr-2">
+                        {expectedRightCTInterfaceRange}
                       </p>
                     </div>
                   )}
@@ -1208,6 +1333,64 @@ const SubAssemblyQRGenerator = () => {
                         <span className="text-red-500 ml-1 mr-1 font-black">
                           {" "}
                           (Left)
+                        </span>
+                      </div>
+                    </div>
+
+                    <img
+                      src={imageData[code.CTId]}
+                      alt={`Converted ${code.CTId}`}
+                      style={{ display: "none", margin: "10px auto" }}
+                    />
+
+                    <div className="mt-5 flex items-center justify-center">
+                      <button
+                        className="bg-signature hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded "
+                        onClick={() => handleDownload(code.CTId)}
+                      >
+                        Download
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {/* ================================ C T I N T E R F A C E (L E F T)  ================================ */}
+          {selectedSubAssemblyType === "RightCTInterface" && (
+            <div className="flex justify-center flex-wrap mt-5 rounded-xl">
+              {qrCode.map((code, index) => (
+                <div
+                  key={index}
+                  className="p-5 shadow-xl rounded-lg m-5 bg-white"
+                  style={{
+                    color: "#043f9d",
+                    fontFamily: "Avenir, sans-serif",
+                    fontSize: "20px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                  }}
+                >
+                  <div>
+                    <div id={`qrcode-${code.CTId}`}>
+                      <ReactQRCode
+                        value={JSON.stringify({
+                          link: code.link,
+                          RightCTInterfaceId: code.CTId,
+                        })}
+                        size={512}
+                        imageSettings={{
+                          src: logo,
+                          excavate: true,
+                          width: 60,
+                          height: 35,
+                        }}
+                      />
+                      <div className="mb-5">
+                        CT Interface ID: {code.CTId}{" "}
+                        <span className="text-red-500 ml-1 mr-1 font-black">
+                          {" "}
+                          (Right)
                         </span>
                       </div>
                     </div>

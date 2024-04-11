@@ -210,6 +210,41 @@ const CTInterfaceLeftSchema = new mongoose.Schema(
   }
 );
 
+const CTInterfaceRightSchema = new mongoose.Schema(
+  {
+    link: {
+      required: true,
+      type: String,
+      unique: true,
+    },
+    generatedDate: {
+      type: String,
+      // required: true,
+    },
+    CTId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    allocatedDate: {
+      type: String,
+    },
+    isAllocated: {
+      type: Boolean,
+      default: false,
+    },
+    components: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ComponentModel",
+      },
+    ],
+  },
+  {
+    collection: "rightCTInterface",
+  }
+);
+
 // Export both models
 module.exports = {
   LoadbankModel: mongoose.model("LoadbankModel", LoadbankSchema),
@@ -223,5 +258,9 @@ module.exports = {
   CTInterfaceLeftModel: mongoose.model(
     "LeftCTInterfaceModel",
     CTInterfaceLeftSchema
+  ),
+  CTInterfaceRightModel: mongoose.model(
+    "RightCTInterfaceModel",
+    CTInterfaceRightSchema
   ),
 };

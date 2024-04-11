@@ -53,6 +53,7 @@ import LoadbankCatcher from "../../containers/SubAssembly/Loadbank/LoadbankCatch
 import MCCBPrimary from "../../containers/SubAssembly/MCCB/MCCBPrimary";
 import MCCBCatcher from "../../containers/SubAssembly/MCCB/MCCBCatcher";
 import CTInterfaceLeft from "../../containers/SubAssembly/CTInterface/CTInterfaceLeft";
+import CTInterfaceRight from "../../containers/SubAssembly/CTInterface/CTInterfaceRight";
 
 const drawerWidth = 200;
 
@@ -433,7 +434,12 @@ const NavBar = () => {
 
                 <DropdownMenuItem
                   to="/CTInterfaceLeft"
-                  primary="CT Interface Left"
+                  primary="CT Interface (Left)"
+                />
+
+                <DropdownMenuItem
+                  to="/CTInterfaceRight"
+                  primary="CT Interface (Right)"
                 />
               </Menu>
 
@@ -538,7 +544,7 @@ const NavBar = () => {
               />
               <Route path="/Dashboard/PDC/:pdcId" element={<DashboardPDC />} />
               <Route
-                path="/Dashboard/ControlPanel/:panelId"
+                path="/Dashboard/CPAN/:panelId"
                 element={<DashboardPanel />}
               />
               <Route
@@ -581,6 +587,7 @@ const NavBar = () => {
               <Route path="/MCCBPrimary" element={<MCCBPrimary />} />
               <Route path="/MCCBCatcher" element={<MCCBCatcher />} />
               <Route path="/CTInterfaceLeft" element={<CTInterfaceLeft />} />
+              <Route path="/CTInterfaceRight" element={<CTInterfaceRight />} />
             </Routes>
           </Box>
         </Box>

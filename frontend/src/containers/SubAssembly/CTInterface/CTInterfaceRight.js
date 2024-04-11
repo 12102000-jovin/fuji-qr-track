@@ -13,7 +13,7 @@ import ReactQRCode from "qrcode.react";
 import html2canvas from "html2canvas";
 import SubAssemblyQRGenerator from "../../../components/SubAssemblyQRGenerator/SubAssemblyQRGenerator";
 import SubAssemblyCustomQRGenerator from "../../../components/SubAssemblyQRGenerator/SubAssemblyCustomQRGenerator";
-import EditLeftCTInterface from "./EditLeftCTInterface";
+import EditRightCTInterface from "./EditRightCTInterface";
 import JSZip from "jszip";
 
 import {
@@ -33,47 +33,17 @@ import {
   Pagination,
 } from "@mui/material";
 
-const CTInterfaceLeft = () => {
-  const fetchLeftCTInterfaceData_API =
-    "http://localhost:3001/SubAssembly/CTInterfaceLeft/getAllCTInterface";
+const CTInterfaceRight = () => {
+  const fetchRightCTInterfaceData_API =
+    "http://localhost:3001/SubAssembly/CTInterfaceRight/getAllCTInterface";
 
   const deleteCTInterface_API =
-    "http://localhost:3001/SubAssembly/CTInterfaceLeft/deleteCTInterfaceLeft/";
+    "http://localhost:3001/SubAssembly/CTInterfaceRight/deleteCTInterfaceRight/";
 
   // Ref
   const captureRef = useRef(null);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [leftCTInterfaceData, setLeftCTInterfaceData] = useState([]);
-
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [selectAll, setSelectAll] = useState(false);
-  const [selectedRowsCount, setSelectedRowsCount] = useState("");
-  const [selectedRowsQRCodes, setSelectedRowsQRCodes] = useState([]);
-  const [openSelectedQRModal, setOpenSelectedQRModal] = useState(false);
-
-  const [filteredCTInterfaces, setFilteredCTInterfaces] = useState([]);
-
-  const [sortOrder, setSortOrder] = useState("DESC");
-
-  const [qrCodeData, setQrCodeData] = useState(null);
-  const [openQRModal, setOpenQRModal] = useState(false);
-  const [modalCTID, setModalCTID] = useState(null);
-
-  const [openAddCTInterfaceModal, setOpenCTInterfaceModal] = useState(false);
-
-  const [deleteCTInterfaceModalState, setDeleteCTInterfaceModalState] =
-    useState(false);
-
-  const [editCTInterfaceModalState, setEditCTInterfaceModalState] =
-    useState(false);
-  const [CTIdToEdit, setCTIdToEdit] = useState("");
-
-  const [
-    showCTInterfaceCustomQRGenerator,
-    setShowCTInterfaceCustomQRGenerator,
-  ] = useState(false);
-
   const handleFormSubmit = (event) => {
     event.preventDefault();
   };
@@ -86,8 +56,40 @@ const CTInterfaceLeft = () => {
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const [selectedRowsCount, setSelectedRowsCount] = useState("");
+  const [selectedRowsQRCodes, setSelectedRowsQRCodes] = useState([]);
+  const [openSelectedQRModal, setOpenSelectedQRModal] = useState(false);
+
+  const [rightCTInterfaceData, setRightCTInterfaceData] = useState([]);
+
+  const [filteredCTInterfaces, setFilteredCTInterfaces] = useState([]);
+
+  const [sortOrder, setSortOrder] = useState("DESC");
+
+  const [deleteCTInterfaceModalState, setDeleteCTInterfaceModalState] =
+    useState(false);
+
+  const [editCTInterfaceModalState, setEditCTInterfaceModalState] =
+    useState(false);
+  const [CTIdToEdit, setCTIdToEdit] = useState("");
+
+  const [qrCodeData, setQrCodeData] = useState(null);
+  const [openQRModal, setOpenQRModal] = useState(false);
+  const [modalCTID, setModalCTID] = useState(null);
+
+  const [openAddCTInterfaceModal, setOpenCTInterfaceModal] = useState(false);
+  const [
+    showCTInterfaceCustomQRGenerator,
+    setShowCTInterfaceCustomQRGenerator,
+  ] = useState(false);
+
+  const indexOfLastRow = page * rowsPerPage;
+  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+
   useEffect(() => {
-    fetchLeftCTInterfaceData();
+    fetchRightCTInterfaceData();
   }, [page, rowsPerPage]);
 
   useEffect(() => {
@@ -95,7 +97,7 @@ const CTInterfaceLeft = () => {
   }, [rowsPerPage, searchQuery]);
 
   useEffect(() => {
-    fetchLeftCTInterfaceData();
+    fetchRightCTInterfaceData();
   }, []);
 
   useEffect(() => {
@@ -106,8 +108,8 @@ const CTInterfaceLeft = () => {
 
     const words = searchQueryWithoutSpaces.split(/\s+/);
 
-    const filteredData = leftCTInterfaceData.filter((row) => {
-      const leftCTInterfaceIdWithoutSpaces = row.CTId.replace(
+    const filteredData = rightCTInterfaceData.filter((row) => {
+      const rightCTInterfaceIdWithoutSpaces = row.CTId.replace(
         /\s/g,
         ""
       ).toLowerCase();
@@ -117,22 +119,19 @@ const CTInterfaceLeft = () => {
         .replace(/\s/g, "")
         .toLowerCase();
 
-      const matchleftCTInterfaceId = words.every((word) =>
-        leftCTInterfaceIdWithoutSpaces.includes(word)
+      const matchrightCTInterfaceId = words.every((word) =>
+        rightCTInterfaceIdWithoutSpaces.includes(word)
       );
 
       const matchGeneratedDate = words.every((word) =>
         generatedDateWithoutSpaces.includes(word)
       );
 
-      return matchleftCTInterfaceId || matchGeneratedDate;
+      return matchrightCTInterfaceId || matchGeneratedDate;
     });
 
     setFilteredCTInterfaces(filteredData);
-  }, [leftCTInterfaceData, searchQuery]);
-
-  const indexOfLastRow = page * rowsPerPage;
-  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+  }, [rightCTInterfaceData, searchQuery]);
 
   // Filtered and sorted data
   const sortedData = filteredCTInterfaces.sort((a, b) => {
@@ -145,25 +144,10 @@ const CTInterfaceLeft = () => {
 
   const currentRows = sortedData.slice(indexOfFirstRow, indexOfLastRow);
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(event.target.value);
-    setPage(1);
-  };
-
-  const fetchLeftCTInterfaceData = () => {
-    axios.get(`${fetchLeftCTInterfaceData_API}`).then((response) => {
-      setLeftCTInterfaceData(response.data);
-    });
-  };
-
   const handleDownloadSelectedRowQR = () => {
     const qrCodes = selectedRows
       .map((rowId) => {
-        const selectedRow = leftCTInterfaceData.find(
+        const selectedRow = rightCTInterfaceData.find(
           (row) => row._id === rowId
         );
         if (selectedRow) {
@@ -196,8 +180,8 @@ const CTInterfaceLeft = () => {
   };
 
   const handleSortCTId = () => {
-    const newSortOrder = sortOrder === "DESC" ? "ASC" : "DESC";
-    setSortOrder(newSortOrder);
+    const newSortOder = sortOrder === "DESC" ? "ASC" : "DESC";
+    setSortOrder(newSortOder);
   };
 
   const handleSelectRow = (rowId) => {
@@ -212,11 +196,21 @@ const CTInterfaceLeft = () => {
     );
   };
 
+  const handleOpenDeleteConfirmationModal = (CTId) => {
+    setDeleteCTInterfaceModalState(true);
+    setModalCTID(CTId);
+  };
+
+  const handleOpenEditModal = (CTId) => {
+    setEditCTInterfaceModalState(true);
+    setCTIdToEdit(CTId);
+  };
+
   const showQRCodes = (data, row) => {
     setQrCodeData(
       JSON.stringify({
         link: data.link,
-        leftCTInterfaceId: data.CTId,
+        rightCTInterfaceId: data.CTId,
       })
     );
     setModalCTID(data.CTId);
@@ -254,6 +248,21 @@ const CTInterfaceLeft = () => {
       });
   };
 
+  const fetchRightCTInterfaceData = () => {
+    axios.get(`${fetchRightCTInterfaceData_API}`).then((response) => {
+      setRightCTInterfaceData(response.data);
+    });
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(event.target.value);
+    setPage(1);
+  };
+
   const handleAddCTInterfaceModal = () => {
     setOpenCTInterfaceModal(true);
     setShowCTInterfaceCustomQRGenerator(false);
@@ -261,7 +270,7 @@ const CTInterfaceLeft = () => {
 
   const handleAddCTInterfaceCloseModal = () => {
     setOpenCTInterfaceModal(false);
-    fetchLeftCTInterfaceData();
+    fetchRightCTInterfaceData();
   };
 
   const handleChangeComponent = () => {
@@ -279,7 +288,7 @@ const CTInterfaceLeft = () => {
 
       if (response.status === 200) {
         console.log("CTInterface Deleted Successfully");
-        fetchLeftCTInterfaceData();
+        fetchRightCTInterfaceData();
         setDeleteCTInterfaceModalState(false);
       } else {
         console.log("Error deleting CT Interface:", response.data.message);
@@ -287,16 +296,6 @@ const CTInterfaceLeft = () => {
     } catch (error) {
       console.error("Error deleting CT Interface", error);
     }
-  };
-
-  const handleOpenDeleteConfirmationModal = (CTId) => {
-    setDeleteCTInterfaceModalState(true);
-    setModalCTID(CTId);
-  };
-
-  const handleOpenEditModal = (CTId) => {
-    setEditCTInterfaceModalState(true);
-    setCTIdToEdit(CTId);
   };
 
   const handleDownloadAllSelectedQR = async () => {
@@ -328,7 +327,7 @@ const CTInterfaceLeft = () => {
       const a = document.createElement("a");
       const url = URL.createObjectURL(content);
       a.href = url;
-      a.download = `Selected-CTInterface(Left)`;
+      a.download = `Selected-CTInterface(Right)`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -338,14 +337,13 @@ const CTInterfaceLeft = () => {
 
   return (
     <div>
-      {" "}
       <div className="flex justify-center bg-background border-none">
         <div className="w-3/4 p-6 shadow-lg bg-white rounded-md my-5">
           <p className="text-4xl text-signature font-black mb-5 mt-3">
             <div className="flex items-center justify-center">
               <p>CT Interface</p>
               <span className="text-xl text-white bg-blue-400 py-2 px-3 font-black rounded-full ml-2">
-                Left
+                Right
               </span>
             </div>
           </p>
@@ -601,7 +599,7 @@ const CTInterfaceLeft = () => {
                       CT Interface ID: {modalCTID}
                       <span className="text-red-500 ml-1 mr-1 font-black">
                         {" "}
-                        (Left)
+                        (Right)
                       </span>
                     </p>
                   </div>
@@ -733,10 +731,10 @@ const CTInterfaceLeft = () => {
         </Dialog>
       </div>
       <div>
-        <EditLeftCTInterface
+        <EditRightCTInterface
           open={editCTInterfaceModalState}
           onClose={() => {
-            fetchLeftCTInterfaceData();
+            fetchRightCTInterfaceData();
             setEditCTInterfaceModalState(false);
           }}
           CTId={CTIdToEdit}
@@ -784,7 +782,7 @@ const CTInterfaceLeft = () => {
                       CT Interface ID: {qrCode.CTId}
                       <span className="text-red-500 ml-1 mr-1 font-black">
                         {" "}
-                        (Left)
+                        (Right)
                       </span>
                     </p>
                   </div>
@@ -812,4 +810,4 @@ const CTInterfaceLeft = () => {
   );
 };
 
-export default CTInterfaceLeft;
+export default CTInterfaceRight;

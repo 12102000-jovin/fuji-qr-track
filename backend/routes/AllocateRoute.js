@@ -8,6 +8,7 @@ const {
   PrimaryMCCBModel,
   CatcherMCCBModel,
   CTInterfaceLeftModel,
+  CTInterfaceRightModel,
 } = require("../models/SubAssemblyModel");
 const ComponentModel = require("../models/ComponentModel");
 
@@ -95,6 +96,9 @@ router.post("/AllocateSubAssembly", async (req, res) => {
     const isMCCBPrimaryPattern = /^MCCBPAN\d{6}-P$/.test(subAssemblyInputValue);
     const isMCCBCatcherPattern = /^MCCBPAN\d{6}-C$/.test(subAssemblyInputValue);
     const isCTInterfaceLeftPattern = /^CT\d{6}L-P$/.test(subAssemblyInputValue);
+    const isCTInterfaceRightPattern = /^CT\d{6}R-P$/.test(
+      subAssemblyInputValue
+    );
 
     const pdc = await PDCModel.findOne({
       pdcId: `${inputPDCValue}`,
@@ -373,7 +377,7 @@ router.post("/AllocateSubAssembly", async (req, res) => {
         }
 
         // Check if the CT already exists in the PDC
-        if (pdc.leftCTInterfaces.some((CTId) => CTId.equals(CT._id))) {
+        if (pdc.leftCTInterfaces.some((CTId) => CTId.equals(CTInterface._id))) {
           return res.status(400).json({
             message: `The CT Interface (Left) already exists in the ${pdc.pdcId}`,
           });
@@ -399,6 +403,60 @@ router.post("/AllocateSubAssembly", async (req, res) => {
 
         // Associate the CTInterface Panel with the PDC by adding its ObjectId to the MCCBs array
         pdc.leftCTInterfaces.push(CTInterface._id);
+
+        // Save both the CT Interface land the updated PDC document
+        await CTInterface.save();
+        await pdc.save();
+
+        //  Respond with success message and the updated PDC
+        const response = "Sub-Assembly allocation successful";
+        return res.status(200).json({ message: response });
+      } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
+    } else if (isCTInterfaceRightPattern) {
+      try {
+        // Check if CT Interface exists
+        const CTInterface = await CTInterfaceRightModel.findOne({
+          CTId: subAssemblyInputValue,
+        });
+
+        if (!CTInterface) {
+          return res
+            .status(404)
+            .json({ message: "CT Interface (Right) not found" });
+        }
+
+        // Check if the CT already exists in the PDC
+        if (
+          pdc.rightCTInterfaces.some((CTId) => CTId.equals(CTInterface._id))
+        ) {
+          return res.status(400).json({
+            message: `The CT Interface (Right) already exists in the ${pdc.pdcId}`,
+          });
+        }
+
+        if (pdc.rightCTInterfaces.length > 0) {
+          return res.status(400).json({
+            message: `Other CT Interface (Right) already exists in the ${pdc.pdcId}`,
+          });
+        }
+
+        if (CTInterface.isAllocated === true) {
+          return res.status(404).json({
+            message: `${CTInterface.CTId} CT Interface (Right) has been allocated to other PDC`,
+          });
+        }
+
+        // Set the allocated date for the CTInterface
+        CTInterface.allocatedDate = new Date();
+
+        // Set the isAllocated Flag to true
+        CTInterface.isAllocated = true;
+
+        // Associate the CTInterface Panel with the PDC by adding its ObjectId to the MCCBs array
+        pdc.rightCTInterfaces.push(CTInterface._id);
 
         // Save both the CT Interface land the updated PDC document
         await CTInterface.save();
@@ -777,6 +835,64 @@ router.post("/AllocateLeftCTInterfaceComponent", async (req, res) => {
 
     return res.status(200).json({
       message: "Component allocated to the CT Interface (Left) successfully ",
+    });
+  } catch (error) {
+    console.error("Error in allocation:", error);
+    // Handle the error and send an appropriate response
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.post("/AllocateRightCTInterfaceComponent", async (req, res) => {
+  try {
+    const { componentSerialNumber, componentType, componentDescription, CTId } =
+      req.body;
+
+    const existingComponent = await ComponentModel.findOne({
+      componentSerialNumber,
+    });
+
+    if (existingComponent) {
+      return res.status(409).json({
+        message:
+          "Component already allocated. Please select a different component.",
+      });
+    }
+
+    // Check if a component with the same type is already allocated to the CT Interface
+    const CTInterface = await CTInterfaceRightModel.findOne({ CTId }).populate(
+      "components"
+    );
+
+    if (!CTInterface) {
+      return res.status(404).json({ message: "CT Interface not found" });
+    }
+
+    const existingComponentType = CTInterface.components.find(
+      (component) => component.componentType === componentType
+    );
+
+    if (existingComponentType) {
+      return res.status(409).json({
+        message: `${existingComponentType.componentType} with serial number [${existingComponentType.componentSerialNumber}] is already allocated to the CT Interface. Please choose another component.`,
+      });
+    }
+
+    // If there are no existing components, proceed to insert new components
+    const component = new ComponentModel({
+      componentSerialNumber,
+      componentType,
+      componentDescription,
+      allocatedDate: new Date(),
+    });
+
+    await component.save();
+
+    CTInterface.components.push(component._id);
+    await CTInterface.save();
+
+    return res.status(200).json({
+      message: "Component allocated to the CT Interface (Right) successfully ",
     });
   } catch (error) {
     console.error("Error in allocation:", error);

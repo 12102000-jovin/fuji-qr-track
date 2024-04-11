@@ -54,6 +54,12 @@ const PDCSchema = new mongoose.Schema(
         ref: "LeftCTInterfaceModel",
       },
     ],
+    rightCTInterfaces: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "RightCTInterfaceModel",
+      },
+    ],
   },
   {
     collection: "pdc",

@@ -10,6 +10,7 @@ const {
   PrimaryMCCBModel,
   CatcherMCCBModel,
   CTInterfaceLeftModel,
+  CTInterfaceRightModel,
 } = require("../models/SubAssemblyModel");
 
 router.get("/getAllComponents", async (req, res) => {
@@ -68,6 +69,12 @@ router.delete("/deleteComponent/:componentSerialNumber", async (req, res) => {
 
     // Extract the _id field of the deleted component
     await CTInterfaceLeftModel.updateMany(
+      { components: deletedComponentObjectId },
+      { $pull: { components: deletedComponentObjectId } }
+    );
+
+    // Extract the _id field of the deleted component
+    await CTInterfaceRightModel.updateMany(
       { components: deletedComponentObjectId },
       { $pull: { components: deletedComponentObjectId } }
     );

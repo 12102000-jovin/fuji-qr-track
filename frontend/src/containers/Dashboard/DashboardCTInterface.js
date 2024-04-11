@@ -9,18 +9,33 @@ const DashboardCTInterface = () => {
   const [dashboardData, setDashboardData] = useState([]);
 
   const fetchDashboardLeftCTInterfaceData_API = `http://localhost:3001/Dashboard/${CTId}/showLeftCTInterfaceDashboard`;
+  const fetchDashboardRightCTInterfaceData_API = `http://localhost:3001/Dashboard/${CTId}/showRightCTInterfaceDashboard`;
 
   useEffect(() => {
     const isLeftCTInterfacePattern = /^CT\d{6}L-P$/.test(CTId);
+    const isRightCTInterfacePattern = /^CT\d{6}R-P$/.test(CTId);
 
     if (isLeftCTInterfacePattern) {
       fetchDashboardLeftCTInterfaceData();
+    } else if (isRightCTInterfacePattern) {
+      fetchDashboardRightCTInterfaceData();
     }
   }, []);
 
   const fetchDashboardLeftCTInterfaceData = () => {
     axios
       .get(`${fetchDashboardLeftCTInterfaceData_API}`)
+      .then((response) => {
+        setDashboardData(response.data);
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching Loadbank data", error);
+      });
+  };
+  const fetchDashboardRightCTInterfaceData = () => {
+    axios
+      .get(`${fetchDashboardRightCTInterfaceData_API}`)
       .then((response) => {
         setDashboardData(response.data);
         console.log(response.data);
