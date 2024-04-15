@@ -5,6 +5,7 @@ const router = express.Router();
 const {
   ChassisRailLeftPrimaryModel,
   ChassisRailRightPrimaryModel,
+  ChassisRailLeftCatcherModel,
 } = require("../models/SubAssemblyModel");
 const PDCModel = require("../models/PDCModel");
 const ComponentModel = require("../models/ComponentModel");
@@ -444,6 +445,229 @@ router.put(
         if (futurePdc && currentPdc && currentPdc.rightPrimaryChassisRails) {
           futurePdc.rightPrimaryChassisRails.push(currentChassisRail._id);
           currentPdc.rightPrimaryChassisRails.pull(currentChassisRail._id);
+
+          // Save changes to both pdcs
+          await futurePdc.save();
+          await currentPdc.save();
+        }
+
+        res.status(200).json({
+          message: "Chassis Rail moved and updated successfully",
+          futurePdc,
+          updatedChassisId,
+        });
+      } else if (pdcId === pdcToEdit && chassisId === chassisIdToEdit) {
+        res.status(200).json({ message: "No Changes" });
+      }
+    } catch (error) {
+      res
+        .status(500)
+        .json({ message: "Internal Server Error", error: error.message });
+    }
+  }
+);
+
+// ================================== C H A S S I S  R A I L (C A T C H E R) (L E F T) ==================================
+// Generate Left Catcher Chassis Rail
+router.post("/LeftCatcherChassisRail/generateSubAssembly", async (req, res) => {
+  const LeftCatcherChassisRails = req.body.LeftCatcherChassisRails;
+
+  const existingChassisRails = await ChassisRailLeftCatcherModel.find({
+    chassisId: {
+      $in: LeftCatcherChassisRails.map((ChassisRail) => ChassisRail.chassisId),
+    },
+  });
+
+  if (existingChassisRails.length > 0) {
+    return res.status(409).json("Duplicate Chassis Rail found");
+  }
+
+  // Create an array of Chassis Rail documents
+  const ChassisRailDocuments = LeftCatcherChassisRails.map((ChassisRail) => ({
+    ...ChassisRail,
+    link: ChassisRail.link,
+    chassisId: ChassisRail.chassisId,
+  }));
+
+  const insertedChassisRail = await ChassisRailLeftCatcherModel.insertMany(
+    ChassisRailDocuments
+  );
+  res.json(insertedChassisRail);
+});
+
+// Get Latest Left Catcher Chassis Rail
+router.get("/LeftCatcherChassisRail/getLatestChassisRail", async (req, res) => {
+  try {
+    // Find the document with the highest Chassis Id
+    const latestChassisRail = await ChassisRailLeftCatcherModel.findOne()
+      .sort({ chassisId: -1 })
+      .limit(1);
+
+    if (latestChassisRail) {
+      res.json(latestChassisRail.chassisId);
+    } else {
+      res.json(null); // No Chassis Rail found
+    }
+  } catch (error) {
+    console.error("Error fetching latest Chassis ID:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// Get all Left Catcher Chassis Rail
+router.get("/LeftCatcherChassisRail/getAllChassisRail", async (req, res) => {
+  try {
+    const ChassisRailData = await ChassisRailLeftCatcherModel.find();
+    res.json(ChassisRailData);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Delete Left Catcher Chassis Rail
+router.delete(
+  "/LeftCatcherChassisRail/deleteLeftCatcherChassisRail/:chassisId",
+  async (req, res) => {
+    try {
+      const chassisId = req.params.chassisId;
+
+      const ChassisToDelete =
+        await ChassisRailLeftCatcherModel.findOneAndDelete({
+          chassisId: chassisId,
+        });
+
+      if (!ChassisToDelete) {
+        res.status(404).json({ message: "Chassis Rail not found!" });
+      }
+
+      const componentIds = ChassisToDelete.components;
+
+      for (const componentId of componentIds) {
+        await ComponentModel.findOneAndDelete({ _id: componentId });
+      }
+
+      const deletedChasissRailObjectId = ChassisToDelete._id;
+
+      await PDCModel.updateMany(
+        {
+          leftCatcherChassisRails: deletedChasissRailObjectId,
+        },
+        {
+          $pull: {
+            leftCatcherChassisRails: deletedChasissRailObjectId,
+          },
+        }
+      );
+
+      console.log(ChassisToDelete);
+      res.status(200).json({ message: "Chassis Rail deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  }
+);
+
+// Edit Left Catcher Chassis Rail
+router.put(
+  "/LeftCatcherChassisRail/editLeftCatcherChassisRail/:pdcId/:chassisId",
+  async (req, res) => {
+    try {
+      const { pdcId, chassisId } = req.params;
+      const { pdcToEdit, chassisIdToEdit } = req.body;
+
+      // Find the current pdcId
+      const currentPdc = await PDCModel.findOne({ pdcId });
+
+      // Find the future pdcId
+      const futurePdc = await PDCModel.findOne({ pdcId: pdcToEdit });
+
+      // Find the current chassis Rail
+      const currentChassisRail = await ChassisRailLeftCatcherModel.findOne({
+        chassisId,
+      });
+
+      // Find the future chassis Rail
+      const futureChassisRail = await ChassisRailLeftCatcherModel.findOne({
+        chassisId: chassisIdToEdit,
+      });
+
+      if (chassisIdToEdit == null || chassisIdToEdit === "") {
+        return res.status(400).json({ error: "Please Enter Chassis Rail Id" });
+      }
+
+      const isLeftCatcherChassisRailPattern = /^CHR\d{6}L-C$/.test(
+        chassisIdToEdit
+      );
+      if (!isLeftCatcherChassisRailPattern) {
+        return res.status(400).json({
+          error: "Please Enter Correct Chassis Rail Id Format",
+        });
+      }
+
+      if (
+        futureChassisRail &&
+        currentChassisRail &&
+        futureChassisRail.chassisId !== currentChassisRail.chassisId
+      ) {
+        return res.status(409).json({
+          error: "Chassis Rail already exists. Please choose a different one.",
+        });
+      }
+
+      if (pdcId !== pdcToEdit && chassisId === chassisIdToEdit) {
+        // Add the Chassis Rail to the future pdc and remove it from the current pdc
+        if (futurePdc && currentPdc && currentPdc.leftCatcherChassisRails) {
+          futurePdc.leftCatcherChassisRails.push(currentChassisRail._id);
+          currentPdc.leftCatcherChassisRails.pull(currentChassisRail._id);
+
+          // Save changes to both pdcs
+          await futurePdc.save();
+          await currentPdc.save();
+        }
+        res.status(200).json({
+          message: "Chassis Rail moved successfully",
+          futurePdc,
+        });
+      } else if (pdcId === pdcToEdit && chassisId !== chassisIdToEdit) {
+        const updatedChassisId =
+          await ChassisRailLeftCatcherModel.findOneAndUpdate(
+            { chassisId: chassisId },
+            {
+              $set: {
+                chassisId: chassisIdToEdit,
+                link: `http://localhost:3000/Dashboard/ChassisRail/${chassisIdToEdit}`,
+              },
+            },
+            { new: true }
+          );
+
+        if (!updatedChassisId) {
+          return res.status(404).json({
+            message: "Chassis Rail not found",
+          });
+        }
+
+        res.status(200).json({
+          message: "Chassis Rail updated successfully",
+          updatedChassisId,
+        });
+      } else if (pdcId !== pdcToEdit && chassisId !== chassisIdToEdit) {
+        const updatedChassisId =
+          await ChassisRailLeftCatcherModel.findOneAndUpdate(
+            { chassisId: chassisId },
+            {
+              $set: {
+                chassisId: chassisIdToEdit,
+                link: `http://localhost:3000/Dashboard/ChassisRail/${chassisIdToEdit}`,
+              },
+            },
+            { new: true }
+          );
+
+        // Add the Chassis Rail to the future pdc and remove it from the current pdc
+        if (futurePdc && currentPdc && currentPdc.leftCatcherChassisRails) {
+          futurePdc.leftCatcherChassisRails.push(currentChassisRail._id);
+          currentPdc.leftCatcherChassisRails.pull(currentChassisRail._id);
 
           // Save changes to both pdcs
           await futurePdc.save();

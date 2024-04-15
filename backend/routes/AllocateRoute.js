@@ -11,6 +11,7 @@ const {
   CTInterfaceRightModel,
   ChassisRailLeftPrimaryModel,
   ChassisRailRightPrimaryModel,
+  ChassisRailLeftCatcherModel,
 } = require("../models/SubAssemblyModel");
 const ComponentModel = require("../models/ComponentModel");
 
@@ -105,6 +106,9 @@ router.post("/AllocateSubAssembly", async (req, res) => {
       subAssemblyInputValue
     );
     const isChassisRailRightPrimaryPattern = /^CHR\d{6}R-P$/.test(
+      subAssemblyInputValue
+    );
+    const isChassisRailLeftCatcherPattern = /^CHR\d{6}L-C$/.test(
       subAssemblyInputValue
     );
 
@@ -573,6 +577,60 @@ router.post("/AllocateSubAssembly", async (req, res) => {
 
         // Associate the Chassis Rail Panel with the PDC by adding its ObjectId to the MCCBs array
         pdc.rightPrimaryChassisRails.push(ChassisRail._id);
+
+        // Save both the Chassis Rail and the updated PDC document
+        await ChassisRail.save();
+        await pdc.save();
+
+        //  Respond with success message and the updated PDC
+        const response = "Sub-Assembly allocation successful";
+        return res.status(200).json({ message: response });
+      } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
+    } else if (isChassisRailLeftCatcherPattern) {
+      try {
+        // Check if Chassis Rail Interface exists
+        const ChassisRail = await ChassisRailLeftCatcherModel.findOne({
+          chassisId: subAssemblyInputValue,
+        });
+
+        if (!ChassisRail) {
+          return res.status(404).json({ message: "Chassis rail not found" });
+        }
+
+        // Check if the Chassis Rail already exists in the PDC
+        if (
+          pdc.leftCatcherChassisRails.some((chassisId) =>
+            chassisId.equals(ChassisRail._id)
+          )
+        ) {
+          return res.status(400).json({
+            message: `The Chassis Rail already exists in the ${pdc.pdcId}`,
+          });
+        }
+
+        if (pdc.leftCatcherChassisRails.length > 0) {
+          return res.status(400).json({
+            message: `Other Chassis Rail already exists in the ${pdc.pdcId}`,
+          });
+        }
+
+        if (ChassisRail.isAllocated === true) {
+          return res.status(404).json({
+            message: `${ChassisRail.chassisId} Chassis Rail has been allocated to other PDC`,
+          });
+        }
+
+        // Set the allocated date for the Chassis Rail
+        ChassisRail.allocatedDate = new Date();
+
+        // Set the isAllocated Flag to true
+        ChassisRail.isAllocated = true;
+
+        // Associate the Chassis Rail Panel with the PDC by adding its ObjectId to the MCCBs array
+        pdc.leftCatcherChassisRails.push(ChassisRail._id);
 
         // Save both the Chassis Rail and the updated PDC document
         await ChassisRail.save();
@@ -1130,6 +1188,68 @@ router.post("/AllocateRightPrimaryChassisRailComponent", async (req, res) => {
 
     ChassisRailRightPrimary.components.push(component._id);
     await ChassisRailRightPrimary.save();
+
+    return res.status(200).json({
+      message: "Component allocated to the Chassis Rail successfully ",
+    });
+  } catch (error) {
+    console.error("Error in allocation:", error);
+    // Handle the error and send an appropriate response
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.post("/AllocateLeftCatcherChassisRailComponent", async (req, res) => {
+  try {
+    const {
+      componentSerialNumber,
+      componentType,
+      componentDescription,
+      chassisId,
+    } = req.body;
+
+    const existingComponent = await ComponentModel.findOne({
+      componentSerialNumber,
+    });
+
+    if (existingComponent) {
+      return res.status(409).json({
+        message:
+          "Component already allocated. Please select a different component.",
+      });
+    }
+
+    // Check if a component with the same type is already allocated to the Chassis Rail
+    const ChassisRailLeftCatcher = await ChassisRailLeftCatcherModel.findOne({
+      chassisId,
+    }).populate("components");
+
+    if (!ChassisRailLeftCatcher) {
+      return res.status(404).json({ message: "Chassis Rail not found" });
+    }
+
+    const existingComponentType = ChassisRailLeftCatcher.components.find(
+      (component) => component.componentType === componentType
+    );
+
+    if (existingComponentType) {
+      return res.status(409).json({
+        message: `${existingComponentType.componentType} with serial number [${existingComponentType.componentSerialNumber}] is already allocated to the Chassis Rail. Please choose another component.`,
+      });
+    }
+
+    // If there are no existing components, proceed to insert new components
+    const component = new ComponentModel({
+      componentSerialNumber,
+      componentType,
+      componentDescription,
+      allocatedDate: new Date(),
+    });
+
+    await component.save();
+
+    ChassisRailLeftCatcher.components.push(component._id);
+    await ChassisRailLeftCatcher.save();
 
     return res.status(200).json({
       message: "Component allocated to the Chassis Rail successfully ",

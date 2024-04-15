@@ -10,15 +10,19 @@ const DashboardChassisRail = () => {
 
   const fetchDashboardLeftPrimaryChassisRailData_API = `http://localhost:3001/Dashboard/${chassisId}/showLeftPrimaryChassisRailDashboard`;
   const fetchDashboardRightPrimaryChassisRailData_API = `http://localhost:3001/Dashboard/${chassisId}/showRightPrimaryChassisRailDashboard`;
+  const fetchDashboardLeftCatcherChassisRailData_API = `http://localhost:3001/Dashboard/${chassisId}/showLeftCatcherChassisRailDashboard`;
 
   useEffect(() => {
     const isLeftPrimaryChassisRailPattern = /^CHR\d{6}L-P$/.test(chassisId);
     const isRightPrimaryChassisRailPattern = /^CHR\d{6}R-P$/.test(chassisId);
+    const isLeftCatcherChassisRailPattern = /^CHR\d{6}L-C$/.test(chassisId);
 
     if (isLeftPrimaryChassisRailPattern) {
       fetchDashboardLeftPrimaryChassisRailData();
     } else if (isRightPrimaryChassisRailPattern) {
       fetchDashboardRightPrimaryChassisRailData();
+    } else if (isLeftCatcherChassisRailPattern) {
+      fetchDashboardLeftCatcherChassisRailData();
     }
   }, []);
 
@@ -37,6 +41,18 @@ const DashboardChassisRail = () => {
   const fetchDashboardRightPrimaryChassisRailData = () => {
     axios
       .get(`${fetchDashboardRightPrimaryChassisRailData_API}`)
+      .then((response) => {
+        setDashboardData(response.data);
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching Chassis Rail data", error);
+      });
+  };
+
+  const fetchDashboardLeftCatcherChassisRailData = () => {
+    axios
+      .get(`${fetchDashboardLeftCatcherChassisRailData_API}`)
       .then((response) => {
         setDashboardData(response.data);
         console.log(response.data);

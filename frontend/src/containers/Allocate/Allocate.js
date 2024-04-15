@@ -88,6 +88,10 @@ const Allocate = () => {
         subAssemblyInputValue
       );
 
+      const isChassisRailLeftCatcherPattern = /^CHR\d{6}L-C$/.test(
+        subAssemblyInputValue
+      );
+
       if (isPanelPattern) {
         setShowSubAssemblyInput(subAssemblyInputValue);
         setDetectedType("Panel");
@@ -123,6 +127,10 @@ const Allocate = () => {
       } else if (isChassisRailRightPrimaryPattern) {
         setShowSubAssemblyInput(subAssemblyInputValue);
         setDetectedType("Chassis Rail (Right) (Primary)");
+        setWrongSubAssemblyError(false);
+      } else if (isChassisRailLeftCatcherPattern) {
+        setShowSubAssemblyInput(subAssemblyInputValue);
+        setDetectedType("Chassis Rail (Left) (Catcher)");
         setWrongSubAssemblyError(false);
       } else {
         try {
@@ -163,6 +171,10 @@ const Allocate = () => {
           } else if (parsedInput.rightPrimaryChassisRailId) {
             setSubAssemblyInputValue(parsedInput.rightPrimaryChassisRailId);
             setDetectedType("Chassis Rail (Right) (Primary)");
+            setWrongSubAssemblyError(false);
+          } else if (parsedInput.leftCatcherChassisRailId) {
+            setSubAssemblyInputValue(parsedInput.leftCatcherChassisRailId);
+            setDetectedType("Chassis Rail (Left) (Catcher)");
             setWrongSubAssemblyError(false);
           } else {
             setWrongSubAssemblyError(true);
