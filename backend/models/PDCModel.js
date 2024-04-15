@@ -60,6 +60,18 @@ const PDCSchema = new mongoose.Schema(
         ref: "RightCTInterfaceModel",
       },
     ],
+    leftPrimaryChassisRails: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "LeftPrimaryChassisRailModel",
+      },
+    ],
+    rightPrimaryChassisRails: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "RightPrimaryChassisRailModel",
+      },
+    ],
   },
   {
     collection: "pdc",

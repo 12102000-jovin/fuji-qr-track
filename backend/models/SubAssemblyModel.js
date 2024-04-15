@@ -245,6 +245,76 @@ const CTInterfaceRightSchema = new mongoose.Schema(
   }
 );
 
+const ChassisRailLeftPrimarySchema = new mongoose.Schema(
+  {
+    link: {
+      required: true,
+      type: String,
+      unique: true,
+    },
+    generatedDate: {
+      type: String,
+      // required: true,
+    },
+    chassisId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    allocatedDate: {
+      type: String,
+    },
+    isAllocated: {
+      type: Boolean,
+      default: false,
+    },
+    components: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ComponentModel",
+      },
+    ],
+  },
+  {
+    collection: "leftPrimaryChassisRail",
+  }
+);
+
+const ChassisRailRightPrimarySchema = new mongoose.Schema(
+  {
+    link: {
+      required: true,
+      type: String,
+      unique: true,
+    },
+    generatedDate: {
+      type: String,
+      // required: true,
+    },
+    chassisId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    allocatedDate: {
+      type: String,
+    },
+    isAllocated: {
+      type: Boolean,
+      default: false,
+    },
+    components: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ComponentModel",
+      },
+    ],
+  },
+  {
+    collection: "rightPrimaryChassisRail",
+  }
+);
+
 // Export both models
 module.exports = {
   LoadbankModel: mongoose.model("LoadbankModel", LoadbankSchema),
@@ -262,5 +332,13 @@ module.exports = {
   CTInterfaceRightModel: mongoose.model(
     "RightCTInterfaceModel",
     CTInterfaceRightSchema
+  ),
+  ChassisRailLeftPrimaryModel: mongoose.model(
+    "LeftPrimaryChassisRailModel",
+    ChassisRailLeftPrimarySchema
+  ),
+  ChassisRailRightPrimaryModel: mongoose.model(
+    "RightPrimaryChassisRailModel",
+    ChassisRailRightPrimarySchema
   ),
 };

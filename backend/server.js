@@ -56,6 +56,9 @@ app.use("/SubAssembly", MCCBRoute);
 const CTInterfaceRoute = require("./routes/CTInterfaceRoute");
 app.use("/SubAssembly", CTInterfaceRoute);
 
+const ChassisRailRoute = require("./routes/ChassisRailRoute");
+app.use("/SubAssembly", ChassisRailRoute);
+
 const allocateRoute = require("./routes/AllocateRoute");
 app.use("/Allocate", allocateRoute);
 

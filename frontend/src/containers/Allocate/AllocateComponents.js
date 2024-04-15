@@ -6,6 +6,8 @@ import MCCBPrimaryComponentForm from "../../components/ComponentForms/MCCBPrimar
 import MCCBCatcherComponentForm from "../../components/ComponentForms/MCCBCatcherComponentForm";
 import LeftCTInterfaceComponentForm from "../../components/ComponentForms/LeftCTInterfaceComponentForm";
 import RightCTInterfaceComponentForm from "../../components/ComponentForms/RightCTInterfaceComponentForm";
+import ChassisRailLeftPrimaryComponentForm from "../../components/ComponentForms/ChassisRailLeftPrimaryComponentForm";
+import ChassisRailRightPrimaryComponentForm from "../../components/ComponentForms/ChassisRailRightPrimaryComponentForm";
 
 const AllocateComponents = () => {
   const [inputSubAssemblyValue, setInputSubAssemblyValue] = useState("");
@@ -17,6 +19,11 @@ const AllocateComponents = () => {
   const [showLeftCTInterfaceForm, setShowLeftCTInterfaceForm] = useState(false);
   const [showRightCTInterfaceForm, setShowRightCTInterfaceForm] =
     useState(false);
+  const [showLeftPrimaryChassisRailForm, setShowLeftPrimaryChassisRailForm] =
+    useState(false);
+  const [showRightPrimaryChassisRailForm, setShowRightPrimaryChassisRailForm] =
+    useState(false);
+
   const [errorMessage, setErrorMessage] = useState("");
 
   const subAssemblyInputRef = useRef(null);
@@ -43,6 +50,12 @@ const AllocateComponents = () => {
         inputSubAssemblyValue
       );
       const isCTInterfaceRightPattern = /^CT\d{6}R-P$/.test(
+        inputSubAssemblyValue
+      );
+      const isChassisRailLeftPrimaryPattern = /^CHR\d{6}L-P$/.test(
+        inputSubAssemblyValue
+      );
+      const isChassisRailRightPrimaryPattern = /^CHR\d{6}R-P$/.test(
         inputSubAssemblyValue
       );
 
@@ -73,6 +86,14 @@ const AllocateComponents = () => {
       } else if (isCTInterfaceRightPattern) {
         setShowPanelForm(false);
         setShowRightCTInterfaceForm(true);
+        setErrorMessage("");
+      } else if (isChassisRailLeftPrimaryPattern) {
+        setShowPanelForm(false);
+        setShowLeftPrimaryChassisRailForm(true);
+        setErrorMessage("");
+      } else if (isChassisRailRightPrimaryPattern) {
+        setShowPanelForm(false);
+        setShowRightPrimaryChassisRailForm(true);
         setErrorMessage("");
       } else {
         try {
@@ -130,10 +151,27 @@ const AllocateComponents = () => {
             setShowPanelForm(false);
             setShowRightCTInterfaceForm(true);
             setErrorMessage("");
+          } else if (
+            parsedInput.leftPrimaryChassisRailId &&
+            /^CHR\d{6}L-P$/.test(parsedInput.leftPrimaryChassisRailId)
+          ) {
+            setInputSubAssemblyValue(parsedInput.leftPrimaryChassisRailId);
+            setShowPanelForm(false);
+            setShowLeftPrimaryChassisRailForm(true);
+            setErrorMessage("");
+          } else if (
+            parsedInput.rightPrimaryChassisRailId &&
+            /^CHR\d{6}R-P$/.test(parsedInput.rightPrimaryChassisRailId)
+          ) {
+            setInputSubAssemblyValue(parsedInput.rightPrimaryChassisRailId);
+            setShowPanelForm(false);
+            setShowRightPrimaryChassisRailForm(true);
+            setErrorMessage("");
           } else {
             setErrorMessage("Invalid Sub-Assembly QR");
           }
         } catch (error) {
+          setErrorMessage("Invalid Sub-Assembly QR");
           console.log("Parsing error:", error);
         }
       }
@@ -243,6 +281,16 @@ const AllocateComponents = () => {
           )}
           {showRightCTInterfaceForm && (
             <RightCTInterfaceComponentForm CTId={inputSubAssemblyValue} />
+          )}
+          {showLeftPrimaryChassisRailForm && (
+            <ChassisRailLeftPrimaryComponentForm
+              chassisId={inputSubAssemblyValue}
+            />
+          )}
+          {showRightPrimaryChassisRailForm && (
+            <ChassisRailRightPrimaryComponentForm
+              chassisId={inputSubAssemblyValue}
+            />
           )}
         </div>
       </div>

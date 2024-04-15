@@ -4,25 +4,26 @@ import { Dialog, DialogContent } from "@mui/material";
 import axios from "axios";
 import LaunchIcon from "@mui/icons-material/Launch";
 
-const EditLeftCTInterface = ({ open, onClose, CTId }) => {
+const EditLeftPrimaryChassisRail = ({ open, onClose, chassisId }) => {
   const [generalError, setGeneralError] = useState("");
   const [selectedPDCId, setSelectedPDCId] = useState("");
   const [pdcDisabled, setPDCDisabled] = useState(true);
   const [PDCs, setPDCs] = useState([]);
-  const [CTIdToEdit, setCTIdToEdit] = useState("");
-  const [CTInterfaceDisabled, setCTInterfaceDisabled] = useState(true);
+  const [chassisIdToEdit, setChassisIdToEdit] = useState("");
+  const [chassisRailDisabled, setChassisRailDisabled] = useState(true);
   const [pdcId, setPDCId] = useState("");
 
   const fetchPDCData_API = "http://localhost:3001/PDC/getAllPDC";
-  const editCTInterface_API = `http://localhost:3001/SubAssembly/CTInterfaceLeft/editCTInterfaceLeft/${pdcId}/${CTId}`;
-  const fetchDashboardCTInterfaceData_API = `http://localhost:3001/Dashboard/${CTId}/showLeftCTInterfaceDashboard`;
+
+  const editChassisRail_API = `http://localhost:3001/SubAssembly/LeftPrimaryChassisRail/editLeftPrimaryChassisRail/${pdcId}/${chassisId}`;
+  const fetchDashboardChassisRailData_API = `http://localhost:3001/Dashboard/${chassisId}/showLeftPrimaryChassisRailDashboard`;
 
   useEffect(() => {
     // Fetch PDCId
     const fetchPDCId = async () => {
       try {
         const response = await axios.get(
-          `${fetchDashboardCTInterfaceData_API}`
+          `${fetchDashboardChassisRailData_API}`
         );
         setPDCId(response.data.pdcId);
       } catch (error) {
@@ -30,7 +31,7 @@ const EditLeftCTInterface = ({ open, onClose, CTId }) => {
       }
     };
     fetchPDCId();
-  }, [CTId]);
+  }, [chassisId]);
 
   useEffect(() => {
     // Fetch
@@ -48,11 +49,11 @@ const EditLeftCTInterface = ({ open, onClose, CTId }) => {
   }, [pdcId]);
 
   useEffect(() => {
-    setCTIdToEdit(CTId);
-  }, [CTId, open]);
+    setChassisIdToEdit(chassisId);
+  }, [chassisId, open]);
 
   useEffect(() => {
-    setCTInterfaceDisabled(true);
+    setChassisRailDisabled(true);
     setPDCDisabled(true);
     setGeneralError("");
   }, [open]);
@@ -61,31 +62,25 @@ const EditLeftCTInterface = ({ open, onClose, CTId }) => {
     setPDCDisabled(false);
   };
 
-  const handleCTInterfaceDisabled = () => {
-    setCTInterfaceDisabled(false);
+  const handleChassisRailDisabled = () => {
+    setChassisRailDisabled(false);
   };
 
-  const handleEditCTInterface = async () => {
-    console.log("Future PDC Id", selectedPDCId);
-    console.log("Future CT Id", CTIdToEdit);
-
-    console.log("Current PDC Id", pdcId);
-    console.log("Current CT Id", CTId);
-
+  const handleEditChassisRail = async () => {
     setGeneralError("");
 
     try {
-      const response = await axios.put(`${editCTInterface_API}`, {
+      const response = await axios.put(`${editChassisRail_API}`, {
         pdcToEdit: selectedPDCId,
-        CTToEdit: CTIdToEdit,
+        chassisIdToEdit: chassisIdToEdit,
       });
 
       if (response.status === 200) {
-        console.log("CT Interface Edited Successfully");
+        console.log("Chassis Id Edited Successfully");
         onClose();
       }
     } catch (error) {
-      console.error("Error editing CT Interface:", error);
+      console.error("Error editing Chassis Id:", error);
       if (error.response && error.response.data) {
         const { error: errorMessage } = error.response.data;
         setGeneralError(errorMessage);
@@ -102,7 +97,7 @@ const EditLeftCTInterface = ({ open, onClose, CTId }) => {
           <div className="absolute top-0 right-0">
             <button
               className="bg-red-600 hover:bg-red-500 text-white font-semibold
-            py-1 pl-2 pr-2 rounded"
+          py-1 pl-2 pr-2 rounded"
               onClick={onClose}
             >
               <CloseIcon style={{ fontSize: "small" }} />
@@ -132,7 +127,7 @@ const EditLeftCTInterface = ({ open, onClose, CTId }) => {
               <span className="flex items-center">
                 <div className="flex">
                   <p className="text-xs text-white px-2 bg-red-500 rounded-full ml-3">
-                    CT Interface (Left) has not been allocated to any PDC.{" "}
+                    Chassis Rail has not been allocated to any PDC.{" "}
                   </p>
                   <a
                     href="/allocateComponents"
@@ -180,10 +175,10 @@ const EditLeftCTInterface = ({ open, onClose, CTId }) => {
 
         <div className="mt-5">
           <label
-            htmlFor="CTId"
+            htmlFor="chassisId"
             className="block mb-2 flex justify-start font-bold text-xl"
           >
-            CT Interface (Left) Id
+            Chassis Rail Id
           </label>
           <div className="flex items-center">
             <div className="relative w-full">
@@ -191,15 +186,15 @@ const EditLeftCTInterface = ({ open, onClose, CTId }) => {
                 type="text"
                 id="CTId"
                 className="border w-full px-2 py-1 rounded-md focus:outline-none focus:ring-3 focus:border-gray-600 text-black"
-                value={CTIdToEdit}
-                onChange={(e) => setCTIdToEdit(e.target.value)}
-                disabled={CTInterfaceDisabled}
+                value={chassisIdToEdit}
+                onChange={(e) => setChassisIdToEdit(e.target.value)}
+                disabled={chassisRailDisabled}
               />
-              {CTInterfaceDisabled && (
+              {chassisRailDisabled && (
                 <p
                   fontSize="small"
                   className="absolute right-0 top-1/2 transform -translate-y-1/2 text-signature font-bold px-2 mr-2 rounded-md hover:bg-gray-300 hover:cursor-pointer hover:text-white"
-                  onClick={handleCTInterfaceDisabled}
+                  onClick={handleChassisRailDisabled}
                 >
                   Edit
                 </p>
@@ -209,9 +204,9 @@ const EditLeftCTInterface = ({ open, onClose, CTId }) => {
           <div className="flex justify-end mt-4">
             <button
               className="bg-signature hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md"
-              onClick={() => handleEditCTInterface()}
+              onClick={() => handleEditChassisRail()}
             >
-              Edit CT Interface
+              Edit Chassis Rail
             </button>
           </div>
         </div>
@@ -220,4 +215,4 @@ const EditLeftCTInterface = ({ open, onClose, CTId }) => {
   );
 };
 
-export default EditLeftCTInterface;
+export default EditLeftPrimaryChassisRail;

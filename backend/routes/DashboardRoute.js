@@ -11,6 +11,8 @@ const {
   CatcherMCCBModel,
   CTInterfaceLeftModel,
   CTInterfaceRightModel,
+  ChassisRailLeftPrimaryModel,
+  ChassisRailRightPrimaryModel,
 } = require("../models/SubAssemblyModel");
 const WorkOrderModel = require("../models/WorkOrderModel");
 const ComponentModel = require("../models/ComponentModel");
@@ -81,6 +83,14 @@ router.get("/:pdcId/showPDCDashboard", async (req, res) => {
       _id: { $in: pdc.rightCTInterfaces },
     });
 
+    const leftPrimaryChassisRails = await ChassisRailLeftPrimaryModel.find({
+      _id: { $in: pdc.leftPrimaryChassisRails },
+    });
+
+    const rightPrimaryChassisRails = await ChassisRailRightPrimaryModel.find({
+      _id: { $in: pdc.rightPrimaryChassisRails },
+    });
+
     // Find the first Work Order that references this PDC
     const workOrder = await WorkOrderModel.findOne({
       pdcs: pdc._id,
@@ -99,6 +109,8 @@ router.get("/:pdcId/showPDCDashboard", async (req, res) => {
       catcherMCCBs,
       leftCTInterfaces,
       rightCTInterfaces,
+      leftPrimaryChassisRails,
+      rightPrimaryChassisRails,
     });
   } catch (error) {
     res.status(500).json({ message: `Error retrieving pdcs in ${pdcId}` });
@@ -495,6 +507,136 @@ router.get("/:CTId/showRightCTInterfaceDashboard", async (req, res) => {
   }
 });
 
+// C H A S S I S  R A I L  (L E F T) (P R I M A R Y)
+router.get(
+  "/:chassisId/showLeftPrimaryChassisRailDashboard",
+  async (req, res) => {
+    try {
+      const { chassisId } = req.params;
+
+      // Find Chassis Rail Panel based on chassisId
+      const ChassisRail = await ChassisRailLeftPrimaryModel.findOne({
+        chassisId,
+      });
+
+      console.log(ChassisRail);
+
+      if (!ChassisRail) {
+        return res.status(404).json({ message: "Chassis Rail not found" });
+      }
+
+      // Extract the component _id referenced in the Chassis Rail
+      const componentIds = ChassisRail.components.map(
+        (component) => component._id
+      );
+
+      // Find components in the ComponentModel matching the extracted component _ids
+      const components = await ComponentModel.find({
+        _id: { $in: componentIds },
+      });
+
+      const componentData = components.map((component) => ({
+        componentType: component.componentType,
+        componentSerialNumber: component.componentSerialNumber,
+        allocatedDate: component.allocatedDate,
+      }));
+
+      // Find the PDC that contains the given Chassis Rail
+      const pdc = await PDCModel.findOne({
+        leftPrimaryChassisRails: ChassisRail._id,
+      }).populate("leftPrimaryChassisRails");
+
+      if (!pdc) {
+        console.log("PDC not found for the given Chassis Rail");
+      }
+
+      // Find the first Work Order that references this PDC
+      const workOrder = await WorkOrderModel.findOne({
+        pdcs: pdc ? pdc._id : null, // Pass null if pdc is not found
+      });
+      // Extracting workOrderId from the found work order
+      const workOrderId = workOrder ? workOrder.workOrderId : null;
+
+      // Respond with the pdcId of the found PDC along with the populated 'MCCBs'
+      res.status(200).json({
+        pdcId: pdc ? pdc.pdcId : null,
+        workOrderId,
+        leftPrimaryChassisRails: pdc ? pdc.leftPrimaryChassisRails : null,
+        componentData,
+      });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ message: `Error retrieving PDCs for CT Interface` });
+    }
+  }
+);
+
+// C H A S S I S  R A I L  (R I G H T) (P R I M A R Y)
+router.get(
+  "/:chassisId/showRightPrimaryChassisRailDashboard",
+  async (req, res) => {
+    try {
+      const { chassisId } = req.params;
+
+      // Find Chassis Rail Panel based on chassisId
+      const ChassisRail = await ChassisRailRightPrimaryModel.findOne({
+        chassisId,
+      });
+
+      console.log(ChassisRail);
+
+      if (!ChassisRail) {
+        return res.status(404).json({ message: "Chassis Rail not found" });
+      }
+
+      // Extract the component _id referenced in the Chassis Rail
+      const componentIds = ChassisRail.components.map(
+        (component) => component._id
+      );
+
+      // Find components in the ComponentModel matching the extracted component _ids
+      const components = await ComponentModel.find({
+        _id: { $in: componentIds },
+      });
+
+      const componentData = components.map((component) => ({
+        componentType: component.componentType,
+        componentSerialNumber: component.componentSerialNumber,
+        allocatedDate: component.allocatedDate,
+      }));
+
+      // Find the PDC that contains the given Chassis Rail
+      const pdc = await PDCModel.findOne({
+        rightPrimaryChassisRails: ChassisRail._id,
+      }).populate("rightPrimaryChassisRails");
+
+      if (!pdc) {
+        console.log("PDC not found for the given Chassis Rail");
+      }
+
+      // Find the first Work Order that references this PDC
+      const workOrder = await WorkOrderModel.findOne({
+        pdcs: pdc ? pdc._id : null, // Pass null if pdc is not found
+      });
+      // Extracting workOrderId from the found work order
+      const workOrderId = workOrder ? workOrder.workOrderId : null;
+
+      // Respond with the pdcId of the found PDC along with the populated 'MCCBs'
+      res.status(200).json({
+        pdcId: pdc ? pdc.pdcId : null,
+        workOrderId,
+        rightPrimaryChassisRails: pdc ? pdc.rightPrimaryChassisRails : null,
+        componentData,
+      });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ message: `Error retrieving PDCs for CT Interface` });
+    }
+  }
+);
+
 router.get(
   "/:componentSerialNumber/showComponentDashboard",
   async (req, res) => {
@@ -544,6 +686,17 @@ router.get(
       const RightCTInterface = await CTInterfaceRightModel.findOne({
         components: componentObjectId,
       }).populate("components");
+
+      // Find the Chassis Rail that contains the specified component
+      const LeftPrimaryChassisRail = await ChassisRailLeftPrimaryModel.findOne({
+        components: componentObjectId,
+      }).populate("components");
+
+      // Find the Chassis Rail that contains the specified component
+      const RightPrimaryChassisRail =
+        await ChassisRailRightPrimaryModel.findOne({
+          components: componentObjectId,
+        }).populate("components");
 
       // Check if the component is part of a Panel or a Loadbank
       if (panel) {
@@ -808,6 +961,82 @@ router.get(
         res.json({
           component,
           CTId,
+          pdcId,
+          workOrderId,
+          subAssemblyType,
+        });
+      } else if (LeftPrimaryChassisRail) {
+        // Include ChassisId Id in the response
+        const chassisId = LeftPrimaryChassisRail.chassisId;
+        const subAssemblyType = "Chassis Rail (Left) (Primary)";
+
+        // Get the object id of the chassis rail
+        const chassisRailObjectId = LeftPrimaryChassisRail._id;
+
+        // Find the PDC that contains the specified CTInterface
+        const PDC = await PDCModel.findOne({
+          leftPrimaryChassisRails: chassisRailObjectId,
+        }).populate("leftPrimaryChassisRails");
+
+        let pdcId = null;
+        let workOrderId = null;
+
+        // If PDC exists, get its properties
+        if (PDC) {
+          // Get the object id of the pdc
+          pdcId = PDC.pdcId;
+
+          // Get the object id of the pdc
+          const pdcObjectId = PDC._id;
+
+          const WorkOrder = await WorkOrderModel.findOne({
+            pdcs: pdcObjectId,
+          }).populate("pdcs");
+
+          workOrderId = WorkOrder.workOrderId;
+        }
+
+        res.json({
+          component,
+          chassisId,
+          pdcId,
+          workOrderId,
+          subAssemblyType,
+        });
+      } else if (RightPrimaryChassisRail) {
+        // Include ChassisId Id in the response
+        const chassisId = RightPrimaryChassisRail.chassisId;
+        const subAssemblyType = "Chassis Rail (Right) (Primary)";
+
+        // Get the object id of the chassis rail
+        const chassisRailObjectId = RightPrimaryChassisRail._id;
+
+        // Find the PDC that contains the specified CTInterface
+        const PDC = await PDCModel.findOne({
+          rightPrimaryChassisRails: chassisRailObjectId,
+        }).populate("rightPrimaryChassisRails");
+
+        let pdcId = null;
+        let workOrderId = null;
+
+        // If PDC exists, get its properties
+        if (PDC) {
+          // Get the object id of the pdc
+          pdcId = PDC.pdcId;
+
+          // Get the object id of the pdc
+          const pdcObjectId = PDC._id;
+
+          const WorkOrder = await WorkOrderModel.findOne({
+            pdcs: pdcObjectId,
+          }).populate("pdcs");
+
+          workOrderId = WorkOrder.workOrderId;
+        }
+
+        res.json({
+          component,
+          chassisId,
           pdcId,
           workOrderId,
           subAssemblyType,

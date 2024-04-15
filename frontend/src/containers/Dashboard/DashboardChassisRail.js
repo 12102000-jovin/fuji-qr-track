@@ -4,44 +4,45 @@ import axios from "axios";
 import "animate.css";
 import moment from "moment";
 
-const DashboardCTInterface = () => {
-  const { CTId } = useParams();
+const DashboardChassisRail = () => {
+  const { chassisId } = useParams();
   const [dashboardData, setDashboardData] = useState([]);
 
-  const fetchDashboardLeftCTInterfaceData_API = `http://localhost:3001/Dashboard/${CTId}/showLeftCTInterfaceDashboard`;
-  const fetchDashboardRightCTInterfaceData_API = `http://localhost:3001/Dashboard/${CTId}/showRightCTInterfaceDashboard`;
+  const fetchDashboardLeftPrimaryChassisRailData_API = `http://localhost:3001/Dashboard/${chassisId}/showLeftPrimaryChassisRailDashboard`;
+  const fetchDashboardRightPrimaryChassisRailData_API = `http://localhost:3001/Dashboard/${chassisId}/showRightPrimaryChassisRailDashboard`;
 
   useEffect(() => {
-    const isLeftCTInterfacePattern = /^CT\d{6}L-P$/.test(CTId);
-    const isRightCTInterfacePattern = /^CT\d{6}R-P$/.test(CTId);
+    const isLeftPrimaryChassisRailPattern = /^CHR\d{6}L-P$/.test(chassisId);
+    const isRightPrimaryChassisRailPattern = /^CHR\d{6}R-P$/.test(chassisId);
 
-    if (isLeftCTInterfacePattern) {
-      fetchDashboardLeftCTInterfaceData();
-    } else if (isRightCTInterfacePattern) {
-      fetchDashboardRightCTInterfaceData();
+    if (isLeftPrimaryChassisRailPattern) {
+      fetchDashboardLeftPrimaryChassisRailData();
+    } else if (isRightPrimaryChassisRailPattern) {
+      fetchDashboardRightPrimaryChassisRailData();
     }
   }, []);
 
-  const fetchDashboardLeftCTInterfaceData = () => {
+  const fetchDashboardLeftPrimaryChassisRailData = () => {
     axios
-      .get(`${fetchDashboardLeftCTInterfaceData_API}`)
+      .get(`${fetchDashboardLeftPrimaryChassisRailData_API}`)
       .then((response) => {
         setDashboardData(response.data);
         console.log(response.data);
       })
       .catch((error) => {
-        console.error("Error fetching CT Interface data", error);
+        console.error("Error fetching Chassis Rail data", error);
       });
   };
-  const fetchDashboardRightCTInterfaceData = () => {
+
+  const fetchDashboardRightPrimaryChassisRailData = () => {
     axios
-      .get(`${fetchDashboardRightCTInterfaceData_API}`)
+      .get(`${fetchDashboardRightPrimaryChassisRailData_API}`)
       .then((response) => {
         setDashboardData(response.data);
         console.log(response.data);
       })
       .catch((error) => {
-        console.error("Error fetching CT Interface data", error);
+        console.error("Error fetching Chassis Rail data", error);
       });
   };
 
@@ -79,9 +80,9 @@ const DashboardCTInterface = () => {
                 </p>
               </div>
               <div className="flex flex-col items-start p-2">
-                <p className="text-3xl font-bold mb-1">CT Interface</p>
+                <p className="text-3xl font-bold mb-1">Chassis Rail</p>
                 <p className="font-semibold text-white rounded-full inline-block">
-                  {CTId}
+                  {chassisId}
                 </p>
               </div>
             </div>
@@ -132,4 +133,4 @@ const DashboardCTInterface = () => {
   );
 };
 
-export default DashboardCTInterface;
+export default DashboardChassisRail;

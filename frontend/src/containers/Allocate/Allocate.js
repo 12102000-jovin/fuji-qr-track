@@ -80,6 +80,13 @@ const Allocate = () => {
       const isCTInterfaceRightPattern = /^CT\d{6}R-P$/.test(
         subAssemblyInputValue
       );
+      const isChassisRailLeftPrimaryPattern = /^CHR\d{6}L-P$/.test(
+        subAssemblyInputValue
+      );
+
+      const isChassisRailRightPrimaryPattern = /^CHR\d{6}R-P$/.test(
+        subAssemblyInputValue
+      );
 
       if (isPanelPattern) {
         setShowSubAssemblyInput(subAssemblyInputValue);
@@ -108,6 +115,14 @@ const Allocate = () => {
       } else if (isCTInterfaceRightPattern) {
         setShowSubAssemblyInput(subAssemblyInputValue);
         setDetectedType("CT Interface (Right)");
+        setWrongSubAssemblyError(false);
+      } else if (isChassisRailLeftPrimaryPattern) {
+        setShowSubAssemblyInput(subAssemblyInputValue);
+        setDetectedType("Chassis Rail (Left) (Primary)");
+        setWrongSubAssemblyError(false);
+      } else if (isChassisRailRightPrimaryPattern) {
+        setShowSubAssemblyInput(subAssemblyInputValue);
+        setDetectedType("Chassis Rail (Right) (Primary)");
         setWrongSubAssemblyError(false);
       } else {
         try {
@@ -140,6 +155,14 @@ const Allocate = () => {
           } else if (parsedInput.rightCTInterfaceId) {
             setSubAssemblyInputValue(parsedInput.rightCTInterfaceId);
             setDetectedType("CT Interface (Right)");
+            setWrongSubAssemblyError(false);
+          } else if (parsedInput.leftPrimaryChassisRailId) {
+            setSubAssemblyInputValue(parsedInput.leftPrimaryChassisRailId);
+            setDetectedType("Chassis Rail (Left) (Primary)");
+            setWrongSubAssemblyError(false);
+          } else if (parsedInput.rightPrimaryChassisRailId) {
+            setSubAssemblyInputValue(parsedInput.rightPrimaryChassisRailId);
+            setDetectedType("Chassis Rail (Right) (Primary)");
             setWrongSubAssemblyError(false);
           } else {
             setWrongSubAssemblyError(true);

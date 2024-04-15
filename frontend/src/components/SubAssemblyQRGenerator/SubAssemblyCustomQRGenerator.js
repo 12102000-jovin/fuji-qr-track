@@ -54,6 +54,24 @@ const SubAssemblyQRGenerator = () => {
     setShowExpectedRightCTInterfaceRange,
   ] = useState(true);
 
+  const [
+    expectedLeftPrimaryChassisRailRange,
+    setExpectedLeftPrimaryChassisRailRange,
+  ] = useState("");
+  const [
+    showExpectedLeftPrimaryChassisRailRange,
+    setShowExpectedLeftPrimaryChassisRailRange,
+  ] = useState(true);
+
+  const [
+    expectedRightPrimaryChassisRailRange,
+    setExpectedRightPrimaryChassisRailRange,
+  ] = useState("");
+  const [
+    showExpectedRightPrimaryChassisRailRange,
+    setShowExpectedRightPrimaryChassisRailRange,
+  ] = useState(true);
+
   const [selectedSubAssemblyType, setSelectedSubAssemblyType] = useState("");
 
   const linkFormat = "http://localhost:";
@@ -73,6 +91,10 @@ const SubAssemblyQRGenerator = () => {
     "http://localhost:3001/SubAssembly/CTInterfaceLeft/generateSubAssembly";
   const generateRightCTInterface_API =
     "http://localhost:3001/SubAssembly/CTInterfaceRight/generateSubAssembly";
+  const generateLeftPrimaryChassisRail_API =
+    "http://localhost:3001/SubAssembly/LeftPrimaryChassisRail/generateSubAssembly";
+  const generateRightPrimaryChassisRail_API =
+    "http://localhost:3001/SubAssembly/RightPrimaryChassisRail/generateSubAssembly";
 
   // ======================================= P A N E L =======================================
 
@@ -228,6 +250,50 @@ const SubAssemblyQRGenerator = () => {
       );
     } else {
       setExpectedRightCTInterfaceRange("");
+    }
+  }, [numQR, startNum]);
+
+  // ==================================== C H A S S I S  R A I L (L E F T) (P R I M A R Y) =======================================
+
+  useEffect(() => {
+    setShowExpectedLeftPrimaryChassisRailRange(true);
+  }, [numQR]);
+
+  useEffect(() => {
+    if (numQR === "1") {
+      setExpectedLeftPrimaryChassisRailRange(
+        `Expected Output: CHR${formatId(Number(startNum))}L-P`
+      );
+    } else if (numQR > 1 && numQR !== "1") {
+      setExpectedLeftPrimaryChassisRailRange(
+        ` Expected Output: CHR${formatId(Number(startNum))}L-P - CHR${formatId(
+          Number(startNum) + Number(numQR) - 1
+        )}L-P`
+      );
+    } else {
+      setExpectedLeftPrimaryChassisRailRange("");
+    }
+  }, [numQR, startNum]);
+
+  // ==================================== C H A S S I S  R A I L (R I G H T) (P R I M A R Y) =======================================
+
+  useEffect(() => {
+    setShowExpectedRightPrimaryChassisRailRange(true);
+  }, [numQR]);
+
+  useEffect(() => {
+    if (numQR === "1") {
+      setExpectedRightPrimaryChassisRailRange(
+        `Expected Output: CHR${formatId(Number(startNum))}R-P`
+      );
+    } else if (numQR > 1 && numQR !== "1") {
+      setExpectedRightPrimaryChassisRailRange(
+        ` Expected Output: CHR${formatId(Number(startNum))}R-P - CHR${formatId(
+          Number(startNum) + Number(numQR) - 1
+        )}R-P`
+      );
+    } else {
+      setExpectedRightPrimaryChassisRailRange("");
     }
   }, [numQR, startNum]);
 
@@ -503,6 +569,47 @@ const SubAssemblyQRGenerator = () => {
         setDuplicateError("Duplicate CT Interface Found");
         setEmptyInputError(false);
       }
+      // ======================================= C H A S S I S (L E F T) (P R I M A R Y) =======================================
+    } else if (selectedSubAssemblyType === "LeftPrimaryChassisRail") {
+    } else if (selectedSubAssemblyType === "RightPrimaryChassisRail") {
+      const RightPrimaryChassisRails = Array.from(
+        { length: numQR },
+        (_, index) => {
+          const newRightPrimaryChassisRailId = formatId(
+            Number(startNum) + index
+          );
+          return {
+            link: `${linkFormat}${applicationPortNumber}/Dashboard/ChassisRail/CHR${newRightPrimaryChassisRailId}R-P`,
+            generatedDate: moment()
+              .tz("Australia/Sydney")
+              .format("YYYY-MM-DD HH:mm:ss"),
+            chassisId: `CHR${newRightPrimaryChassisRailId}R-P`,
+          };
+        }
+      );
+
+      try {
+        const response = await axios.post(generateRightPrimaryChassisRail_API, {
+          RightPrimaryChassisRails,
+        });
+        console.log(response.data);
+
+        setQRcode(() => {
+          const newQRCodes = response.data.map((qrcode, index) => ({
+            ...qrcode,
+            chassisId: `CHR${formatId(Number(startNum) + index)}R-P`,
+          }));
+          return newQRCodes;
+        });
+
+        setQRGeneratedStatus(true);
+        setShowExpectedRightPrimaryChassisRailRange(false);
+        setEmptyInputError(false);
+      } catch (error) {
+        console.error("Error generating Chassis Rail:", error.message);
+        setDuplicateError("Duplicate Chassis Rail Found");
+        setEmptyInputError(false);
+      }
     } else {
       console.log("Unvalid Type");
     }
@@ -541,7 +648,12 @@ const SubAssemblyQRGenerator = () => {
           ? code.CTId
           : selectedSubAssemblyType === "RightCTInterface"
           ? code.CTId
-          : code.CTId;
+          : selectedSubAssemblyType === "LeftPrimaryChassisRail"
+          ? code.chassisId
+          : selectedSubAssemblyType === "RightPrimaryChassisRail"
+          ? code.chassisId
+          : code.chassisId;
+
       const qrCodeElement = document.getElementById(`qrcode-${id}`);
       const qrCodeCanvas = await html2canvas(qrCodeElement, {
         width: 512,
@@ -578,8 +690,12 @@ const SubAssemblyQRGenerator = () => {
           : selectedSubAssemblyType === "MCCBCatcher"
           ? "MCCB Panel (Catcher) "
           : selectedSubAssemblyType === "LeftCTInterface"
-          ? "CT Iterface (Left) "
-          : "CT Interface (Right)";
+          ? "CT Interface (Left) "
+          : selectedSubAssemblyType === "RightCTInterface"
+          ? "CT Interface (Right) "
+          : selectedSubAssemblyType === "LeftPrimaryChassisRail"
+          ? "Chassis Rail (Left) (Primary) "
+          : "Chassis Rail (Right) (Primary)";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -613,6 +729,12 @@ const SubAssemblyQRGenerator = () => {
     } else if (currentUrl.includes("CTInterfaceRight")) {
       // Set the selected value of the dropdown to "RightCTInterface"
       setSelectedSubAssemblyType("RightCTInterface");
+    } else if (currentUrl.includes("ChassisRailLeftPrimary")) {
+      // Set the selected value of the dropdown to "ChassisRailLeftPrimary"
+      setSelectedSubAssemblyType("LeftPrimaryChassisRail");
+    } else if (currentUrl.includes("ChassisRailRightPrimary")) {
+      // Set the selected value of the dropdown to "ChassisRailRightPrimary"
+      setSelectedSubAssemblyType("RightPrimaryChassisRail");
     }
   }, []);
 
@@ -662,6 +784,12 @@ const SubAssemblyQRGenerator = () => {
               <option value="MCCBCatcher">MCCB Panel (Catcher)</option>
               <option value="LeftCTInterface">CT Interface (Left)</option>
               <option value="RightCTInterface">CT Interface (Right)</option>
+              <option value="LeftPrimaryChassisRail">
+                Chassis Rail (Left) (Primary)
+              </option>
+              <option value="RightPrimaryChassisRail">
+                Chassis Rail (Right) (Primary)
+              </option>
             </select>
             {selectedSubAssemblyType && (
               <div className="mt-5">
@@ -683,7 +811,11 @@ const SubAssemblyQRGenerator = () => {
                       ? "MCCB Panel (Catcher) "
                       : selectedSubAssemblyType === "LeftCTInterface"
                       ? "CT Interface (Left) "
-                      : "CT Interface (Right) "}
+                      : selectedSubAssemblyType === "RightCTInterface"
+                      ? "CT Interface (Right) "
+                      : selectedSubAssemblyType === "LeftPrimaryChassisRail"
+                      ? "Chassis Rail (Left) (Primary) "
+                      : "Chassis Rail (Right) (Primary) "}
                     Number
                   </label>
                   <input
@@ -712,7 +844,11 @@ const SubAssemblyQRGenerator = () => {
                       ? "MCCB Panel (Catcher) "
                       : selectedSubAssemblyType === "LeftCTInterface"
                       ? "CT Interface (Left) "
-                      : "CT Interface (Right) "}
+                      : selectedSubAssemblyType === "RightCTInterface"
+                      ? "CT Interface (Right) "
+                      : selectedSubAssemblyType === "LeftPrimaryChassisRail"
+                      ? "Chassis Rail (Left) (Primary) "
+                      : "Chassis Rail (Right) (Primary) "}
                     QR
                   </label>
                   <input
@@ -787,6 +923,25 @@ const SubAssemblyQRGenerator = () => {
                     <div className="flex justify-start">
                       <p className="mt-2 font-black p-1 text-white bg-secondary text-xs rounded-full pl-2 pr-2">
                         {expectedRightCTInterfaceRange}
+                      </p>
+                    </div>
+                  )}
+                {selectedSubAssemblyType === "LeftPrimaryChassisRail" &&
+                  showExpectedLeftPrimaryChassisRailRange &&
+                  expectedLeftPrimaryChassisRailRange && (
+                    <div className="flex justify-start">
+                      <p className="mt-2 font-black p-1 text-white bg-secondary text-xs rounded-full pl-2 pr-2">
+                        {expectedLeftPrimaryChassisRailRange}
+                      </p>
+                    </div>
+                  )}
+
+                {selectedSubAssemblyType === "RightPrimaryChassisRail" &&
+                  showExpectedRightPrimaryChassisRailRange &&
+                  expectedRightPrimaryChassisRailRange && (
+                    <div className="flex justify-start">
+                      <p className="mt-2 font-black p-1 text-white bg-secondary text-xs rounded-full pl-2 pr-2">
+                        {expectedRightPrimaryChassisRailRange}
                       </p>
                     </div>
                   )}
@@ -1191,6 +1346,130 @@ const SubAssemblyQRGenerator = () => {
                       <button
                         className="bg-signature hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded "
                         onClick={() => handleDownload(code.CTId)}
+                      >
+                        Download
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {/* ================================ C H A S S I S  R A I L (L E F T) (P R I M A R Y)  ================================ */}
+          {selectedSubAssemblyType === "LeftPrimaryChassisRail" && (
+            <div className="flex justify-center flex-wrap mt-5 rounded-xl">
+              {qrCode.map((code, index) => (
+                <div
+                  key={index}
+                  className="p-5 shadow-xl rounded-lg m-5 bg-white"
+                  style={{
+                    color: "#043f9d",
+                    fontFamily: "Avenir, sans-serif",
+                    fontSize: "20px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                  }}
+                >
+                  <div>
+                    <div id={`qrcode-${code.chassisId}`}>
+                      <ReactQRCode
+                        value={JSON.stringify({
+                          link: code.link,
+                          leftPrimaryChassisRailId: code.chassisId,
+                        })}
+                        size={512}
+                        imageSettings={{
+                          src: logo,
+                          excavate: true,
+                          width: 60,
+                          height: 35,
+                        }}
+                      />
+                      <div className="mb-5">
+                        Chassis Rail ID: {code.chassisId}{" "}
+                        <span className="text-red-500 ml-1 mr-1 font-black">
+                          {" "}
+                          (Left)
+                        </span>
+                        <span className="text-red-500 ml-1 mr-1 font-black">
+                          {" "}
+                          (Primary)
+                        </span>
+                      </div>
+                    </div>
+
+                    <img
+                      src={imageData[code.chassisId]}
+                      alt={`Converted ${code.chassisId}`}
+                      style={{ display: "none", margin: "10px auto" }}
+                    />
+
+                    <div className="mt-5 flex items-center justify-center">
+                      <button
+                        className="bg-signature hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded "
+                        onClick={() => handleDownload(code.chassisId)}
+                      >
+                        Download
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {/* ================================ C H A S S I S  R A I L (R I G H T) (P R I M A R Y)  ================================ */}
+          {selectedSubAssemblyType === "RightPrimaryChassisRail" && (
+            <div className="flex justify-center flex-wrap mt-5 rounded-xl">
+              {qrCode.map((code, index) => (
+                <div
+                  key={index}
+                  className="p-5 shadow-xl rounded-lg m-5 bg-white"
+                  style={{
+                    color: "#043f9d",
+                    fontFamily: "Avenir, sans-serif",
+                    fontSize: "20px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                  }}
+                >
+                  <div>
+                    <div id={`qrcode-${code.chassisId}`}>
+                      <ReactQRCode
+                        value={JSON.stringify({
+                          link: code.link,
+                          rightPrimaryChassisRailId: code.chassisId,
+                        })}
+                        size={512}
+                        imageSettings={{
+                          src: logo,
+                          excavate: true,
+                          width: 60,
+                          height: 35,
+                        }}
+                      />
+                      <div className="mb-5">
+                        Chassis Rail ID: {code.chassisId}{" "}
+                        <span className="text-red-500 ml-1 mr-1 font-black">
+                          {" "}
+                          (Right)
+                        </span>
+                        <span className="text-red-500 ml-1 mr-1 font-black">
+                          {" "}
+                          (Primary)
+                        </span>
+                      </div>
+                    </div>
+
+                    <img
+                      src={imageData[code.chassisId]}
+                      alt={`Converted ${code.chassisId}`}
+                      style={{ display: "none", margin: "10px auto" }}
+                    />
+
+                    <div className="mt-5 flex items-center justify-center">
+                      <button
+                        className="bg-signature hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded "
+                        onClick={() => handleDownload(code.chassisId)}
                       >
                         Download
                       </button>

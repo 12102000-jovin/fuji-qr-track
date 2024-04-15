@@ -46,6 +46,7 @@ import DashboardLoadbank from "../../containers/Dashboard/DashboardLoadbank";
 import DashboardComponent from "../../containers/Dashboard/DashboardComponent";
 import DashboardMCCB from "../../containers/Dashboard/DashboardMCCB";
 import DashboardCTInterface from "../../containers/Dashboard/DashboardCTInterface";
+import DashboardChassisRail from "../../containers/Dashboard/DashboardChassisRail";
 import AllocateComponents from "../../containers/Allocate/AllocateComponents";
 import Components from "../../containers/Component/Component";
 import LoadbankPrimary from "../../containers/SubAssembly/Loadbank/LoadbankPrimary";
@@ -54,6 +55,8 @@ import MCCBPrimary from "../../containers/SubAssembly/MCCB/MCCBPrimary";
 import MCCBCatcher from "../../containers/SubAssembly/MCCB/MCCBCatcher";
 import CTInterfaceLeft from "../../containers/SubAssembly/CTInterface/CTInterfaceLeft";
 import CTInterfaceRight from "../../containers/SubAssembly/CTInterface/CTInterfaceRight";
+import ChassisRailLeftPrimary from "../../containers/SubAssembly/ChassisRail/LeftPrimaryChassisRail";
+import ChassisRailRightPrimary from "../../containers/SubAssembly/ChassisRail/RightPrimaryChassisRail";
 
 const drawerWidth = 200;
 
@@ -441,6 +444,16 @@ const NavBar = () => {
                   to="/CTInterfaceRight"
                   primary="CT Interface (Right)"
                 />
+
+                <DropdownMenuItem
+                  to="/ChassisRailLeftPrimary"
+                  primary="Chassis Rail (Left) (Primary)"
+                />
+
+                <DropdownMenuItem
+                  to="/ChassisRailRightPrimary"
+                  primary="Chassis Rail (Right) (Primary)"
+                />
               </Menu>
 
               <ListItem disablePadding sx={{ display: "block" }}>
@@ -564,6 +577,11 @@ const NavBar = () => {
                 path="Dashboard/CTInterface/:CTId"
                 element={<DashboardCTInterface />}
               />
+
+              <Route
+                path="Dashboard/ChassisRail/:chassisId"
+                element={<DashboardChassisRail />}
+              />
               {/* <Route
                 path="/WorkOrderQRGenerator"
                 element={<WorkOrderGenerator />}
@@ -588,6 +606,14 @@ const NavBar = () => {
               <Route path="/MCCBCatcher" element={<MCCBCatcher />} />
               <Route path="/CTInterfaceLeft" element={<CTInterfaceLeft />} />
               <Route path="/CTInterfaceRight" element={<CTInterfaceRight />} />
+              <Route
+                path="/ChassisRailLeftPrimary"
+                element={<ChassisRailLeftPrimary />}
+              />
+              <Route
+                path="/ChassisRailRightPrimary"
+                element={<ChassisRailRightPrimary />}
+              />
             </Routes>
           </Box>
         </Box>
