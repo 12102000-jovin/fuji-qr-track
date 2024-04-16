@@ -47,6 +47,7 @@ import DashboardComponent from "../../containers/Dashboard/DashboardComponent";
 import DashboardMCCB from "../../containers/Dashboard/DashboardMCCB";
 import DashboardCTInterface from "../../containers/Dashboard/DashboardCTInterface";
 import DashboardChassisRail from "../../containers/Dashboard/DashboardChassisRail";
+import DashboardRoof from "../../containers/Dashboard/DashboardRoof";
 import AllocateComponents from "../../containers/Allocate/AllocateComponents";
 import Components from "../../containers/Component/Component";
 import LoadbankPrimary from "../../containers/SubAssembly/Loadbank/LoadbankPrimary";
@@ -59,6 +60,7 @@ import ChassisRailLeftPrimary from "../../containers/SubAssembly/ChassisRail/Lef
 import ChassisRailRightPrimary from "../../containers/SubAssembly/ChassisRail/RightPrimaryChassisRail";
 import ChassisRailLeftCatcher from "../../containers/SubAssembly/ChassisRail/LeftCatcherChassisRail";
 import ChassisRailRightCatcher from "../../containers/SubAssembly/ChassisRail/RightCatcherChassisRail";
+import RoofPrimary from "../../containers/SubAssembly/Roof/RoofPrimary";
 
 const drawerWidth = 200;
 
@@ -466,6 +468,8 @@ const NavBar = () => {
                   to="/ChassisRailRightCatcher"
                   primary="Chassis Rail (Right) (Catcher)"
                 />
+
+                <DropdownMenuItem to="/RoofPrimary" primary="Roof (Primary)" />
               </Menu>
 
               <ListItem disablePadding sx={{ display: "block" }}>
@@ -594,6 +598,11 @@ const NavBar = () => {
                 path="Dashboard/ChassisRail/:chassisId"
                 element={<DashboardChassisRail />}
               />
+
+              <Route
+                path="Dashboard/Roof/:roofId"
+                element={<DashboardRoof />}
+              />
               {/* <Route
                 path="/WorkOrderQRGenerator"
                 element={<WorkOrderGenerator />}
@@ -634,6 +643,7 @@ const NavBar = () => {
                 path="/ChassisRailRightCatcher"
                 element={<ChassisRailRightCatcher />}
               />
+              <Route path="/RoofPrimary" element={<RoofPrimary />} />
             </Routes>
           </Box>
         </Box>

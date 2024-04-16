@@ -77,6 +77,12 @@ const Dashboard = () => {
                 {dashboardData && dashboardData.CTId && (
                   <p className="font-semibold">{dashboardData.CTId}</p>
                 )}
+                {dashboardData && dashboardData.chassisId && (
+                  <p className="font-semibold">{dashboardData.chassisId}</p>
+                )}
+                {dashboardData && dashboardData.roofId && (
+                  <p className="font-semibold">{dashboardData.roofId}</p>
+                )}
               </div>
             </div>
           </div>

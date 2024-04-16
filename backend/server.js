@@ -59,6 +59,9 @@ app.use("/SubAssembly", CTInterfaceRoute);
 const ChassisRailRoute = require("./routes/ChassisRailRoute");
 app.use("/SubAssembly", ChassisRailRoute);
 
+const RoofRoute = require("./routes/RoofRoute");
+app.use("/SubAssembly", RoofRoute);
+
 const allocateRoute = require("./routes/AllocateRoute");
 app.use("/Allocate", allocateRoute);
 

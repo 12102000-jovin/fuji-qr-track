@@ -84,6 +84,12 @@ const PDCSchema = new mongoose.Schema(
         ref: "RightCatcherChassisRailModel",
       },
     ],
+    primaryRoofs: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "PrimaryRoofModel",
+      },
+    ],
   },
   {
     collection: "pdc",

@@ -18,6 +18,7 @@ const {
   ChassisRailRightPrimaryModel,
   ChassisRailLeftCatcherModel,
   ChassisRailRightCatcherModel,
+  RoofPrimaryModel,
 } = require("../models/SubAssemblyModel");
 
 // Generate PDC API
@@ -207,6 +208,15 @@ router.delete("/deletePDC/:pdcId", async (req, res) => {
       {
         _id: {
           $in: [...pdcToDelete.rightCatcherChassisRails],
+        },
+      },
+      { $set: { isAllocated: false, allocatedDate: null } }
+    );
+
+    await RoofPrimaryModel.updateMany(
+      {
+        _id: {
+          $in: [...pdcToDelete.primaryRoofs],
         },
       },
       { $set: { isAllocated: false, allocatedDate: null } }

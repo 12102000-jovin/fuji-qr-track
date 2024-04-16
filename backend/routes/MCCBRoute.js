@@ -1,5 +1,4 @@
 const express = require("express");
-const { route } = require("./AllocateRoute");
 
 const router = express.Router();
 

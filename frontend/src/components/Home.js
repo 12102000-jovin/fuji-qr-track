@@ -196,6 +196,12 @@ const Home = () => {
               >
                 Chassis Rail (Right) (Catcher)
               </a>
+              <a
+                href="/RoofPrimary"
+                class="border p-4 rounded-md shadow-sm bg-gray-100 hover:bg-blue-100 "
+              >
+                Roof (Primary)
+              </a>
             </div>
           </div>
           <div class="bg-white rounded-lg shadow-md">

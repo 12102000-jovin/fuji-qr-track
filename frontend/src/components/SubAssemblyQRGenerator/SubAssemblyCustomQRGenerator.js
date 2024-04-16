@@ -90,6 +90,10 @@ const SubAssemblyQRGenerator = () => {
     setShowExpectedRightCatcherChassisRailRange,
   ] = useState(true);
 
+  const [expectedPrimaryRoofRange, setExpectedPrimaryRoofRange] = useState("");
+  const [showExpectedPrimaryRoofRange, setShowExpectedPrimaryRoofRange] =
+    useState(true);
+
   const [selectedSubAssemblyType, setSelectedSubAssemblyType] = useState("");
 
   const linkFormat = "http://localhost:";
@@ -117,6 +121,8 @@ const SubAssemblyQRGenerator = () => {
     "http://localhost:3001/SubAssembly/LeftCatcherChassisRail/generateSubAssembly";
   const generateRightCatcherChassisRail_API =
     "http://localhost:3001/SubAssembly/RightCatcherChassisRail/generateSubAssembly";
+  const generatePrimaryRoof_API =
+    "http://localhost:3001/SubAssembly/RoofPrimary/generateSubAssembly";
 
   // ======================================= P A N E L =======================================
 
@@ -360,6 +366,28 @@ const SubAssemblyQRGenerator = () => {
       );
     } else {
       setExpectedRightCatcherChassisRailRange("");
+    }
+  }, [numQR, startNum]);
+
+  // ==================================== R O O F (P R I M A R Y) =======================================
+
+  useEffect(() => {
+    setShowExpectedPrimaryRoofRange(true);
+  }, [numQR]);
+
+  useEffect(() => {
+    if (numQR === "1") {
+      setExpectedPrimaryRoofRange(
+        `Expected Output: ROOF${formatId(Number(startNum))}-P`
+      );
+    } else if (numQR > 1 && numQR !== "1") {
+      setExpectedPrimaryRoofRange(
+        ` Expected Output: ROOF${formatId(Number(startNum))}-P - ROOF${formatId(
+          Number(startNum) + Number(numQR) - 1
+        )}-P`
+      );
+    } else {
+      setExpectedPrimaryRoofRange("");
     }
   }, [numQR, startNum]);
 
@@ -762,7 +790,7 @@ const SubAssemblyQRGenerator = () => {
             Number(startNum) + index
           );
           return {
-            link: `${linkFormat}${applicationPortNumber}/Dashboard/ChassisRail/CHR${newRightCatcherChassisRailId}L-C`,
+            link: `${linkFormat}${applicationPortNumber}/Dashboard/ChassisRail/CHR${newRightCatcherChassisRailId}R-C`,
             generatedDate: moment()
               .tz("Australia/Sydney")
               .format("YYYY-MM-DD HH:mm:ss"),
@@ -791,6 +819,40 @@ const SubAssemblyQRGenerator = () => {
       } catch (error) {
         console.error("Error generating Chassis Rail:", error.message);
         setDuplicateError("Duplicate Chassis Rail Found");
+        setEmptyInputError(false);
+      }
+    } else if (selectedSubAssemblyType === "PrimaryRoof") {
+      const PrimaryRoofs = Array.from({ length: numQR }, (_, index) => {
+        const newPrimaryRoofId = formatId(Number(startNum) + index);
+        return {
+          link: `${linkFormat}${applicationPortNumber}/Dashboard/Roof/ROOF${newPrimaryRoofId}-P`,
+          generatedDate: moment()
+            .tz("Australia/Sydney")
+            .format("YYYY-MM-DD HH:mm:ss"),
+          roofId: `ROOF${newPrimaryRoofId}-P`,
+        };
+      });
+
+      try {
+        const response = await axios.post(generatePrimaryRoof_API, {
+          PrimaryRoofs,
+        });
+        console.log(response.data);
+
+        setQRcode(() => {
+          const newQRCodes = response.data.map((qrcode, index) => ({
+            ...qrcode,
+            roofId: `ROOF${formatId(Number(startNum) + index)}-P`,
+          }));
+          return newQRCodes;
+        });
+
+        setQRGeneratedStatus(true);
+        setShowExpectedPrimaryRoofRange(false);
+        setEmptyInputError(false);
+      } catch (error) {
+        console.error("Error generating Roof:", error.message);
+        setDuplicateError("Duplicate Roof Found");
         setEmptyInputError(false);
       }
     } else {
@@ -839,7 +901,9 @@ const SubAssemblyQRGenerator = () => {
           ? code.chassisId
           : selectedSubAssemblyType === "RightCatcherChassisRail"
           ? code.chassisId
-          : code.chassisId;
+          : selectedSubAssemblyType === "PrimaryRoof"
+          ? code.roofId
+          : code.roofId;
 
       const qrCodeElement = document.getElementById(`qrcode-${id}`);
       const qrCodeCanvas = await html2canvas(qrCodeElement, {
@@ -886,7 +950,9 @@ const SubAssemblyQRGenerator = () => {
           ? "Chassis Rail (Right) (Primary) "
           : selectedSubAssemblyType === "LeftCatcherChassisRail"
           ? "Chassis Rail (Left) (Catcher) "
-          : "Chassis Rail (Right) (Catcher)";
+          : selectedSubAssemblyType === "RightCatcherChassisRail"
+          ? "Chassis Rail (Right) (Catcher) "
+          : "Roof (Primary)";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -932,6 +998,9 @@ const SubAssemblyQRGenerator = () => {
     } else if (currentUrl.includes("ChassisRailRightCatcher")) {
       // Set the selected value of the dropdown to "ChassisRailRightCatcher"
       setSelectedSubAssemblyType("RightCatcherChassisRail");
+    } else if (currentUrl.includes("RoofPrimary")) {
+      // Set the selected value of the dropdown to "PrimaryRoof"
+      setSelectedSubAssemblyType("PrimaryRoof");
     }
   }, []);
 
@@ -993,6 +1062,7 @@ const SubAssemblyQRGenerator = () => {
               <option value="RightCatcherChassisRail">
                 Chassis Rail (Right) (Catcher)
               </option>
+              <option value="PrimaryRoof">Roof (Primary)</option>
             </select>
             {selectedSubAssemblyType && (
               <div className="mt-5">
@@ -1022,7 +1092,9 @@ const SubAssemblyQRGenerator = () => {
                       ? "Chassis Rail (Right) (Primary) "
                       : selectedSubAssemblyType === "LeftCatcherChassisRail"
                       ? "Chassis Rail (Left) (Catcher) "
-                      : "Chassis Rail (Right) (Catcher) "}
+                      : selectedSubAssemblyType === "RightCatcherChassisRail"
+                      ? "Chassis Rail (Right) (Catcher) "
+                      : "Primary (Roof) "}
                     Number
                   </label>
                   <input
@@ -1059,7 +1131,9 @@ const SubAssemblyQRGenerator = () => {
                       ? "Chassis Rail (Right) (Primary) "
                       : selectedSubAssemblyType === "LeftCatcherChassisRail"
                       ? "Chassis Rail (Left) (Catcher) "
-                      : "Chassis Rail (Right) (Catcher) "}
+                      : selectedSubAssemblyType === "RightCatcherChassisRail"
+                      ? "Chassis Rail (Right) (Catcher) "
+                      : "Primary (Roof) "}
                     QR
                   </label>
                   <input
@@ -1173,6 +1247,16 @@ const SubAssemblyQRGenerator = () => {
                     <div className="flex justify-start">
                       <p className="mt-2 font-black p-1 text-white bg-secondary text-xs rounded-full pl-2 pr-2">
                         {expectedRightCatcherChassisRailRange}
+                      </p>
+                    </div>
+                  )}
+
+                {selectedSubAssemblyType === "PrimaryRoof" &&
+                  showExpectedPrimaryRoofRange &&
+                  expectedPrimaryRoofRange && (
+                    <div className="flex justify-start">
+                      <p className="mt-2 font-black p-1 text-white bg-secondary text-xs rounded-full pl-2 pr-2">
+                        {expectedPrimaryRoofRange}
                       </p>
                     </div>
                   )}
@@ -1710,7 +1794,7 @@ const SubAssemblyQRGenerator = () => {
               ))}
             </div>
           )}
-          {/* ================================ C H A S S I S  R A I L (L E F T) (P R I M A R Y)  ================================ */}
+          {/* ================================ C H A S S I S  R A I L (L E F T) (C A T C H E R)  ================================ */}
           {selectedSubAssemblyType === "LeftCatcherChassisRail" && (
             <div className="flex justify-center flex-wrap mt-5 rounded-xl">
               {qrCode.map((code, index) => (
@@ -1772,7 +1856,7 @@ const SubAssemblyQRGenerator = () => {
               ))}
             </div>
           )}
-          {/* ================================ C H A S S I S  R A I L (R I G H T) (P R I M A R Y)  ================================ */}
+          {/* ================================ C H A S S I S  R A I L (R I G H T) (C A T C H E R)  ================================ */}
           {selectedSubAssemblyType === "RightCatcherChassisRail" && (
             <div className="flex justify-center flex-wrap mt-5 rounded-xl">
               {qrCode.map((code, index) => (
@@ -1825,6 +1909,64 @@ const SubAssemblyQRGenerator = () => {
                       <button
                         className="bg-signature hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded "
                         onClick={() => handleDownload(code.chassisId)}
+                      >
+                        Download
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {/* ================================ R O O F (P R I M A R Y )  ================================ */}
+          {selectedSubAssemblyType === "PrimaryRoof" && (
+            <div className="flex justify-center flex-wrap mt-5 rounded-xl">
+              {qrCode.map((code, index) => (
+                <div
+                  key={index}
+                  className="p-5 shadow-xl rounded-lg m-5 bg-white"
+                  style={{
+                    color: "#043f9d",
+                    fontFamily: "Avenir, sans-serif",
+                    fontSize: "20px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                  }}
+                >
+                  <div>
+                    <div id={`qrcode-${code.roofId}`}>
+                      <ReactQRCode
+                        value={JSON.stringify({
+                          link: code.link,
+                          primaryRoofId: code.roofId,
+                        })}
+                        size={512}
+                        imageSettings={{
+                          src: logo,
+                          excavate: true,
+                          width: 60,
+                          height: 35,
+                        }}
+                      />
+                      <div className="mb-5">
+                        Roof ID: {code.roofId}{" "}
+                        <span className="text-red-500 ml-1 mr-1 font-black">
+                          {" "}
+                          (Primary)
+                        </span>
+                      </div>
+                    </div>
+
+                    <img
+                      src={imageData[code.roofId]}
+                      alt={`Converted ${code.roofId}`}
+                      style={{ display: "none", margin: "10px auto" }}
+                    />
+
+                    <div className="mt-5 flex items-center justify-center">
+                      <button
+                        className="bg-signature hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded "
+                        onClick={() => handleDownload(code.roofId)}
                       >
                         Download
                       </button>

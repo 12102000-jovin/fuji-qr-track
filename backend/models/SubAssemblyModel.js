@@ -385,6 +385,41 @@ const ChassisRailRightCatcherSchema = new mongoose.Schema(
   }
 );
 
+const RoofPrimarySchema = new mongoose.Schema(
+  {
+    link: {
+      required: true,
+      type: String,
+      unique: true,
+    },
+    generatedDate: {
+      type: String,
+      // required: true,
+    },
+    roofId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    allocatedDate: {
+      type: String,
+    },
+    isAllocated: {
+      type: Boolean,
+      default: false,
+    },
+    components: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ComponentModel",
+      },
+    ],
+  },
+  {
+    collection: "primaryRoof",
+  }
+);
+
 // Export both models
 module.exports = {
   LoadbankModel: mongoose.model("LoadbankModel", LoadbankSchema),
@@ -419,4 +454,5 @@ module.exports = {
     "RightCatcherChassisRailModel",
     ChassisRailRightCatcherSchema
   ),
+  RoofPrimaryModel: mongoose.model("PrimaryRoofModel", RoofPrimarySchema),
 };

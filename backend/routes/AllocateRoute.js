@@ -13,6 +13,7 @@ const {
   ChassisRailRightPrimaryModel,
   ChassisRailLeftCatcherModel,
   ChassisRailRightCatcherModel,
+  RoofPrimaryModel,
 } = require("../models/SubAssemblyModel");
 const ComponentModel = require("../models/ComponentModel");
 
@@ -116,6 +117,8 @@ router.post("/AllocateSubAssembly", async (req, res) => {
     const isChassisRailRightCatcherPattern = /^CHR\d{6}R-C$/.test(
       subAssemblyInputValue
     );
+
+    const isRoofPrimaryPattern = /^ROOF\d{6}-P$/.test(subAssemblyInputValue);
 
     const pdc = await PDCModel.findOne({
       pdcId: `${inputPDCValue}`,
@@ -693,6 +696,56 @@ router.post("/AllocateSubAssembly", async (req, res) => {
 
         // Save both the Chassis Rail and the updated PDC document
         await ChassisRail.save();
+        await pdc.save();
+
+        //  Respond with success message and the updated PDC
+        const response = "Sub-Assembly allocation successful";
+        return res.status(200).json({ message: response });
+      } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
+    } else if (isRoofPrimaryPattern) {
+      try {
+        // Check if Roof Primary exists
+        const PrimaryRoof = await RoofPrimaryModel.findOne({
+          roofId: subAssemblyInputValue,
+        });
+
+        if (!PrimaryRoof) {
+          return res.status(404).json({ message: "Roof not found" });
+        }
+
+        // Check if the Roof already exists in the PDC
+        if (pdc.primaryRoofs.some((roofId) => roofId.equals(PrimaryRoof._id))) {
+          return res.status(400).json({
+            message: `The Primary Roof already exists in the ${pdc.pdcId}`,
+          });
+        }
+
+        if (pdc.primaryRoofs.length > 0) {
+          return res.status(400).json({
+            message: `Other Primary Roof already exists in the ${pdc.pdcId}`,
+          });
+        }
+
+        if (PrimaryRoof.isAllocated === true) {
+          return res.status(404).json({
+            message: `${PrimaryRoof.roofId} Primary Roof has been allocated to other PDC`,
+          });
+        }
+
+        // Set the allocated date for the Primary Roof
+        PrimaryRoof.allocatedDate = new Date();
+
+        // Set the isAllocated Flag to true
+        PrimaryRoof.isAllocated = true;
+
+        // Associate the Chassis Rail Panel with the PDC by adding its ObjectId to the MCCBs array
+        pdc.primaryRoofs.push(PrimaryRoof._id);
+
+        // Save both the Chassis Rail and the updated PDC document
+        await PrimaryRoof.save();
         await pdc.save();
 
         //  Respond with success message and the updated PDC
@@ -1374,6 +1427,68 @@ router.post("/AllocateRightCatcherChassisRailComponent", async (req, res) => {
 
     return res.status(200).json({
       message: "Component allocated to the Chassis Rail successfully ",
+    });
+  } catch (error) {
+    console.error("Error in allocation:", error);
+    // Handle the error and send an appropriate response
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.post("/AllocatePrimaryRoofComponent", async (req, res) => {
+  try {
+    const {
+      componentSerialNumber,
+      componentType,
+      componentDescription,
+      roofId,
+    } = req.body;
+
+    const existingComponent = await ComponentModel.findOne({
+      componentSerialNumber,
+    });
+
+    if (existingComponent) {
+      return res.status(409).json({
+        message:
+          "Component already allocated. Please select a different component.",
+      });
+    }
+
+    // Check if a component with the same type is already allocated to the Roof
+    const RoofPrimary = await RoofPrimaryModel.findOne({
+      roofId,
+    }).populate("components");
+
+    if (!RoofPrimary) {
+      return res.status(404).json({ message: "Roof not found" });
+    }
+
+    const existingComponentType = RoofPrimary.components.find(
+      (component) => component.componentType === componentType
+    );
+
+    if (existingComponentType) {
+      return res.status(409).json({
+        message: `${existingComponentType.componentType} with serial number [${existingComponentType.componentSerialNumber}] is already allocated to the Roof. Please choose another component.`,
+      });
+    }
+
+    // If there are no existing components, proceed to insert new components
+    const component = new ComponentModel({
+      componentSerialNumber,
+      componentType,
+      componentDescription,
+      allocatedDate: new Date(),
+    });
+
+    await component.save();
+
+    RoofPrimary.components.push(component._id);
+    await RoofPrimary.save();
+
+    return res.status(200).json({
+      message: "Component allocated to the Roof successfully ",
     });
   } catch (error) {
     console.error("Error in allocation:", error);
