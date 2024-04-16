@@ -14,6 +14,7 @@ const {
   ChassisRailLeftPrimaryModel,
   ChassisRailRightPrimaryModel,
   ChassisRailLeftCatcherModel,
+  ChassisRailRightCatcherModel,
 } = require("../models/SubAssemblyModel");
 
 router.get("/getAllComponents", async (req, res) => {
@@ -96,6 +97,12 @@ router.delete("/deleteComponent/:componentSerialNumber", async (req, res) => {
 
     // Extract the _id field of the deleted component
     await ChassisRailLeftCatcherModel.updateMany(
+      { components: deletedComponentObjectId },
+      { $pull: { components: deletedComponentObjectId } }
+    );
+
+    // Extract the _id field of the deleted component
+    await ChassisRailRightCatcherModel.updateMany(
       { components: deletedComponentObjectId },
       { $pull: { components: deletedComponentObjectId } }
     );

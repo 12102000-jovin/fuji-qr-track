@@ -58,6 +58,7 @@ import CTInterfaceRight from "../../containers/SubAssembly/CTInterface/CTInterfa
 import ChassisRailLeftPrimary from "../../containers/SubAssembly/ChassisRail/LeftPrimaryChassisRail";
 import ChassisRailRightPrimary from "../../containers/SubAssembly/ChassisRail/RightPrimaryChassisRail";
 import ChassisRailLeftCatcher from "../../containers/SubAssembly/ChassisRail/LeftCatcherChassisRail";
+import ChassisRailRightCatcher from "../../containers/SubAssembly/ChassisRail/RightCatcherChassisRail";
 
 const drawerWidth = 200;
 
@@ -460,6 +461,11 @@ const NavBar = () => {
                   to="/ChassisRailLeftCatcher"
                   primary="Chassis Rail (Left) (Catcher)"
                 />
+
+                <DropdownMenuItem
+                  to="/ChassisRailRightCatcher"
+                  primary="Chassis Rail (Right) (Catcher)"
+                />
               </Menu>
 
               <ListItem disablePadding sx={{ display: "block" }}>
@@ -623,6 +629,10 @@ const NavBar = () => {
               <Route
                 path="/ChassisRailLeftCatcher"
                 element={<ChassisRailLeftCatcher />}
+              />
+              <Route
+                path="/ChassisRailRightCatcher"
+                element={<ChassisRailRightCatcher />}
               />
             </Routes>
           </Box>

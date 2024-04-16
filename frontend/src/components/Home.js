@@ -136,7 +136,6 @@ const Home = () => {
               >
                 Control Panel
               </a>
-
               <a
                 href="/LoadbankPrimary"
                 class="border p-4 rounded-md shadow-sm bg-gray-100 hover:bg-blue-100 "
@@ -160,6 +159,42 @@ const Home = () => {
                 class="border p-4 rounded-md shadow-sm bg-gray-100 hover:bg-blue-100 "
               >
                 MCCB Panel (Catcher)
+              </a>
+              <a
+                href="/CTInterfaceLeft"
+                class="border p-4 rounded-md shadow-sm bg-gray-100 hover:bg-blue-100 "
+              >
+                CT Interface (Left)
+              </a>{" "}
+              <a
+                href="/CTInterfaceRight"
+                class="border p-4 rounded-md shadow-sm bg-gray-100 hover:bg-blue-100 "
+              >
+                CT Interface (Right)
+              </a>
+              <a
+                href="/ChassisRailLeftPrimary"
+                class="border p-4 rounded-md shadow-sm bg-gray-100 hover:bg-blue-100 "
+              >
+                Chassis Rail (Left) (Primary)
+              </a>
+              <a
+                href="/ChassisRailRightPrimary"
+                class="border p-4 rounded-md shadow-sm bg-gray-100 hover:bg-blue-100 "
+              >
+                Chassis Rail (Right) (Primary)
+              </a>
+              <a
+                href="/ChassisRailLeftCatcher"
+                class="border p-4 rounded-md shadow-sm bg-gray-100 hover:bg-blue-100 "
+              >
+                Chassis Rail (Left) (Catcher)
+              </a>
+              <a
+                href="/ChassisRailRightCatcher"
+                class="border p-4 rounded-md shadow-sm bg-gray-100 hover:bg-blue-100 "
+              >
+                Chassis Rail (Right) (Catcher)
               </a>
             </div>
           </div>

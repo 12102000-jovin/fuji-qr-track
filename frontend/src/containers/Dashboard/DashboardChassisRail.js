@@ -11,11 +11,13 @@ const DashboardChassisRail = () => {
   const fetchDashboardLeftPrimaryChassisRailData_API = `http://localhost:3001/Dashboard/${chassisId}/showLeftPrimaryChassisRailDashboard`;
   const fetchDashboardRightPrimaryChassisRailData_API = `http://localhost:3001/Dashboard/${chassisId}/showRightPrimaryChassisRailDashboard`;
   const fetchDashboardLeftCatcherChassisRailData_API = `http://localhost:3001/Dashboard/${chassisId}/showLeftCatcherChassisRailDashboard`;
+  const fetchDashboardRightCatcherChassisRailData_API = `http://localhost:3001/Dashboard/${chassisId}/showRightCatcherChassisRailDashboard`;
 
   useEffect(() => {
     const isLeftPrimaryChassisRailPattern = /^CHR\d{6}L-P$/.test(chassisId);
     const isRightPrimaryChassisRailPattern = /^CHR\d{6}R-P$/.test(chassisId);
     const isLeftCatcherChassisRailPattern = /^CHR\d{6}L-C$/.test(chassisId);
+    const isRightCatcherChassisRailPattern = /^CHR\d{6}R-C$/.test(chassisId);
 
     if (isLeftPrimaryChassisRailPattern) {
       fetchDashboardLeftPrimaryChassisRailData();
@@ -23,6 +25,8 @@ const DashboardChassisRail = () => {
       fetchDashboardRightPrimaryChassisRailData();
     } else if (isLeftCatcherChassisRailPattern) {
       fetchDashboardLeftCatcherChassisRailData();
+    } else if (isRightCatcherChassisRailPattern) {
+      fetchDashboardRightCatcherChassisRailData();
     }
   }, []);
 
@@ -53,6 +57,18 @@ const DashboardChassisRail = () => {
   const fetchDashboardLeftCatcherChassisRailData = () => {
     axios
       .get(`${fetchDashboardLeftCatcherChassisRailData_API}`)
+      .then((response) => {
+        setDashboardData(response.data);
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching Chassis Rail data", error);
+      });
+  };
+
+  const fetchDashboardRightCatcherChassisRailData = () => {
+    axios
+      .get(`${fetchDashboardRightCatcherChassisRailData_API}`)
       .then((response) => {
         setDashboardData(response.data);
         console.log(response.data);

@@ -350,6 +350,41 @@ const ChassisRailLeftCatcherSchema = new mongoose.Schema(
   }
 );
 
+const ChassisRailRightCatcherSchema = new mongoose.Schema(
+  {
+    link: {
+      required: true,
+      type: String,
+      unique: true,
+    },
+    generatedDate: {
+      type: String,
+      // required: true,
+    },
+    chassisId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    allocatedDate: {
+      type: String,
+    },
+    isAllocated: {
+      type: Boolean,
+      default: false,
+    },
+    components: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ComponentModel",
+      },
+    ],
+  },
+  {
+    collection: "rightCatcherChassisRail",
+  }
+);
+
 // Export both models
 module.exports = {
   LoadbankModel: mongoose.model("LoadbankModel", LoadbankSchema),
@@ -379,5 +414,9 @@ module.exports = {
   ChassisRailLeftCatcherModel: mongoose.model(
     "LeftCatcherChassisRailModel",
     ChassisRailLeftCatcherSchema
+  ),
+  ChassisRailRightCatcherModel: mongoose.model(
+    "RightCatcherChassisRailModel",
+    ChassisRailRightCatcherSchema
   ),
 };

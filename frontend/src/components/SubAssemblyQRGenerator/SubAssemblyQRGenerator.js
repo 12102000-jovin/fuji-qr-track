@@ -88,6 +88,17 @@ const SubAssemblyQRGenerator = () => {
     setShowExpectedLeftCatcherChassisRailRange,
   ] = useState(true);
 
+  const [latestRightCatcherChassisRailId, setLatestRightCatcherChassisRailId] =
+    useState("0");
+  const [
+    expectedRightCatcherChassisRailRange,
+    setExpectedRightCatcherChassisRailRange,
+  ] = useState("");
+  const [
+    showExpectedRightCatcherChassisRailRange,
+    setShowExpectedRightCatcherChassisRailRange,
+  ] = useState(true);
+
   const [emptyInputError, setEmptyInputError] = useState(false);
   const [qrGeneratedStatus, setQRGeneratedStatus] = useState(false);
   const [qrCode, setQRcode] = useState([]);
@@ -145,6 +156,11 @@ const SubAssemblyQRGenerator = () => {
     "http://localhost:3001/SubAssembly/LeftCatcherChassisRail/generateSubAssembly";
   const getLatestLeftCatcherChassisRail_API =
     "http://localhost:3001/SubAssembly/LeftCatcherChassisRail/getLatestChassisRail";
+
+  const generateRightCatcherChassisRail_API =
+    "http://localhost:3001/SubAssembly/RightCatcherChassisRail/generateSubAssembly";
+  const getLatestRightCatcherChassisRail_API =
+    "http://localhost:3001/SubAssembly/RightCatcherChassisRail/getLatestChassisRail";
 
   // ======================================= P A N E L =======================================
   useEffect(() => {
@@ -599,6 +615,55 @@ const SubAssemblyQRGenerator = () => {
     return ChasissRailString.replace("CHR", "").replace("L-C", "");
   };
 
+  // ==================================== C H A S S I S  R A I L  (R I G H T) (C A T C H E R) =======================================
+  useEffect(() => {
+    fetchLatestRightCatcherChassisRail();
+  }, []);
+
+  useEffect(() => {
+    if (numQR === "1") {
+      setExpectedRightCatcherChassisRailRange(
+        `Expected Output: CHR${formatId(
+          Number(latestRightCatcherChassisRailId) + 1
+        )}R-C`
+      );
+    } else if (numQR > 1 && numQR !== "1") {
+      setExpectedRightCatcherChassisRailRange(
+        ` Expected Output: CHR${formatId(
+          Number(latestRightCatcherChassisRailId) + 1
+        )}R-C - CHR${formatId(
+          Number(latestRightCatcherChassisRailId) + Number(numQR)
+        )}R-C`
+      );
+    } else {
+      setExpectedRightCatcherChassisRailRange("");
+    }
+  }, [numQR, latestRightCatcherChassisRailId]);
+
+  useEffect(() => {
+    setShowExpectedRightCatcherChassisRailRange(true);
+  }, [numQR]);
+
+  const fetchLatestRightCatcherChassisRail = async () => {
+    try {
+      const response = await axios.get(getLatestRightCatcherChassisRail_API);
+      const latestRightCatcherChassisRail = response.data;
+      const latestRightCatcherChassisRailId = extractRightCatcherChassisRailId(
+        latestRightCatcherChassisRail
+      );
+      setLatestRightCatcherChassisRailId(
+        Number(latestRightCatcherChassisRailId)
+      );
+    } catch (error) {
+      console.error("Error fetching latest Chassis Rail:", error.message);
+    }
+  };
+
+  const extractRightCatcherChassisRailId = (ChasissRailString) => {
+    // Remove "ChasissRail" prefix and "P" suffix from the ChasissRailString
+    return ChasissRailString.replace("CHR", "").replace("R-C", "");
+  };
+
   // ==================================== S U B M I T =======================================
 
   useEffect(() => {
@@ -996,6 +1061,47 @@ const SubAssemblyQRGenerator = () => {
       } catch (error) {
         console.error("Error generating Chassis Rail:", error.message);
       }
+    } else if (selectedSubAssemblyType === "RightCatcherChassisRail") {
+      const RightCatcherChassisRails = Array.from(
+        { length: numQR },
+        (_, index) => {
+          const newRightCatcherChassisId = formatId(
+            Number(latestRightCatcherChassisRailId + 1) + index
+          );
+
+          return {
+            link: `${linkFormat}${applicationPortNumber}/Dashboard/ChassisRail/CHR${newRightCatcherChassisId}R-C`,
+            generatedDate: moment()
+              .tz("Australia/Sydney")
+              .format("YYYY-MM-DD HH:mm:ss"),
+            chassisId: `CHR${newRightCatcherChassisId}R-C`,
+          };
+        }
+      );
+
+      try {
+        const response = await axios.post(generateRightCatcherChassisRail_API, {
+          RightCatcherChassisRails,
+        });
+        console.log(response.data);
+        fetchLatestRightCatcherChassisRail();
+
+        setQRcode(() => {
+          const newQRCodes = response.data.map((qrcode, index) => ({
+            ...qrcode,
+            chassisId: `CHR${formatId(
+              Number(latestRightCatcherChassisRailId + 1) + index
+            )}R-C`,
+          }));
+          return newQRCodes;
+        });
+
+        setQRGeneratedStatus(true);
+        setShowExpectedRightCatcherChassisRailRange(false);
+        setEmptyInputError(false);
+      } catch (error) {
+        console.error("Error generating Chassis Rail:", error.message);
+      }
     } else {
       console.log("Unvalid Type");
     }
@@ -1046,6 +1152,10 @@ const SubAssemblyQRGenerator = () => {
       // Set the selected value of the dropdown to "LeftCatcherChassisRail"
       setSelectedSubAssemblyType("LeftCatcherChassisRail");
       fetchLatestLeftCatcherChassisRail();
+    } else if (currentUrl.includes("ChassisRailRightCatcher")) {
+      // Set the selected value of the dropdown to "RightCatcherChassisRail"
+      setSelectedSubAssemblyType("RightCatcherChassisRail");
+      fetchLatestRightCatcherChassisRail();
     }
   }, []);
 
@@ -1087,6 +1197,8 @@ const SubAssemblyQRGenerator = () => {
           : selectedSubAssemblyType === "RightPrimaryChassisRail"
           ? code.chassisId
           : selectedSubAssemblyType === "LeftCatcherChassisRail"
+          ? code.chassisId
+          : selectedSubAssemblyType === "RightCatcherChassisRail"
           ? code.chassisId
           : code.chassisId;
 
@@ -1133,7 +1245,9 @@ const SubAssemblyQRGenerator = () => {
           ? "Chassis Rail (Left (Primary)"
           : selectedSubAssemblyType === "RightPrimaryChassisRail"
           ? "Chassis Rail (Right) (Primary)"
-          : "Chassis Rail (Left) (Catcher)";
+          : selectedSubAssemblyType === "LeftCatcherChassisRail"
+          ? "Chassis Rail (Left) (Catcher)"
+          : "Chassis Rail (Right) (Catcher)";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -1189,6 +1303,9 @@ const SubAssemblyQRGenerator = () => {
               <option value="LeftCatcherChassisRail">
                 Chassis Rail (Catcher) (Left)
               </option>
+              <option value="RightCatcherChassisRail">
+                Chassis Rail (Catcher) (Right)
+              </option>
             </select>
             {selectedSubAssemblyType && (
               <div className="mt-5">
@@ -1215,7 +1332,9 @@ const SubAssemblyQRGenerator = () => {
                     ? "Chassis Rail (Left) (Primary) "
                     : selectedSubAssemblyType === "RightPrimaryChassisRail"
                     ? "Chassis Rail (Right) (Primary) "
-                    : "Chassis Rail (Left) (Catcher) "}
+                    : selectedSubAssemblyType === "LeftCatcherChassisRail"
+                    ? "Chassis Rail (Left) (Catcher) "
+                    : "Chassis Rail (Right) (Catcher) "}
                   QR
                   <div className="flex items-center">
                     {selectedSubAssemblyType === "Panel" && (
@@ -1276,6 +1395,12 @@ const SubAssemblyQRGenerator = () => {
                       <span className="text-white p-1 pl-2 pr-2 ml-2  font-black rounded-full text-xs bg-green-700">
                         Latest Chassis Rails (Left) (Catcher) Id: CHR
                         {formatId(Number(latestLeftCatcherChassisRailId))}L-C
+                      </span>
+                    )}
+                    {selectedSubAssemblyType === "RightCatcherChassisRail" && (
+                      <span className="text-white p-1 pl-2 pr-2 ml-2  font-black rounded-full text-xs bg-green-700">
+                        Latest Chassis Rails (Right) (Catcher) Id: CHR
+                        {formatId(Number(latestRightCatcherChassisRailId))}R-C
                       </span>
                     )}
                   </div>
@@ -1384,6 +1509,16 @@ const SubAssemblyQRGenerator = () => {
                     <div className="flex justify-start">
                       <p className="mt-2 font-black p-1 text-white bg-secondary text-xs rounded-full pl-2 pr-2">
                         {expectedLeftCatcherChassisRailRange}
+                      </p>
+                    </div>
+                  )}
+                {/* ================================ C H A S S I S  R A I L (R I G H T) (C A T C H E R)  ================================ */}
+                {selectedSubAssemblyType === "RightCatcherChassisRail" &&
+                  showExpectedRightCatcherChassisRailRange &&
+                  expectedRightCatcherChassisRailRange && (
+                    <div className="flex justify-start">
+                      <p className="mt-2 font-black p-1 text-white bg-secondary text-xs rounded-full pl-2 pr-2">
+                        {expectedRightCatcherChassisRailRange}
                       </p>
                     </div>
                   )}
@@ -1977,6 +2112,68 @@ const SubAssemblyQRGenerator = () => {
                         <span className="text-red-500 ml-1 mr-1 font-black">
                           {" "}
                           (Left)
+                        </span>
+                        <span className="text-red-500 ml-1 mr-1 font-black">
+                          {" "}
+                          (Catcher)
+                        </span>
+                      </div>
+                    </div>
+
+                    <img
+                      src={imageData[code.chassisId]}
+                      alt={`Converted ${code.chassisId}`}
+                      style={{ display: "none", margin: "10px auto" }}
+                    />
+
+                    <div className="mt-5 flex items-center justify-center">
+                      <button
+                        className="bg-signature hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded "
+                        onClick={() => handleDownload(code.chassisId)}
+                      >
+                        Download
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {/* ================================ C H A S S I S  R A I L (R I G H T) (C A T C H E R) ================================ */}
+          {selectedSubAssemblyType === "RightCatcherChassisRail" && (
+            <div className="flex justify-center flex-wrap mt-5 rounded-xl">
+              {qrCode.map((code, index) => (
+                <div
+                  key={index}
+                  className="p-5 shadow-xl rounded-lg m-5 bg-white"
+                  style={{
+                    color: "#043f9d",
+                    fontFamily: "Avenir, sans-serif",
+                    fontSize: "20px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                  }}
+                >
+                  <div>
+                    <div id={`qrcode-${code.chassisId}`}>
+                      <ReactQRCode
+                        value={JSON.stringify({
+                          link: code.link,
+                          rightCatcherChassisRailId: code.chassisId,
+                        })}
+                        size={512}
+                        imageSettings={{
+                          src: logo,
+                          excavate: true,
+                          width: 60,
+                          height: 35,
+                        }}
+                      />
+                      <div className="mb-5">
+                        Chassis Rail ID: {code.chassisId}{" "}
+                        <span className="text-red-500 ml-1 mr-1 font-black">
+                          {" "}
+                          (Right)
                         </span>
                         <span className="text-red-500 ml-1 mr-1 font-black">
                           {" "}
