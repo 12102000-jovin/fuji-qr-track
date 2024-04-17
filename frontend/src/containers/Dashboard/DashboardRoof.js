@@ -8,19 +8,35 @@ const DashboardRoof = () => {
   const { roofId } = useParams();
   const [dashboardData, setDashboardData] = useState([]);
 
-  const fetchDashboardRoofData_API = `http://localhost:3001/Dashboard/${roofId}/showPrimaryRoofDashboard`;
+  const fetchDashboardPrimaryRoofData_API = `http://localhost:3001/Dashboard/${roofId}/showPrimaryRoofDashboard`;
+  const fetchDashboardCatcherRoofData_API = `http://localhost:3001/Dashboard/${roofId}/showCatcherRoofDashboard`;
 
   useEffect(() => {
     const isRoofPrimaryPattern = /^ROOF\d{6}-P$/.test(roofId);
+    const isRoofCatcherPattern = /^ROOF\d{6}-C$/.test(roofId);
 
     if (isRoofPrimaryPattern) {
-      fetchDashboardRoofData();
+      fetchDashboardPrimaryRoofData();
+    } else if (isRoofCatcherPattern) {
+      fetchDashboardCatcherRoofData();
     }
   }, []);
 
-  const fetchDashboardRoofData = () => {
+  const fetchDashboardPrimaryRoofData = () => {
     axios
-      .get(`${fetchDashboardRoofData_API}`)
+      .get(`${fetchDashboardPrimaryRoofData_API}`)
+      .then((response) => {
+        setDashboardData(response.data);
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching Roof data", error);
+      });
+  };
+
+  const fetchDashboardCatcherRoofData = () => {
+    axios
+      .get(`${fetchDashboardCatcherRoofData_API}`)
       .then((response) => {
         setDashboardData(response.data);
         console.log(response.data);

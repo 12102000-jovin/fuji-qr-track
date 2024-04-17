@@ -61,6 +61,7 @@ import ChassisRailRightPrimary from "../../containers/SubAssembly/ChassisRail/Ri
 import ChassisRailLeftCatcher from "../../containers/SubAssembly/ChassisRail/LeftCatcherChassisRail";
 import ChassisRailRightCatcher from "../../containers/SubAssembly/ChassisRail/RightCatcherChassisRail";
 import RoofPrimary from "../../containers/SubAssembly/Roof/RoofPrimary";
+import RoofCatcher from "../../containers/SubAssembly/Roof/RoofCatcher";
 
 const drawerWidth = 200;
 
@@ -470,6 +471,8 @@ const NavBar = () => {
                 />
 
                 <DropdownMenuItem to="/RoofPrimary" primary="Roof (Primary)" />
+
+                <DropdownMenuItem to="/RoofCatcher" primary="Roof (Catcher)" />
               </Menu>
 
               <ListItem disablePadding sx={{ display: "block" }}>
@@ -644,6 +647,7 @@ const NavBar = () => {
                 element={<ChassisRailRightCatcher />}
               />
               <Route path="/RoofPrimary" element={<RoofPrimary />} />
+              <Route path="/RoofCatcher" element={<RoofCatcher />} />
             </Routes>
           </Box>
         </Box>

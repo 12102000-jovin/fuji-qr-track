@@ -202,6 +202,12 @@ const Home = () => {
               >
                 Roof (Primary)
               </a>
+              <a
+                href="/RoofCatcher"
+                class="border p-4 rounded-md shadow-sm bg-gray-100 hover:bg-blue-100 "
+              >
+                Roof (Catcher)
+              </a>
             </div>
           </div>
           <div class="bg-white rounded-lg shadow-md">

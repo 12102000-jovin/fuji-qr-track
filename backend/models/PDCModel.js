@@ -90,6 +90,12 @@ const PDCSchema = new mongoose.Schema(
         ref: "PrimaryRoofModel",
       },
     ],
+    catcherRoofs: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "CatcherRoofModel",
+      },
+    ],
   },
   {
     collection: "pdc",

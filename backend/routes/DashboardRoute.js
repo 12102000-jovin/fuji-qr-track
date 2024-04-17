@@ -16,6 +16,7 @@ const {
   ChassisRailLeftCatcherModel,
   ChassisRailRightCatcherModel,
   RoofPrimaryModel,
+  RoofCatcherModel,
 } = require("../models/SubAssemblyModel");
 const WorkOrderModel = require("../models/WorkOrderModel");
 const ComponentModel = require("../models/ComponentModel");
@@ -106,6 +107,10 @@ router.get("/:pdcId/showPDCDashboard", async (req, res) => {
       _id: { $in: pdc.primaryRoofs },
     });
 
+    const catcherRoofs = await RoofCatcherModel.find({
+      _id: { $in: pdc.catcherRoofs },
+    });
+
     // Find the first Work Order that references this PDC
     const workOrder = await WorkOrderModel.findOne({
       pdcs: pdc._id,
@@ -129,6 +134,7 @@ router.get("/:pdcId/showPDCDashboard", async (req, res) => {
       leftCatcherChassisRails,
       rightCatcherChassisRails,
       primaryRoofs,
+      catcherRoofs,
     });
   } catch (error) {
     res.status(500).json({ message: `Error retrieving pdcs in ${pdcId}` });
@@ -843,6 +849,64 @@ router.get("/:roofId/showPrimaryRoofDashboard", async (req, res) => {
   }
 });
 
+// R O O F (C A T C H E R)
+router.get("/:roofId/showCatcherRoofDashboard", async (req, res) => {
+  try {
+    const { roofId } = req.params;
+
+    // Find Roof based on roofId
+    const Roof = await RoofCatcherModel.findOne({
+      roofId,
+    });
+
+    console.log(Roof);
+
+    if (!Roof) {
+      return res.status(404).json({ message: "Roof not found" });
+    }
+
+    // Extract the component _id referenced in the Roof
+    const componentIds = Roof.components.map((component) => component._id);
+
+    // Find components in the ComponentModel matching the extracted component _ids
+    const components = await ComponentModel.find({
+      _id: { $in: componentIds },
+    });
+
+    const componentData = components.map((component) => ({
+      componentType: component.componentType,
+      componentSerialNumber: component.componentSerialNumber,
+      allocatedDate: component.allocatedDate,
+    }));
+
+    // Find the PDC that contains the given Roof
+    const pdc = await PDCModel.findOne({
+      catcherRoofs: Roof._id,
+    }).populate("catcherRoofs");
+
+    if (!pdc) {
+      console.log("PDC not found for the given Roof");
+    }
+
+    // Find the first Work Order that references this PDC
+    const workOrder = await WorkOrderModel.findOne({
+      pdcs: pdc ? pdc._id : null, // Pass null if pdc is not found
+    });
+    // Extracting workOrderId from the found work order
+    const workOrderId = workOrder ? workOrder.workOrderId : null;
+
+    // Respond with the pdcId of the found PDC along with the populated 'MCCBs'
+    res.status(200).json({
+      pdcId: pdc ? pdc.pdcId : null,
+      workOrderId,
+      catcherRoofs: pdc ? pdc.catcherRoofs : null,
+      componentData,
+    });
+  } catch (error) {
+    res.status(500).json({ message: `Error retrieving PDCs for CT Interface` });
+  }
+});
+
 router.get(
   "/:componentSerialNumber/showComponentDashboard",
   async (req, res) => {
@@ -917,6 +981,11 @@ router.get(
 
       // Find the Roof that contains the specified component
       const PrimaryRoof = await RoofPrimaryModel.findOne({
+        components: componentObjectId,
+      }).populate("components");
+
+      // Find the Roof that contains the specified component
+      const CatcherRoof = await RoofCatcherModel.findOne({
         components: componentObjectId,
       }).populate("components");
 
@@ -1351,6 +1420,44 @@ router.get(
         const PDC = await PDCModel.findOne({
           primaryRoofs: roofObjectId,
         }).populate("primaryRoofs");
+
+        let pdcId = null;
+        let workOrderId = null;
+
+        // If PDC exists, get its properties
+        if (PDC) {
+          // Get the object id of the pdc
+          pdcId = PDC.pdcId;
+
+          // Get the object id of the pdc
+          const pdcObjectId = PDC._id;
+
+          const WorkOrder = await WorkOrderModel.findOne({
+            pdcs: pdcObjectId,
+          }).populate("pdcs");
+
+          workOrderId = WorkOrder.workOrderId;
+        }
+
+        res.json({
+          component,
+          roofId,
+          pdcId,
+          workOrderId,
+          subAssemblyType,
+        });
+      } else if (CatcherRoof) {
+        // Include roofId in the response
+        const roofId = CatcherRoof.roofId;
+        const subAssemblyType = "Roof (Catcher)";
+
+        // Get the object id of the Roof
+        const roofObjectId = CatcherRoof._id;
+
+        // Find the PDC that contains the specified CTInterface
+        const PDC = await PDCModel.findOne({
+          catcherRoofs: roofObjectId,
+        }).populate("catcherRoofs");
 
         let pdcId = null;
         let workOrderId = null;

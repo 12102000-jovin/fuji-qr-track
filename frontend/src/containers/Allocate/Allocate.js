@@ -96,6 +96,7 @@ const Allocate = () => {
         subAssemblyInputValue
       );
       const isRoofPrimaryPattern = /^ROOF\d{6}-P$/.test(subAssemblyInputValue);
+      const isRoofCatcherPattern = /^ROOF\d{6}-C$/.test(subAssemblyInputValue);
 
       if (isPanelPattern) {
         setShowSubAssemblyInput(subAssemblyInputValue);
@@ -144,6 +145,10 @@ const Allocate = () => {
       } else if (isRoofPrimaryPattern) {
         setShowSubAssemblyInput(subAssemblyInputValue);
         setDetectedType("Roof (Primary)");
+        setWrongSubAssemblyError(false);
+      } else if (isRoofCatcherPattern) {
+        setShowSubAssemblyInput(subAssemblyInputValue);
+        setDetectedType("Roof (Catcher)");
         setWrongSubAssemblyError(false);
       } else {
         try {
@@ -196,6 +201,10 @@ const Allocate = () => {
           } else if (parsedInput.roofPrimaryId) {
             setSubAssemblyInputValue(parsedInput.roofPrimaryId);
             setDetectedType("Roof (Primary)");
+            setWrongSubAssemblyError(false);
+          } else if (parsedInput.roofCatcherId) {
+            setSubAssemblyInputValue(parsedInput.roofCatcherId);
+            setDetectedType("Roof (Catcher)");
             setWrongSubAssemblyError(false);
           } else {
             setWrongSubAssemblyError(true);

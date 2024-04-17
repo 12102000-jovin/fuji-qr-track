@@ -11,6 +11,7 @@ import ChassisRailRightPrimaryComponentForm from "../../components/ComponentForm
 import ChassisRailLeftCatcherComponentForm from "../../components/ComponentForms/ChassisRailLeftCatcherComponentForm";
 import ChassisRailRightCatcherComponentForm from "../../components/ComponentForms/ChassisRailRightCatcherComponentForm";
 import PrimaryRoofComponentForm from "../../components/ComponentForms/PrimaryRoofComponentForm";
+import CatcherRoofComponentForm from "../../components/ComponentForms/CatcherRoofComponentForm";
 
 const AllocateComponents = () => {
   const [inputSubAssemblyValue, setInputSubAssemblyValue] = useState("");
@@ -31,6 +32,8 @@ const AllocateComponents = () => {
   const [showRightCatcherChassisRailForm, setShowRightCatcherChassisRailForm] =
     useState(false);
   const [showPrimaryRoofForm, setShowPrimaryRoofForm] = useState(false);
+  const [showCatcherRoofForm, setShowCatcherRoofForm] = useState(false);
+
   const [errorMessage, setErrorMessage] = useState("");
 
   const subAssemblyInputRef = useRef(null);
@@ -72,6 +75,7 @@ const AllocateComponents = () => {
         inputSubAssemblyValue
       );
       const isPrimaryRoofPattern = /^ROOF\d{6}-P$/.test(inputSubAssemblyValue);
+      const isCatcherRoofPattern = /^ROOF\d{6}-C$/.test(inputSubAssemblyValue);
 
       if (isPanelPattern) {
         setShowPanelForm(true);
@@ -120,6 +124,10 @@ const AllocateComponents = () => {
       } else if (isPrimaryRoofPattern) {
         setShowPanelForm(false);
         setShowPrimaryRoofForm(true);
+        setErrorMessage("");
+      } else if (isCatcherRoofPattern) {
+        setShowPanelForm(false);
+        setShowCatcherRoofForm(true);
         setErrorMessage("");
       } else {
         try {
@@ -217,6 +225,14 @@ const AllocateComponents = () => {
             setShowPanelForm(false);
             setShowPrimaryRoofForm(true);
             setErrorMessage("");
+          } else if (
+            parsedInput.roofCatcherId &&
+            /^ROOF\d{6}-C$/.test(parsedInput.roofCatcherId)
+          ) {
+            setInputSubAssemblyValue(parsedInput.roofCatcherId);
+            setShowPanelForm(false);
+            setShowCatcherRoofForm(true);
+            setErrorMessage("");
           } else {
             setErrorMessage("Invalid Sub-Assembly QR");
           }
@@ -290,7 +306,8 @@ const AllocateComponents = () => {
                   showRightPrimaryChassisRailForm ||
                   showLeftCatcherChassisRailForm ||
                   showRightCatcherChassisRailForm ||
-                  showPrimaryRoofForm
+                  showPrimaryRoofForm ||
+                  showCatcherRoofForm
                 }
                 placeholder="Enter Sub-Assembly"
               />
@@ -362,6 +379,9 @@ const AllocateComponents = () => {
           )}
           {showPrimaryRoofForm && (
             <PrimaryRoofComponentForm roofId={inputSubAssemblyValue} />
+          )}
+          {showCatcherRoofForm && (
+            <CatcherRoofComponentForm roofId={inputSubAssemblyValue} />
           )}
         </div>
       </div>

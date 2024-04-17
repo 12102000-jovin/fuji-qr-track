@@ -14,6 +14,7 @@ const {
   ChassisRailLeftCatcherModel,
   ChassisRailRightCatcherModel,
   RoofPrimaryModel,
+  RoofCatcherModel,
 } = require("../models/SubAssemblyModel");
 const ComponentModel = require("../models/ComponentModel");
 
@@ -119,6 +120,7 @@ router.post("/AllocateSubAssembly", async (req, res) => {
     );
 
     const isRoofPrimaryPattern = /^ROOF\d{6}-P$/.test(subAssemblyInputValue);
+    const isRoofCatcherPattern = /^ROOF\d{6}-C$/.test(subAssemblyInputValue);
 
     const pdc = await PDCModel.findOne({
       pdcId: `${inputPDCValue}`,
@@ -746,6 +748,56 @@ router.post("/AllocateSubAssembly", async (req, res) => {
 
         // Save both the Chassis Rail and the updated PDC document
         await PrimaryRoof.save();
+        await pdc.save();
+
+        //  Respond with success message and the updated PDC
+        const response = "Sub-Assembly allocation successful";
+        return res.status(200).json({ message: response });
+      } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
+    } else if (isRoofCatcherPattern) {
+      try {
+        // Check if Roof Catcher exists
+        const CatcherRoof = await RoofCatcherModel.findOne({
+          roofId: subAssemblyInputValue,
+        });
+
+        if (!CatcherRoof) {
+          return res.status(404).json({ message: "Roof not found" });
+        }
+
+        // Check if the Roof already exists in the PDC
+        if (pdc.catcherRoofs.some((roofId) => roofId.equals(CatcherRoof._id))) {
+          return res.status(400).json({
+            message: `The Catcher Roof already exists in the ${pdc.pdcId}`,
+          });
+        }
+
+        if (pdc.catcherRoofs.length > 0) {
+          return res.status(400).json({
+            message: `Other Catcher Roof already exists in the ${pdc.pdcId}`,
+          });
+        }
+
+        if (CatcherRoof.isAllocated === true) {
+          return res.status(404).json({
+            message: `${CatcherRoof.roofId} Catcher Roof has been allocated to other PDC`,
+          });
+        }
+
+        // Set the allocated date for the Catcher Roof
+        CatcherRoof.allocatedDate = new Date();
+
+        // Set the isAllocated Flag to true
+        CatcherRoof.isAllocated = true;
+
+        // Associate the Chassis Rail Panel with the PDC by adding its ObjectId to the MCCBs array
+        pdc.catcherRoofs.push(CatcherRoof._id);
+
+        // Save both the Chassis Rail and the updated PDC document
+        await CatcherRoof.save();
         await pdc.save();
 
         //  Respond with success message and the updated PDC
@@ -1486,6 +1538,68 @@ router.post("/AllocatePrimaryRoofComponent", async (req, res) => {
 
     RoofPrimary.components.push(component._id);
     await RoofPrimary.save();
+
+    return res.status(200).json({
+      message: "Component allocated to the Roof successfully ",
+    });
+  } catch (error) {
+    console.error("Error in allocation:", error);
+    // Handle the error and send an appropriate response
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.post("/AllocateCatcherRoofComponent", async (req, res) => {
+  try {
+    const {
+      componentSerialNumber,
+      componentType,
+      componentDescription,
+      roofId,
+    } = req.body;
+
+    const existingComponent = await ComponentModel.findOne({
+      componentSerialNumber,
+    });
+
+    if (existingComponent) {
+      return res.status(409).json({
+        message:
+          "Component already allocated. Please select a different component.",
+      });
+    }
+
+    // Check if a component with the same type is already allocated to the Roof
+    const RoofCatcher = await RoofCatcherModel.findOne({
+      roofId,
+    }).populate("components");
+
+    if (!RoofCatcher) {
+      return res.status(404).json({ message: "Roof not found" });
+    }
+
+    const existingComponentType = RoofCatcher.components.find(
+      (component) => component.componentType === componentType
+    );
+
+    if (existingComponentType) {
+      return res.status(409).json({
+        message: `${existingComponentType.componentType} with serial number [${existingComponentType.componentSerialNumber}] is already allocated to the Roof. Please choose another component.`,
+      });
+    }
+
+    // If there are no existing components, proceed to insert new components
+    const component = new ComponentModel({
+      componentSerialNumber,
+      componentType,
+      componentDescription,
+      allocatedDate: new Date(),
+    });
+
+    await component.save();
+
+    RoofCatcher.components.push(component._id);
+    await RoofCatcher.save();
 
     return res.status(200).json({
       message: "Component allocated to the Roof successfully ",

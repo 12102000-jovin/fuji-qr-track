@@ -2,7 +2,10 @@ const express = require("express");
 
 const router = express.Router();
 
-const { RoofPrimaryModel } = require("../models/SubAssemblyModel");
+const {
+  RoofPrimaryModel,
+  RoofCatcherModel,
+} = require("../models/SubAssemblyModel");
 
 const ComponentModel = require("../models/ComponentModel");
 const PDCModel = require("../models/PDCModel");
@@ -20,10 +23,10 @@ router.post("/RoofPrimary/generateSubAssembly", async (req, res) => {
   });
 
   if (existingRoofs.length > 0) {
-    return res.status(409).json("Duplicate Roof Rail found");
+    return res.status(409).json("Duplicate Roof found");
   }
 
-  // Create an array of Roof Rail documents
+  // Create an array of Roof documents
   const RoofDocuments = Roofs.map((Roof) => ({
     ...Roof,
     link: Roof.link,
@@ -142,7 +145,7 @@ router.put("/RoofPrimary/editRoof/:pdcId/:roofId", async (req, res) => {
       // Add the roof to the future PDC and remove it from the current PDC
       if (futurePdc && currentPdc && currentPdc.primaryRoofs) {
         futurePdc.primaryRoofs.push(currentRoof._id);
-        currentPdc.primaryMCCBs.pull(currentRoof._id);
+        currentPdc.primaryRoofs.pull(currentRoof._id);
 
         // Save changes to both pdcs
         await futurePdc.save();
@@ -187,6 +190,207 @@ router.put("/RoofPrimary/editRoof/:pdcId/:roofId", async (req, res) => {
       if (futurePdc && currentPdc && currentPdc.primaryRoofs) {
         futurePdc.primaryRoofs.push(currentRoof._id);
         currentPdc.primaryRoofs.pull(currentRoof._id);
+
+        // Save changes to both pdcs
+        await futurePdc.save();
+        await currentPdc.save();
+      }
+
+      res.status(200).json({
+        message: "Roof moved and updated successfully",
+        futurePdc,
+        updatedRoofId,
+      });
+    } else if (pdcId === pdcToEdit && roofId === roofToEdit) {
+      res.status(200).json({ message: "No Changes" });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
+  }
+});
+
+// ================================== R O O F (C A T C H E R)==================================
+
+// Generate Roof Catcher
+router.post("/RoofCatcher/generateSubAssembly", async (req, res) => {
+  const Roofs = req.body.CatcherRoofs;
+
+  const existingRoofs = await RoofCatcherModel.find({
+    roofId: {
+      $in: Roofs.map((Roof) => Roof.roofId),
+    },
+  });
+
+  if (existingRoofs.length > 0) {
+    return res.status(409).json("Duplicate Roof found ");
+  }
+
+  // Create an array of Roof Rail documents
+  const RoofDocuments = Roofs.map((Roof) => ({
+    ...Roof,
+    link: Roof.link,
+    roofId: Roof.roofId,
+  }));
+
+  const insertedRoof = await RoofCatcherModel.insertMany(RoofDocuments);
+  res.json(insertedRoof);
+});
+
+// Get Latest Roof Catcher
+router.get("/RoofCatcher/getLatestRoof", async (req, res) => {
+  try {
+    // Find the document with the highest Roof Id
+    const latestRoof = await RoofCatcherModel.findOne()
+      .sort({ roofId: -1 })
+      .limit(1);
+
+    if (latestRoof) {
+      res.json(latestRoof.roofId);
+    } else {
+      res.json(null); // No Roof Catcher Found
+    }
+  } catch (error) {
+    console.error("Error fetching latest Catcher Roof Id:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// Get All Roof Catcher
+router.get("/RoofCatcher/getAllRoof", async (req, res) => {
+  try {
+    RoofData = await RoofCatcherModel.find();
+    res.json(RoofData);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Delete Roof Catcher
+router.delete("/RoofCatcher/deleteRoof/:roofId", async (req, res) => {
+  try {
+    const roofId = req.params.roofId;
+
+    const roofToDelete = await RoofCatcherModel.findOneAndDelete({
+      roofId: roofId,
+    });
+
+    if (!roofId) {
+      res.status(404).json({ message: "Roof not found!" });
+    }
+
+    const componentIds = roofToDelete.components;
+
+    for (const componentId of componentIds) {
+      await ComponentModel.findOneAndDelete({ _id: componentId });
+    }
+
+    const deletedRoofObjectId = roofToDelete._id;
+
+    await PDCModel.updateMany(
+      {
+        $or: [{ primaryRoofs: deletedRoofObjectId }],
+      },
+      {
+        $pull: {
+          catcherRoofs: deletedRoofObjectId,
+        },
+      }
+    );
+
+    console.log(roofToDelete);
+    res.status(200).json({ message: "Roof Catcher deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+// Edit Roof Catcher
+router.put("/RoofCatcher/editRoof/:pdcId/:roofId", async (req, res) => {
+  try {
+    const { pdcId, roofId } = req.params;
+    const { pdcToEdit, roofToEdit } = req.body;
+
+    // Find the current pdcId
+    const currentPdc = await PDCModel.findOne({ pdcId });
+
+    // Find the future pdcId
+    const futurePdc = await PDCModel.findOne({ pdcId: pdcToEdit });
+
+    // Find the current roofId
+    const currentRoof = await RoofCatcherModel.findOne({ roofId });
+
+    // Find the future roofId
+    const futureRoof = await RoofCatcherModel.findOne({ roofId: roofToEdit });
+
+    if (roofToEdit == null || roofToEdit === "") {
+      return res.status(400).json({ error: "Please Enter Roof Id" });
+    }
+
+    // Check whether the future Roof exist or not
+    const isRoofPattern = /^ROOF\d{6}-C$/.test(roofToEdit);
+    if (!isRoofPattern) {
+      return res
+        .status(400)
+        .json({ error: "Please Enter Correct Roof (Catcher) Id Format" });
+    }
+
+    if (futureRoof && currentRoof && futureRoof.roofId !== currentRoof.roofId) {
+      return res.status(409).json({
+        error: "Roof already exists. Please choose a different one",
+      });
+    }
+
+    if (pdcId !== pdcToEdit && roofId === roofToEdit) {
+      // Add the roof to the future PDC and remove it from the current PDC
+      if (futurePdc && currentPdc && currentPdc.catcherRoofs) {
+        futurePdc.catcherRoofs.push(currentRoof._id);
+        currentPdc.catcherRoofs.pull(currentRoof._id);
+
+        // Save changes to both pdcs
+        await futurePdc.save();
+        await currentPdc.save();
+      }
+      res.status(200).json({ message: "Roof moved successfully", futureRoof });
+    } else if (pdcId === pdcToEdit && roofId !== roofToEdit) {
+      const updatedRoofId = await RoofCatcherModel.findOneAndUpdate(
+        {
+          roofId: roofId,
+        },
+        {
+          $set: {
+            roofId: roofToEdit,
+            link: `http://localhost:3000/Dashboard/Roof/${roofToEdit}`,
+          },
+        },
+        { new: true }
+      );
+
+      if (!updatedRoofId) {
+        return res.status(404).json({ message: "Roof not found" });
+      }
+
+      res
+        .status(200)
+        .json({ message: "Roof updated successfully", updatedRoofId });
+    } else if (pdcId !== pdcToEdit && roofId !== roofToEdit) {
+      const updatedRoofId = await RoofCatcherModel.findOneAndUpdate(
+        {
+          roofId: roofId,
+        },
+        {
+          $set: {
+            roofId: roofToEdit,
+            link: `http://localhost:3000/Dashboard/Roof/${roofToEdit}`,
+          },
+        }
+      );
+
+      // Add the Roof to the future pdc and remove it from the current pdc
+      if (futurePdc && currentPdc && currentPdc.catcherRoofs) {
+        futurePdc.catcherRoofs.push(currentRoof._id);
+        currentPdc.catcherRoofs.pull(currentRoof._id);
 
         // Save changes to both pdcs
         await futurePdc.save();

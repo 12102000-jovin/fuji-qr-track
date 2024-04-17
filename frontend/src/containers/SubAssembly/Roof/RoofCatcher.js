@@ -13,7 +13,7 @@ import ReactQRCode from "qrcode.react";
 import html2canvas from "html2canvas";
 import SubAssemblyQRGenerator from "../../../components/SubAssemblyQRGenerator/SubAssemblyQRGenerator";
 import SubAssemblyCustomQRGenerator from "../../../components/SubAssemblyQRGenerator/SubAssemblyCustomQRGenerator";
-import EditRoofPrimary from "./EditRoofPrimary";
+import EditRoofCatcher from "./EditRoofCatcher";
 import JSZip from "jszip";
 
 import {
@@ -33,15 +33,15 @@ import {
   Pagination,
 } from "@mui/material";
 
-const RoofPrimary = () => {
+const RoofCatcher = () => {
   // Ref
   const captureRef = useRef(null);
 
   const fetchRoofData_API =
-    "http://localhost:3001/SubAssembly/RoofPrimary/getAllRoof";
+    "http://localhost:3001/SubAssembly/RoofCatcher/getAllRoof";
 
   const deleteRoof_API =
-    "http://localhost:3001/SubAssembly/RoofPrimary/deleteRoof/";
+    "http://localhost:3001/SubAssembly/RoofCatcher/deleteRoof/";
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -202,7 +202,7 @@ const RoofPrimary = () => {
     setQrCodeData(
       JSON.stringify({
         link: data.link,
-        roofPrimaryId: data.roofId,
+        roofCatcherId: data.roofId,
       })
     );
     setModalRoofID(data.roofId);
@@ -332,7 +332,7 @@ const RoofPrimary = () => {
             <div className="flex items-center justify-center">
               <p>Roof</p>
               <span className="text-xl text-white bg-red-500 py-2 px-3 font-black rounded-full ml-2">
-                Primary
+                Catcher
               </span>
             </div>
           </p>
@@ -588,7 +588,7 @@ const RoofPrimary = () => {
                       Roof ID: {modalRoofID}
                       <span className="text-red-500 ml-1 mr-1 font-black">
                         {" "}
-                        (Primary)
+                        (Catcher)
                       </span>
                     </p>
                   </div>
@@ -718,7 +718,7 @@ const RoofPrimary = () => {
         </Dialog>
       </div>
       <div>
-        <EditRoofPrimary
+        <EditRoofCatcher
           open={editRoofModalState}
           onClose={() => {
             fetchRoofData();
@@ -769,7 +769,7 @@ const RoofPrimary = () => {
                       Roof ID: {qrCode.roofId}
                       <span className="text-red-500 ml-1 mr-1 font-black">
                         {" "}
-                        (Primary)
+                        (Catcher)
                       </span>
                     </p>
                   </div>
@@ -797,4 +797,4 @@ const RoofPrimary = () => {
   );
 };
 
-export default RoofPrimary;
+export default RoofCatcher;

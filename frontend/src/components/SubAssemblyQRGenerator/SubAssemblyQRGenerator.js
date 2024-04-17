@@ -104,6 +104,11 @@ const SubAssemblyQRGenerator = () => {
   const [showExpectedPrimaryRoofRange, setShowExpectedPrimaryRoofRange] =
     useState(true);
 
+  const [latestCatcherRoofId, setLatestCatcherRoofId] = useState("0");
+  const [expectedCatcherRoofRange, setExpectedCatcherRoofRange] = useState("");
+  const [showExpectedCatcherRoofRange, setShowExpectedCatcherRoofRange] =
+    useState(true);
+
   const [emptyInputError, setEmptyInputError] = useState(false);
   const [qrGeneratedStatus, setQRGeneratedStatus] = useState(false);
   const [qrCode, setQRcode] = useState([]);
@@ -171,6 +176,11 @@ const SubAssemblyQRGenerator = () => {
     "http://localhost:3001/SubAssembly/RoofPrimary/generateSubAssembly";
   const getLatestPrimaryRoof_API =
     "http://localhost:3001/SubAssembly/RoofPrimary/getLatestRoof";
+
+  const generateCatcherRoof_API =
+    "http://localhost:3001/SubAssembly/RoofCatcher/generateSubAssembly";
+  const getLatestCatcherRoof_API =
+    "http://localhost:3001/SubAssembly/RoofCatcher/getLatestRoof";
 
   // ======================================= P A N E L =======================================
   useEffect(() => {
@@ -715,6 +725,47 @@ const SubAssemblyQRGenerator = () => {
     return ChasissRailString.replace("ROOF", "").replace("-P", "");
   };
 
+  // ==================================== R O O F (C A T C H E R) =======================================
+  useEffect(() => {
+    fetchLatestCatcherRoof();
+  }, []);
+
+  useEffect(() => {
+    if (numQR === "1") {
+      setExpectedCatcherRoofRange(
+        `Expected Output: ROOF${formatId(Number(latestCatcherRoofId) + 1)}-C`
+      );
+    } else if (numQR > 1 && numQR !== "1") {
+      setExpectedCatcherRoofRange(
+        ` Expected Output: ROOF${formatId(
+          Number(latestCatcherRoofId) + 1
+        )}-C - ROOF${formatId(Number(latestCatcherRoofId) + Number(numQR))}-C`
+      );
+    } else {
+      setExpectedCatcherRoofRange("");
+    }
+  }, [numQR, latestCatcherRoofId]);
+
+  useEffect(() => {
+    setShowExpectedCatcherRoofRange(true);
+  }, [numQR]);
+
+  const fetchLatestCatcherRoof = async () => {
+    try {
+      const response = await axios.get(getLatestCatcherRoof_API);
+      const latestCatcherRoof = response.data;
+      const latestCatcherRoofId = extractCatcherRoofId(latestCatcherRoof);
+      setLatestCatcherRoofId(Number(latestCatcherRoofId));
+    } catch (error) {
+      console.error("Error fetching latest Chassis Rail:", error.message);
+    }
+  };
+
+  const extractCatcherRoofId = (ChasissRailString) => {
+    // Remove "ChasissRail" prefix and "P" suffix from the ChasissRailString
+    return ChasissRailString.replace("ROOF", "").replace("-C", "");
+  };
+
   // ==================================== S U B M I T =======================================
 
   useEffect(() => {
@@ -1191,6 +1242,44 @@ const SubAssemblyQRGenerator = () => {
       } catch (error) {
         console.error("Error generating Roof:", error.message);
       }
+    } else if (selectedSubAssemblyType === "CatcherRoof") {
+      const CatcherRoofs = Array.from({ length: numQR }, (_, index) => {
+        const newCatcherRoofId = formatId(
+          Number(latestCatcherRoofId + 1) + index
+        );
+
+        return {
+          link: `${linkFormat}${applicationPortNumber}/Dashboard/Roof/ROOF${newCatcherRoofId}-C`,
+          generatedDate: moment()
+            .tz("Australia/Sydney")
+            .format("YYYY-MM-DD HH:mm:ss"),
+          roofId: `ROOF${newCatcherRoofId}-C`,
+        };
+      });
+
+      try {
+        const response = await axios.post(generateCatcherRoof_API, {
+          CatcherRoofs,
+        });
+        console.log(response.data);
+        fetchLatestCatcherRoof();
+
+        setQRcode(() => {
+          const newQRCodes = response.data.map((qrcode, index) => ({
+            ...qrcode,
+            roofId: `ROOF${formatId(
+              Number(latestCatcherRoofId + 1) + index
+            )}-C`,
+          }));
+          return newQRCodes;
+        });
+
+        setQRGeneratedStatus(true);
+        setShowExpectedCatcherRoofRange(false);
+        setEmptyInputError(false);
+      } catch (error) {
+        console.error("Error generating Roof:", error.message);
+      }
     } else {
       console.log("Unvalid Type");
     }
@@ -1249,6 +1338,10 @@ const SubAssemblyQRGenerator = () => {
       // Set the selected value of the dropdown to "PrimaryRoof"
       setSelectedSubAssemblyType("PrimaryRoof");
       fetchLatestRightCatcherChassisRail();
+    } else if (currentUrl.includes("RoofCatcher")) {
+      // Set the selected value of the dropdown to "CatcherRoof"
+      setSelectedSubAssemblyType("CatcherRoof");
+      fetchLatestRightCatcherChassisRail();
     }
   }, []);
 
@@ -1294,6 +1387,8 @@ const SubAssemblyQRGenerator = () => {
           : selectedSubAssemblyType === "RightCatcherChassisRail"
           ? code.chassisId
           : selectedSubAssemblyType === "PrimaryRoof"
+          ? code.roofId
+          : selectedSubAssemblyType === "CatcherRoof"
           ? code.roofId
           : code.roofId;
 
@@ -1344,7 +1439,9 @@ const SubAssemblyQRGenerator = () => {
           ? "Chassis Rail (Left) (Catcher)"
           : selectedSubAssemblyType === "RightCatcherChassisRail"
           ? "Chassis Rail (Right) (Catcher)"
-          : "Roof (Primary)";
+          : selectedSubAssemblyType === "PrimaryRoof"
+          ? "Roof (Primary)"
+          : "Roof (Catcher)";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -1404,6 +1501,7 @@ const SubAssemblyQRGenerator = () => {
                 Chassis Rail (Catcher) (Right)
               </option>
               <option value="PrimaryRoof">Roof (Primary)</option>
+              <option value="CatcherRoof">Roof (Catcher)</option>
             </select>
             {selectedSubAssemblyType && (
               <div className="mt-5">
@@ -1434,7 +1532,9 @@ const SubAssemblyQRGenerator = () => {
                     ? "Chassis Rail (Left) (Catcher) "
                     : selectedSubAssemblyType === "RightCatcherChassisRail"
                     ? "Chassis Rail (Right) (Catcher) "
-                    : "Roof (Primary) "}
+                    : selectedSubAssemblyType === "PrimaryRoof"
+                    ? "Roof (Primary) "
+                    : "Roof (Catcher) "}
                   QR
                   <div className="flex items-center">
                     {selectedSubAssemblyType === "Panel" && (
@@ -1507,6 +1607,12 @@ const SubAssemblyQRGenerator = () => {
                       <span className="text-white p-1 pl-2 pr-2 ml-2  font-black rounded-full text-xs bg-green-700">
                         Latest Roof (Primary): ROOF
                         {formatId(Number(latestPrimaryRoofId))}-P
+                      </span>
+                    )}
+                    {selectedSubAssemblyType === "CatcherRoof" && (
+                      <span className="text-white p-1 pl-2 pr-2 ml-2  font-black rounded-full text-xs bg-green-700">
+                        Latest Roof (Catcher): ROOF
+                        {formatId(Number(latestCatcherRoofId))}-C
                       </span>
                     )}
                   </div>
@@ -1635,6 +1741,16 @@ const SubAssemblyQRGenerator = () => {
                     <div className="flex justify-start">
                       <p className="mt-2 font-black p-1 text-white bg-secondary text-xs rounded-full pl-2 pr-2">
                         {expectedPrimaryRoofRange}
+                      </p>
+                    </div>
+                  )}
+                {/* ================================ R O O F (C A T C H E R)  ================================ */}
+                {selectedSubAssemblyType === "CatcherRoof" &&
+                  showExpectedCatcherRoofRange &&
+                  expectedCatcherRoofRange && (
+                    <div className="flex justify-start">
+                      <p className="mt-2 font-black p-1 text-white bg-secondary text-xs rounded-full pl-2 pr-2">
+                        {expectedCatcherRoofRange}
                       </p>
                     </div>
                   )}
@@ -2352,6 +2468,64 @@ const SubAssemblyQRGenerator = () => {
                         <span className="text-red-500 ml-1 mr-1 font-black">
                           {" "}
                           (Primary)
+                        </span>
+                      </div>
+                    </div>
+
+                    <img
+                      src={imageData[code.roofId]}
+                      alt={`Converted ${code.roofId}`}
+                      style={{ display: "none", margin: "10px auto" }}
+                    />
+
+                    <div className="mt-5 flex items-center justify-center">
+                      <button
+                        className="bg-signature hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded "
+                        onClick={() => handleDownload(code.roofId)}
+                      >
+                        Download
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {/* ================================ R O O F (C A T C H E R) ================================ */}
+          {selectedSubAssemblyType === "CatcherRoof" && (
+            <div className="flex justify-center flex-wrap mt-5 rounded-xl">
+              {qrCode.map((code, index) => (
+                <div
+                  key={index}
+                  className="p-5 shadow-xl rounded-lg m-5 bg-white"
+                  style={{
+                    color: "#043f9d",
+                    fontFamily: "Avenir, sans-serif",
+                    fontSize: "20px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                  }}
+                >
+                  <div>
+                    <div id={`qrcode-${code.roofId}`}>
+                      <ReactQRCode
+                        value={JSON.stringify({
+                          link: code.link,
+                          catcherRoofId: code.roofId,
+                        })}
+                        size={512}
+                        imageSettings={{
+                          src: logo,
+                          excavate: true,
+                          width: 60,
+                          height: 35,
+                        }}
+                      />
+                      <div className="mb-5">
+                        Roof ID: {code.roofId}{" "}
+                        <span className="text-red-500 ml-1 mr-1 font-black">
+                          {" "}
+                          (Catcher)
                         </span>
                       </div>
                     </div>
