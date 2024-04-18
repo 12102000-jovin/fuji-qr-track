@@ -79,26 +79,27 @@ const Home = () => {
 
   return (
     <div>
-      <div class="grid grid-cols-1 lg:grid-cols-5">
-        <div class="col-span-full md:col-span-3 px-5 md:px-10">
-          <div class="bg-white rounded-lg shadow-md">
-            <h2 class="text-2xl font-semibold bg-signature text-white py-4 px-6 rounded-t-md">
+      <div className="grid grid-cols-1 lg:grid-cols-5">
+        <div className="col-span-full md:col-span-3 px-5 md:px-10">
+          <div className="bg-white rounded-lg shadow-md">
+            <h2 className="text-2xl font-semibold bg-signature text-white py-4 px-6 rounded-t-md">
               Sub-Assemblies
             </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 p-6">
               <a
                 href="/ControlPanel"
-                class="card-link border px-4 py-12 text-xl text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
+                className="card-link border px-4 py-12 text-sm text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
               >
-                <div className="flex items-center justify-center flex-wrap">
-                  Control Panel
+                <div className="flex flex-col items-center justify-center flex-wrap overflow-auto">
+                  <p>Control</p>
+                  <p>Panel</p>
                 </div>
               </a>
               <a
                 href="/LoadbankPrimary"
-                class="card-link border px-4 py-12 text-xl text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
+                className="card-link border px-4 py-12 text-sm text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
               >
-                <div className="flex items-center justify-center flex-wrap">
+                <div className="flex flex-col items-center justify-center flex-wrap">
                   Loadbank{" "}
                   <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
                     Primary
@@ -107,9 +108,9 @@ const Home = () => {
               </a>
               <a
                 href="/LoadbankCatcher"
-                class="card-link border px-4 py-12 text-xl text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
+                className="card-link border px-4 py-12 text-sm text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
               >
-                <div className="flex items-center justify-center flex-wrap">
+                <div className="flex flex-col items-center justify-center flex-wrap">
                   Loadbank{" "}
                   <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
                     Catcher
@@ -118,9 +119,9 @@ const Home = () => {
               </a>
               <a
                 href="/MCCBPrimary"
-                class="card-link border px-4 py-12 text-xl text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
+                className="card-link border px-4 py-12 text-sm text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
               >
-                <div className="flex items-center justify-center flex-wrap">
+                <div className="flex flex-col items-center justify-center flex-wrap">
                   MCCB Panel{" "}
                   <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
                     Primary
@@ -129,9 +130,9 @@ const Home = () => {
               </a>
               <a
                 href="/MCCBCatcher"
-                class="card-link border px-4 py-12 text-xl text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
+                className="card-link border px-4 py-12 text-sm text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
               >
-                <div className="flex items-center justify-center flex-wrap">
+                <div className="flex flex-col items-center justify-center flex-wrap">
                   MCCB Panel{" "}
                   <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
                     Catcher
@@ -140,93 +141,105 @@ const Home = () => {
               </a>
               <a
                 href="/CTInterfaceLeft"
-                class="card-link border px-4 py-12 text-xl text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
+                className="card-link border px-4 py-12 text-sm text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
               >
-                <div className="flex items-center justify-center flex-wrap">
+                <div className="flex flex-col items-center justify-center flex-wrap">
                   CT Interface{" "}
-                  <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
-                    Primary
-                  </span>
-                  <span className="text-xs text-white bg-blue-400 py-1 px-2.5 font-black rounded-full ml-1">
-                    L
-                  </span>
+                  <div>
+                    <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
+                      Primary
+                    </span>
+                    <span className="text-xs text-white bg-blue-400 py-1 px-2.5 font-black rounded-full ml-1">
+                      L
+                    </span>
+                  </div>
                 </div>
               </a>
               <a
                 href="/CTInterfaceRight"
-                class="card-link border px-4 py-12 text-xl text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
+                className="card-link border px-4 py-12 text-sm text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
               >
-                <div className="flex items-center justify-center flex-wrap">
+                <div className="flex flex-col items-center justify-center flex-wrap">
                   CT Interface{" "}
-                  <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
-                    Primary
-                  </span>
-                  <span className="text-xs text-white bg-blue-400 py-1 px-2.5 font-black rounded-full ml-1">
-                    R
-                  </span>
+                  <div>
+                    <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
+                      Primary
+                    </span>
+                    <span className="text-xs text-white bg-blue-400 py-1 px-2.5 font-black rounded-full ml-1">
+                      R
+                    </span>
+                  </div>
                 </div>
               </a>
               <a
                 href="/ChassisRailLeftPrimary"
-                class="card-link border px-4 py-12 text-xl text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
+                className="card-link border px-4 py-12 text-sm text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
               >
-                <div className="flex items-center justify-center flex-wrap">
+                <div className="flex flex-col items-center justify-center flex-wrap">
                   Chassis Rail
-                  <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
-                    Primary
-                  </span>
-                  <span className="text-xs text-white bg-blue-400 py-1 px-2.5 font-black rounded-full ml-1">
-                    L
-                  </span>
+                  <div>
+                    <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
+                      Primary
+                    </span>
+                    <span className="text-xs text-white bg-blue-400 py-1 px-2.5 font-black rounded-full ml-1">
+                      L
+                    </span>
+                  </div>
                 </div>
               </a>
               <a
                 href="/ChassisRailRightPrimary"
-                class="card-link border px-4 py-12 text-xl text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
+                className="card-link border px-4 py-12 text-sm text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
               >
-                <div className="flex items-center justify-center flex-wrap">
+                <div className="flex flex-col items-center justify-center flex-wrap">
                   Chassis Rail
-                  <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
-                    Primary
-                  </span>
-                  <span className="text-xs text-white bg-blue-400 py-1 px-2.5 font-black rounded-full ml-1">
-                    R
-                  </span>
+                  <div>
+                    <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
+                      Primary
+                    </span>
+                    <span className="text-xs text-white bg-blue-400 py-1 px-2.5 font-black rounded-full ml-1">
+                      R
+                    </span>
+                  </div>
                 </div>
               </a>
               <a
                 href="/ChassisRailLeftCatcher"
-                class="card-link border px-4 py-12 text-xl text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
+                className="card-link border px-4 py-12 text-sm text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
               >
-                <div className="flex items-center justify-center flex-wrap">
+                <div className="flex flex-col items-center justify-center flex-wrap">
                   Chassis Rail
-                  <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
-                    Catcher
-                  </span>
-                  <span className="text-xs text-white bg-blue-400 py-1 px-2.5 font-black rounded-full ml-1">
-                    L
-                  </span>
+                  <div>
+                    <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
+                      Catcher
+                    </span>
+                    <span className="text-xs text-white bg-blue-400 py-1 px-2.5 font-black rounded-full ml-1">
+                      L
+                    </span>
+                  </div>
                 </div>
               </a>
               <a
                 href="/ChassisRailRightCatcher"
-                class="card-link border px-4 py-12 text-xl text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
+                className="card-link border px-4 py-12 text-sm text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
               >
-                <div className="flex items-center justify-center flex-wrap">
+                <div className="flex flex-col items-center justify-center flex-wrap">
                   Chassis Rail
-                  <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
-                    Catcher
-                  </span>
-                  <span className="text-xs text-white bg-blue-400 py-1 px-2.5 font-black rounded-full ml-1">
-                    R
-                  </span>
+                  <div>
+                    <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
+                      Catcher
+                    </span>
+                    <span className="text-xs text-white bg-blue-400 py-1 px-2.5 font-black rounded-full ml-1">
+                      R
+                    </span>
+                  </div>
                 </div>
               </a>
               <a
                 href="/RoofPrimary"
-                class="card-link border px-4 py-12 text-xl text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
+                className="card-link border px-4 py-12 text-sm text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
               >
-                <div className="flex items-center justify-center flex-wrap">
+                <div className="flex flex-col items-center justify-center flex-wrap">
                   Roof{" "}
                   <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
                     Primary
@@ -235,9 +248,9 @@ const Home = () => {
               </a>
               <a
                 href="/RoofCatcher"
-                class="card-link border px-4 py-12 text-xl text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
+                className="card-link border px-4 py-12 text-sm text-signature font-black rounded-md shadow-sm bg-gray-100 hover:bg-blue-100"
               >
-                <div className="flex items-center justify-center flex-wrap">
+                <div className="flex flex-col items-center justify-center flex-wrap">
                   Roof{" "}
                   <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
                     Catcher
@@ -247,7 +260,7 @@ const Home = () => {
             </div>
           </div>
         </div>
-        <div class="col-span-full md:col-span-2 px-5 md:px-10">
+        <div className="col-span-full md:col-span-2 px-5 md:px-10 mt-5 lg:mt-0">
           <div>
             <div className="p-5 bg-white rounded-md">
               <p className="text-2xl text-signature font-black mb-2">
@@ -257,7 +270,7 @@ const Home = () => {
               <div className="flex flex-grow" style={{ overflowY: "auto" }}>
                 <a
                   href="/Allocate"
-                  class="card-link border px-8 py-8 text-xl text-white font-black rounded-md shadow-sm bg-black flex-grow mr-1"
+                  className="card-link border px-4 py-4 text-sm text-white font-black rounded-md shadow-sm bg-black flex-grow mr-1"
                 >
                   <div className="flex items-center justify-center flex-wrap">
                     Allocate Sub-Assembly
@@ -266,7 +279,7 @@ const Home = () => {
 
                 <a
                   href="/AllocateComponents"
-                  class="card-link border px-8 py-8 text-xl text-white font-black rounded-md shadow-sm bg-black flex-grow ml-1"
+                  className="card-link border px-4 py-4 text-sm text-white font-black rounded-md shadow-sm bg-black flex-grow ml-1"
                 >
                   <div className="flex items-center justify-center flex-wrap">
                     Allocate Component
@@ -276,11 +289,11 @@ const Home = () => {
             </div>
           </div>
           <div
-            class="bg-white rounded-lg shadow-md mt-10"
+            className="bg-white rounded-lg shadow-md mt-10"
             style={{ overflowY: "auto" }}
           >
             <h2
-              class="text-2xl font-semibold text-white bg-signature py-4 px-6 border-b rounded-t-md"
+              className="font-semibold text-white bg-signature py-4 px-6 border-b rounded-t-md"
               onClick={() => toggleWorkOrder()}
             >
               Recent Work Order
@@ -290,7 +303,7 @@ const Home = () => {
               <div className="p-6">
                 {workOrderData
                   .sort((a, b) => b.workOrderId.localeCompare(a.workOrderId))
-                  .slice(0, 10)
+                  .slice(0, 5)
                   .map((row) => (
                     <div className="flex flex-col" key={row.workOrderId}>
                       <a
@@ -310,11 +323,11 @@ const Home = () => {
             )}
           </div>
           <div
-            class="bg-white rounded-lg shadow-md mt-5"
+            className="bg-white rounded-lg shadow-md mt-5"
             style={{ overflowY: "auto" }}
           >
             <h2
-              class="text-2xl font-semibold text-white bg-signature py-4 px-6 border-b rounded-t-md"
+              className="font-semibold text-white bg-signature py-4 px-6 border-b rounded-t-md"
               onClick={() => togglePDC()}
             >
               Recent PDC
@@ -326,7 +339,7 @@ const Home = () => {
                   // Sort the array by date in descending order
                   .sort((a, b) => b.pdcId.localeCompare(a.pdcId))
                   // Take the first 10 elements
-                  .slice(0, 10)
+                  .slice(0, 5)
                   // Map over the sorted and limited array
                   .map((row) => (
                     <div className="flex flex-col ">
@@ -348,11 +361,11 @@ const Home = () => {
             )}
           </div>
           <div
-            class="bg-white rounded-lg shadow-md mt-5"
+            className="bg-white rounded-lg shadow-md mt-5 mb-10"
             style={{ overflowY: "auto" }}
           >
             <h2
-              class="text-2xl font-semibold text-white bg-signature py-4 px-6 border-b rounded-t-md"
+              className="font-semibold text-white bg-signature py-4 px-6 border-b rounded-t-md"
               onClick={() => toggleComponent()}
             >
               Recent Component
@@ -368,7 +381,7 @@ const Home = () => {
                     )
                   )
                   // Take the first 10 elements
-                  .slice(0, 10)
+                  .slice(0, 5)
                   // Map over the sorted and limited array
                   .map((row) => (
                     <div className="flex flex-col ">

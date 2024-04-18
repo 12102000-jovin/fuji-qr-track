@@ -54,10 +54,10 @@ const Dashboard = () => {
             </div>
 
             {dashboardType === "WorkOrder" && dashboardData.length > 0 ? (
-              <div className="flex flex-wrap justify-center items-center w-full">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {dashboardData.map((workOrder) => (
-                  <div className="bg-white m-3 rounded-md p-8 w-6/7  md:w-8/9 lg:w-96">
-                    <div className=" flex text-black font-black ">
+                  <div key={workOrder.id} className="bg-white rounded-md p-8">
+                    <div className="flex text-black font-black">
                       <button
                         onClick={() => window.open(workOrder.link, "_blank")}
                         className="text-blue-500 text-xl hover:underline focus:outline-none mb-5"
@@ -67,20 +67,22 @@ const Dashboard = () => {
                         </span>
                       </button>
                     </div>
-                    <p className="text-black flex flex-col">
-                      <p className="text-xs text-start">Allocated Date</p>
-                      <p className="text-xs text-start font-bold">
+                    <p className="text-black">
+                      <span className="block text-xs text-start">
+                        Allocated Date
+                      </span>
+                      <span className="block text-xs font-bold text-start">
                         {moment(workOrder.allocatedDate).format(
                           "DD MMM YYYY HH:mm:ss"
                         )}
-                      </p>
+                      </span>
                     </p>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="flex justify-start">
-                <p className="bg-red-500 font-black  p-1 pr-2 pl-2 rounded-full text-xs">
+                <p className="bg-red-500 font-black p-1 pr-2 pl-2 rounded-full text-xs">
                   No PDC Found
                 </p>
               </div>

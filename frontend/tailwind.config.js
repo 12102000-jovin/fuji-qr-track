@@ -7,6 +7,7 @@ module.exports = {
         signature: "#043f9d",
         secondary: "#6c757d",
         background: "#eef3f9",
+        catcher: "#FF08F4",
       },
       colors: {
         signature: "#043f9d",

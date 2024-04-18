@@ -374,7 +374,7 @@ const NavBar = () => {
                     // <ListItemIcon>
                     //   <InboxIcon />
                     // </ListItemIcon>
-                    <ListItemText primary="PDC" />
+                    <ListItemIcon>PDC</ListItemIcon>
                   )}
                 </ListItemButton>
               </ListItem>
@@ -423,56 +423,164 @@ const NavBar = () => {
                 <DropdownMenuItem to="/ControlPanel" primary="Control Panel" />
                 <DropdownMenuItem
                   to="/LoadbankPrimary"
-                  primary="Loadbank (Primary)"
+                  primary={
+                    <div className="flex items-center">
+                      <span>Loadbank </span>
+                      <span className="text-xs text-white bg-red-500 py-1 px-2 font-black rounded-full ml-1">
+                        Primary
+                      </span>
+                    </div>
+                  }
                 />
                 <DropdownMenuItem
                   to="/LoadbankCatcher"
-                  primary="Loadbank (Catcher)"
+                  primary={
+                    <div className="flex items-center">
+                      <span>Loadbank </span>
+                      <span className="text-xs text-white bg-red-500 py-1 px-2 font-black rounded-full ml-1">
+                        Catcher
+                      </span>
+                    </div>
+                  }
                 />
 
                 <DropdownMenuItem
                   to="/MCCBPrimary"
-                  primary="MCCB Panel (Primary)"
+                  primary={
+                    <div className="flex items-center">
+                      <span>MCCB Panel </span>
+                      <span className="text-xs text-white bg-red-500 py-1 px-2 font-black rounded-full ml-1">
+                        Primary
+                      </span>
+                    </div>
+                  }
                 />
 
                 <DropdownMenuItem
                   to="/MCCBCatcher"
-                  primary="MCCB Panel (Catcher)"
+                  primary={
+                    <div className="flex items-center">
+                      <span>MCCB Panel </span>
+                      <span className="text-xs text-white bg-red-500 py-1 px-2 font-black rounded-full ml-1">
+                        Catcher
+                      </span>
+                    </div>
+                  }
                 />
 
                 <DropdownMenuItem
                   to="/CTInterfaceLeft"
-                  primary="CT Interface (Primary) (Left)"
+                  primary={
+                    <div className="flex items-center">
+                      <span>CT Interface </span>
+                      <span className="text-xs text-white bg-red-500 py-1 px-2 font-black rounded-full ml-1">
+                        Primary
+                      </span>
+                      <span className="text-xs text-white bg-blue-400 py-1 px-2 font-black rounded-full ml-1">
+                        L
+                      </span>
+                    </div>
+                  }
                 />
 
                 <DropdownMenuItem
                   to="/CTInterfaceRight"
-                  primary="CT Interface (Primary) (Right)"
+                  primary={
+                    <div className="flex items-center">
+                      <span>CT Interface </span>
+                      <span className="text-xs text-white bg-red-500 py-1 px-2 font-black rounded-full ml-1">
+                        Primary
+                      </span>
+                      <span className="text-xs text-white bg-blue-400 py-1 px-2 font-black rounded-full ml-1">
+                        R
+                      </span>
+                    </div>
+                  }
                 />
 
                 <DropdownMenuItem
                   to="/ChassisRailLeftPrimary"
-                  primary="Chassis Rail (Primary) (Left) "
+                  primary={
+                    <div className="flex items-center">
+                      <span>Chassis Rail </span>
+                      <span className="text-xs text-white bg-red-500 py-1 px-2 font-black rounded-full ml-1">
+                        Primary
+                      </span>
+                      <span className="text-xs text-white bg-blue-400 py-1 px-2 font-black rounded-full ml-1">
+                        L
+                      </span>
+                    </div>
+                  }
                 />
 
                 <DropdownMenuItem
                   to="/ChassisRailRightPrimary"
-                  primary="Chassis Rail (Primary) (Right)"
+                  primary={
+                    <div className="flex items-center">
+                      <span>Chassis Rail </span>
+                      <span className="text-xs text-white bg-red-500 py-1 px-2 font-black rounded-full ml-1">
+                        Primary
+                      </span>
+                      <span className="text-xs text-white bg-blue-400 py-1 px-2 font-black rounded-full ml-1">
+                        R
+                      </span>
+                    </div>
+                  }
                 />
 
                 <DropdownMenuItem
                   to="/ChassisRailLeftCatcher"
-                  primary="Chassis Rail (Catcher) (Left)"
+                  primary={
+                    <div className="flex items-center">
+                      <span>Chassis Rail </span>
+                      <span className="text-xs text-white bg-red-500 py-1 px-2 font-black rounded-full ml-1">
+                        Catcher
+                      </span>
+                      <span className="text-xs text-white bg-blue-400 py-1 px-2 font-black rounded-full ml-1">
+                        L
+                      </span>
+                    </div>
+                  }
                 />
 
                 <DropdownMenuItem
                   to="/ChassisRailRightCatcher"
-                  primary="Chassis Rail (Catcher) (Right)"
+                  primary={
+                    <div className="flex items-center">
+                      <span>Chassis Rail </span>
+                      <span className="text-xs text-white bg-red-500 py-1 px-2 font-black rounded-full ml-1">
+                        Catcher
+                      </span>
+                      <span className="text-xs text-white bg-blue-400 py-1 px-2 font-black rounded-full ml-1">
+                        R
+                      </span>
+                    </div>
+                  }
                 />
 
-                <DropdownMenuItem to="/RoofPrimary" primary="Roof (Primary)" />
+                <DropdownMenuItem
+                  to="/RoofPrimary"
+                  primary={
+                    <div className="flex items-center">
+                      <span>Roof </span>
+                      <span className="text-xs text-white bg-red-500 py-1 px-2 font-black rounded-full ml-1">
+                        Primary
+                      </span>
+                    </div>
+                  }
+                />
 
-                <DropdownMenuItem to="/RoofCatcher" primary="Roof (Catcher)" />
+                <DropdownMenuItem
+                  to="/RoofCatcher"
+                  primary={
+                    <div className="flex items-center">
+                      <span>Roof </span>
+                      <span className="text-xs text-white bg-red-500 py-1 px-2 font-black rounded-full ml-1">
+                        Catcher
+                      </span>
+                    </div>
+                  }
+                />
               </Menu>
 
               <ListItem disablePadding sx={{ display: "block" }}>

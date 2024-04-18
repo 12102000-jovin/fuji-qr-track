@@ -163,6 +163,7 @@ router.get("/:panelId/showPanelDashboard", async (req, res) => {
     const componentData = components.map((component) => ({
       componentType: component.componentType,
       componentSerialNumber: component.componentSerialNumber,
+      componentDescription: component.componentDescription,
       allocatedDate: component.allocatedDate,
     }));
 
@@ -993,7 +994,7 @@ router.get(
       if (panel) {
         // Include panelId in the response
         const panelId = panel.panelId;
-        const subAssemblyType = "Panel";
+        const subAssemblyType = "Control Panel";
 
         // Get the object id of the panel
         const panelObjectId = panel._id;

@@ -63,7 +63,7 @@ const Dashboard = () => {
                 )}
               </div>
               <div className="flex flex-col items-start p-2">
-                <p className="text-3xl font-bold mb-1">Panel</p>
+                <p className="text-3xl font-bold mb-1">Control Panel</p>
                 {dashboardType === "Panel" && (
                   <p className="font-semibold text-white rounded-full inline-block">
                     {panelId}
@@ -93,6 +93,10 @@ const Dashboard = () => {
                       <div className="flex justify-between">
                         <span className="m-3">
                           {component.componentSerialNumber}
+                          <br />
+                        </span>
+                        <span className="m-3">
+                          {component.componentDescription}
                           <br />
                         </span>
                         <span className="m-3">
