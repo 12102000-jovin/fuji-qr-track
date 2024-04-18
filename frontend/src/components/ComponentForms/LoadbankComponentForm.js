@@ -68,8 +68,12 @@ const LoadbankComponentForm = (loadbankId) => {
   return (
     <div>
       <div className="p-5 bg-signature text-white font-bold rounded-md">
-        <div className="flex justify-start text-2xl font-black mb-5">
-          Loadbank (Primary) Components
+        <div className="flex justify-start text-2xl font-black mb-5 items-center">
+          Loadbank{" "}
+          <span className="text-xl text-white bg-red-500 py-1 px-2 font-black rounded-full ml-2 mr-2">
+            Primary
+          </span>
+          Components
         </div>
         {errorMessage && (
           <span className="p-1 pl-2 pr-2 bg-red-500 text-xs rounded-full text-white font-bold mt-2">

@@ -133,12 +133,12 @@ router.put("/MCCBPrimary/editMCCB/:pdcId/:MCCBId", async (req, res) => {
     // Check whether the future MCCB Panel exist or not
     if (futureMCCB && currentMCCB && futureMCCB.MCCBId !== currentMCCB.MCCBId) {
       return res.status(409).json({
-        error: "MCCBs already exists. Please choose a different one",
+        error: "MCCB already exists. Please choose a different one",
       });
     }
 
     if (pdcId !== pdcToEdit && MCCBId === MCCBToEdit) {
-      // Add the MCCB Panel to the future MCCB Panel and remove it from the current pdc
+      // Add the MCCB Panel to the future PDC and remove it from the current pdc
       if (futurePdc && currentPdc && currentPdc.primaryMCCBs) {
         futurePdc.primaryMCCBs.push(currentMCCB._id);
         currentPdc.primaryMCCBs.pull(currentMCCB._id);
@@ -330,13 +330,13 @@ router.put("/MCCBCatcher/editMCCB/:pdcId/:MCCBId", async (req, res) => {
     if (!isMCCBPattern) {
       return res
         .status(400)
-        .json({ error: "Please Enter Correct MCCB Panel (Primary) Id Format" });
+        .json({ error: "Please Enter Correct MCCB Panel (Catcher) Id Format" });
     }
 
     // Check whether the future MCCB Panel exist or not
     if (futureMCCB && currentMCCB && futureMCCB.MCCBId !== currentMCCB.MCCBId) {
       return res.status(409).json({
-        error: "MCCBs already exists. Please choose a different one",
+        error: "MCCB already exists. Please choose a different one",
       });
     }
 

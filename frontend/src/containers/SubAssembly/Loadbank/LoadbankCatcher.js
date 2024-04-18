@@ -278,7 +278,7 @@ const LoadBank = () => {
             loadbankId: selectedRow.loadbankId,
             qrCodeData: JSON.stringify({
               link: selectedRow.link,
-              workOrderId: selectedRow.workOrderId,
+              loadbankCatcherId: selectedRow.loadbankId,
             }),
           };
         }
@@ -367,7 +367,7 @@ const LoadBank = () => {
                   type="search"
                   id="default-search"
                   className="block h-12 p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 w-1/3"
-                  placeholder="Search Loadbank"
+                  placeholder="Search Loadbank (Catcher)"
                   required
                   onChange={handleSearchChange}
                   value={searchQuery}

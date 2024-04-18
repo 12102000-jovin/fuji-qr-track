@@ -264,6 +264,14 @@ const AllocateComponents = () => {
     setShowLoadbankCatcherForm(false);
     setShowMCCBPrimaryForm(false);
     setShowMCCBCatcherForm(false);
+    setShowLeftCTInterfaceForm(false);
+    setShowRightCTInterfaceForm(false);
+    setShowLeftPrimaryChassisRailForm(false);
+    setShowRightPrimaryChassisRailForm(false);
+    setShowLeftCatcherChassisRailForm(false);
+    setShowRightCatcherChassisRailForm(false);
+    setShowPrimaryRoofForm(false);
+    setShowCatcherRoofForm(false);
     setErrorMessage("");
   };
 

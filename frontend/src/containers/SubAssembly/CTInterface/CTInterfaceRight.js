@@ -155,7 +155,7 @@ const CTInterfaceRight = () => {
             CTId: selectedRow.CTId,
             qrCodeData: JSON.stringify({
               link: selectedRow.link,
-              workOrderId: selectedRow.workOrderId,
+              rightCTInterfaceId: selectedRow.CTId,
             }),
           };
         }
@@ -342,8 +342,11 @@ const CTInterfaceRight = () => {
           <p className="text-4xl text-signature font-black mb-5 mt-3">
             <div className="flex items-center justify-center">
               <p>CT Interface</p>
-              <span className="text-xl text-white bg-blue-400 py-2 px-3 font-black rounded-full ml-2">
-                Right
+              <span className="text-xl text-white bg-red-500 py-2 px-3 font-black rounded-full ml-2">
+                Primary
+              </span>
+              <span className="text-xl text-white bg-blue-400 py-2 px-4 font-black rounded-full ml-2">
+                R
               </span>
             </div>
           </p>
@@ -370,7 +373,7 @@ const CTInterfaceRight = () => {
                   type="search"
                   id="default-search"
                   className="block h-12 p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 w-1/3"
-                  placeholder="Search CT Interface"
+                  placeholder="Search CT Interface (Right)"
                   required
                   onChange={handleSearchChange}
                   value={searchQuery}
@@ -436,7 +439,7 @@ const CTInterfaceRight = () => {
                     }}
                   >
                     <div className="flex items-center justify-center">
-                      <p onClick={handleSortCTId}> CT ID</p>
+                      <p onClick={handleSortCTId}> CT Interface ID</p>
                       <span>
                         <FaSort
                           fontSize="small"

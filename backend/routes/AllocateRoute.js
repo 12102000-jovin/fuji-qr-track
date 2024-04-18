@@ -389,7 +389,7 @@ router.post("/AllocateSubAssembly", async (req, res) => {
       try {
         // Check if CT Interface exists
         const CTInterface = await CTInterfaceLeftModel.findOne({
-          chassisId: subAssemblyInputValue,
+          CTId: subAssemblyInputValue,
         });
 
         if (!CTInterface) {

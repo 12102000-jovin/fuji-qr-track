@@ -792,7 +792,7 @@ const SubAssemblyQRGenerator = () => {
       const Panels = Array.from({ length: numQR }, (_, index) => {
         const newPanelId = formatId(Number(latestPanelId + 1) + index);
         return {
-          link: `${linkFormat}${applicationPortNumber}/Dashboard/CPAN/CPAN${newPanelId}`,
+          link: `${linkFormat}${applicationPortNumber}/Dashboard/ControlPanel/CPAN${newPanelId}`,
           generatedDate: moment()
             .tz("Australia/Sydney")
             .format("YYYY-MM-DD HH:mm:ss"),
@@ -1418,7 +1418,7 @@ const SubAssemblyQRGenerator = () => {
       a.href = url;
       a.download =
         selectedSubAssemblyType === "Panel"
-          ? "Panel "
+          ? "Panel"
           : selectedSubAssemblyType === "LoadbankPrimary"
           ? "Loadbank (Primary)"
           : selectedSubAssemblyType === "LoadbankCatcher"
@@ -1432,7 +1432,7 @@ const SubAssemblyQRGenerator = () => {
           : selectedSubAssemblyType === "RightCTInterface"
           ? "CT Interface (Right)"
           : selectedSubAssemblyType === "LeftPrimaryChassisRail"
-          ? "Chassis Rail (Left (Primary)"
+          ? "Chassis Rail (Left) (Primary)"
           : selectedSubAssemblyType === "RightPrimaryChassisRail"
           ? "Chassis Rail (Right) (Primary)"
           : selectedSubAssemblyType === "LeftCatcherChassisRail"
@@ -1481,7 +1481,7 @@ const SubAssemblyQRGenerator = () => {
                 Select Sub-Assembly Type
               </option>
 
-              <option value="Panel">Panel</option>
+              <option value="Panel">Control Panel</option>
               <option value="LoadbankPrimary">Loadbank (Primary)</option>
               <option value="LoadbankCatcher">Loadbank (Catcher)</option>
               <option value="MCCBPrimary">MCCB Panel (Primary)</option>
@@ -1511,7 +1511,7 @@ const SubAssemblyQRGenerator = () => {
                 >
                   Number of{" "}
                   {selectedSubAssemblyType === "Panel"
-                    ? "Panel "
+                    ? "Control Panel "
                     : selectedSubAssemblyType === "LoadbankPrimary"
                     ? "Loadbank (Primary) "
                     : selectedSubAssemblyType === "LoadbankCatcher"
@@ -1870,7 +1870,6 @@ const SubAssemblyQRGenerator = () => {
                       <div className="mb-5">
                         Loadbank ID: {code.loadbankId}{" "}
                         <span className="text-red-500 ml-1 mr-1 font-black">
-                          {" "}
                           (Primary)
                         </span>
                       </div>
@@ -2089,7 +2088,7 @@ const SubAssemblyQRGenerator = () => {
                       <ReactQRCode
                         value={JSON.stringify({
                           link: code.link,
-                          LeftCTInterfaceId: code.CTId,
+                          leftCTInterfaceId: code.CTId,
                         })}
                         size={512}
                         imageSettings={{
@@ -2147,7 +2146,7 @@ const SubAssemblyQRGenerator = () => {
                       <ReactQRCode
                         value={JSON.stringify({
                           link: code.link,
-                          RightCTInterfaceId: code.CTId,
+                          rightCTInterfaceId: code.CTId,
                         })}
                         size={512}
                         imageSettings={{

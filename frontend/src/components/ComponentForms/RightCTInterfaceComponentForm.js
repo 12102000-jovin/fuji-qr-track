@@ -71,8 +71,15 @@ const RightCTInterfaceComponentForm = (CTId) => {
   return (
     <div>
       <div className="p-5 bg-signature text-white font-bold rounded-md">
-        <div className="flex justify-start text-2xl font-black mb-5">
-          CT Interface (Right) Components
+        <div className="flex justify-start text-2xl font-black mb-5 items-center">
+          CT Interface{" "}
+          <span className="text-xl text-white bg-red-500 py-1 px-2 font-black rounded-full ml-2 mr-2">
+            Primary
+          </span>
+          <span className="text-xl text-white bg-blue-500 py-1 px-4 font-black rounded-full mr-2">
+            R
+          </span>
+          Components
         </div>
         {errorMessage && (
           <span className="p-1 pl-2 pr-2 bg-red-500 text-xs rounded-full text-white font-bold mt-2">

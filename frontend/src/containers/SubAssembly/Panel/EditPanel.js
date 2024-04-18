@@ -178,7 +178,7 @@ const EditPanel = ({ open, onClose, panelId }) => {
             htmlFor="panelId"
             className="block mb-2 flex justify-start font-bold text-xl"
           >
-            Panel Id
+            Control Panel Id
           </label>
           <div className="flex items-center">
             <div className="relative w-full">

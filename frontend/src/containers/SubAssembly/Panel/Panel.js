@@ -276,7 +276,7 @@ const Panel = () => {
             panelId: selectedRow.panelId,
             qrCodeData: JSON.stringify({
               link: selectedRow.link,
-              workOrderId: selectedRow.workOrderId,
+              panelId: selectedRow.panelId,
             }),
           };
         }
@@ -360,7 +360,7 @@ const Panel = () => {
                   type="search"
                   id="default-search"
                   className="block h-12 p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 w-1/3"
-                  placeholder="Search Panel"
+                  placeholder="Search Control Panel"
                   required
                   onChange={handleSearchChange}
                   value={searchQuery}
@@ -426,7 +426,7 @@ const Panel = () => {
                     }}
                   >
                     <div className="flex items-center justify-center">
-                      <p onClick={handleSortPanelId}> Panel ID </p>
+                      <p onClick={handleSortPanelId}> Control Panel ID </p>
                       <span>
                         <FaSort
                           fontSize="small"
@@ -590,7 +590,7 @@ const Panel = () => {
                         marginTop: "5px",
                       }}
                     >
-                      Panel ID: {modalPanelID}
+                      Control Panel ID: {modalPanelID}
                     </p>
                   </div>
                 </DialogContent>
@@ -769,7 +769,7 @@ const Panel = () => {
                       }}
                       className="text-signature text-center"
                     >
-                      Panel ID: {qrCode.panelId}
+                      Control Panel ID: {qrCode.panelId}
                     </p>
                   </div>
                 </div>

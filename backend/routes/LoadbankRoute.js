@@ -373,9 +373,9 @@ router.put(
 
       if (pdcId !== pdcToEdit && loadbankId === loadbankToEdit) {
         // Add the loadbank to the future pdc and remove it from the current pdc
-        if (futurePdc && currentPdc && currentPdc.loadbanks) {
-          futurePdc.loadbanks.push(currentLoadbank._id);
-          currentPdc.loadbanks.pull(currentLoadbank._id);
+        if (futurePdc && currentPdc && currentPdc.catcherLoadbanks) {
+          futurePdc.catcherLoadbanks.push(currentLoadbank._id);
+          currentPdc.catcherLoadbanks.pull(currentLoadbank._id);
 
           // Save changes to both pdcs
           await futurePdc.save();
@@ -419,9 +419,9 @@ router.put(
         );
 
         // Add the loadbank to the future pdc and remove it from the current pdc
-        if (futurePdc && currentPdc && currentPdc.loadbanks) {
-          futurePdc.loadbanks.push(currentLoadbank._id);
-          currentPdc.loadbanks.pull(currentLoadbank._id);
+        if (futurePdc && currentPdc && currentPdc.catcherLoadbanks) {
+          futurePdc.catcherLoadbanks.push(currentLoadbank._id);
+          currentPdc.catcherLoadbanks.pull(currentLoadbank._id);
 
           // Save changes to both pdcs
           await futurePdc.save();

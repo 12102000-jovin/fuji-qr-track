@@ -116,7 +116,7 @@ const LeftPrimaryChassisRail = () => {
             chassisId: selectedRow.chassisId,
             qrCodeData: JSON.stringify({
               link: selectedRow.link,
-              workOrderId: selectedRow.workOrderId,
+              leftPrimaryChassisRailId: selectedRow.chassisId,
             }),
           };
         }
@@ -430,7 +430,7 @@ const LeftPrimaryChassisRail = () => {
                     }}
                   >
                     <div className="flex items-center justify-center">
-                      <p onClick={handleSortChassisId}> Chassis ID</p>
+                      <p onClick={handleSortChassisId}> Chassis Rail ID</p>
                       <span>
                         <FaSort
                           fontSize="small"
@@ -592,10 +592,10 @@ const LeftPrimaryChassisRail = () => {
                         marginTop: "5px",
                       }}
                     >
-                      Chassis ID: {modalChassisID}
+                      Chassis Rail ID: {modalChassisID}
                       <span className="text-red-500 ml-1 mr-1 font-black">
                         {" "}
-                        (Primary)
+                        (Left) (Primary)
                       </span>
                     </p>
                   </div>

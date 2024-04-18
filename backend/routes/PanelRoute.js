@@ -157,7 +157,7 @@ router.put("/Panel/editPanel/:pdcId/:panelId", async (req, res) => {
         {
           $set: {
             panelId: panelToEdit,
-            link: `http://localhost:3000/Dashboard/CPAN/${panelToEdit}`,
+            link: `http://localhost:3000/Dashboard/ControlPanel/${panelToEdit}`,
           },
         },
         { new: true } // This option returns the modified document rather than the original
@@ -177,7 +177,7 @@ router.put("/Panel/editPanel/:pdcId/:panelId", async (req, res) => {
         {
           $set: {
             panelId: panelToEdit,
-            link: `http://localhost:3000/Dashboard/CPAN/${panelToEdit}`,
+            link: `http://localhost:3000/Dashboard/ControlPanel/${panelToEdit}`,
           },
         },
         { new: true }

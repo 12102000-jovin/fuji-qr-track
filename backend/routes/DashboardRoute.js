@@ -1259,7 +1259,7 @@ router.get(
       } else if (LeftPrimaryChassisRail) {
         // Include ChassisId Id in the response
         const chassisId = LeftPrimaryChassisRail.chassisId;
-        const subAssemblyType = "Chassis Rail (Left) (Primary)";
+        const subAssemblyType = "Chassis Rail";
 
         // Get the object id of the chassis rail
         const chassisRailObjectId = LeftPrimaryChassisRail._id;
@@ -1297,7 +1297,7 @@ router.get(
       } else if (RightPrimaryChassisRail) {
         // Include ChassisId Id in the response
         const chassisId = RightPrimaryChassisRail.chassisId;
-        const subAssemblyType = "Chassis Rail (Right) (Primary)";
+        const subAssemblyType = "Chassis Rail";
 
         // Get the object id of the chassis rail
         const chassisRailObjectId = RightPrimaryChassisRail._id;
@@ -1335,7 +1335,7 @@ router.get(
       } else if (LeftCatcherChassisRail) {
         // Include ChassisId Id in the response
         const chassisId = LeftCatcherChassisRail.chassisId;
-        const subAssemblyType = "Chassis Rail (Left) (Catcher)";
+        const subAssemblyType = "Chassis Rail";
 
         // Get the object id of the chassis rail
         const chassisRailObjectId = LeftCatcherChassisRail._id;
@@ -1373,7 +1373,7 @@ router.get(
       } else if (RightCatcherChassisRail) {
         // Include ChassisId Id in the response
         const chassisId = RightCatcherChassisRail.chassisId;
-        const subAssemblyType = "Chassis Rail (Right) (Catcher)";
+        const subAssemblyType = "Chassis Rail";
 
         // Get the object id of the chassis rail
         const chassisRailObjectId = RightCatcherChassisRail._id;
@@ -1411,7 +1411,7 @@ router.get(
       } else if (PrimaryRoof) {
         // Include roofId in the response
         const roofId = PrimaryRoof.roofId;
-        const subAssemblyType = "Roof (Primary)";
+        const subAssemblyType = "Roof";
 
         // Get the object id of the Roof
         const roofObjectId = PrimaryRoof._id;
@@ -1449,7 +1449,7 @@ router.get(
       } else if (CatcherRoof) {
         // Include roofId in the response
         const roofId = CatcherRoof.roofId;
-        const subAssemblyType = "Roof (Catcher)";
+        const subAssemblyType = "Roof";
 
         // Get the object id of the Roof
         const roofObjectId = CatcherRoof._id;

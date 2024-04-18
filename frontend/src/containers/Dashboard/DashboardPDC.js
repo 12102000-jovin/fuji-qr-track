@@ -314,8 +314,11 @@ const Dashboard = () => {
                 <div className="w-full p-5 bg-white rounded-md min-h-40">
                   <p className="text-black font-black text-2xl mb-2 flex items-center">
                     CT Interface{" "}
+                    <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
+                      Primary
+                    </span>
                     <span className="text-xs text-white bg-blue-400 py-1 px-2.5 font-black rounded-full ml-1">
-                      Left
+                      L
                     </span>
                   </p>
                   {dashboardType === "PDC" ? (
@@ -364,8 +367,11 @@ const Dashboard = () => {
                 <div className="w-full p-5 bg-white rounded-md min-h-40">
                   <p className="text-black font-black text-2xl mb-2 flex items-center">
                     CT Interface{" "}
+                    <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
+                      Primary
+                    </span>
                     <span className="text-xs text-white bg-blue-400 py-1 px-2.5 font-black rounded-full ml-1">
-                      Right
+                      R
                     </span>
                   </p>
                   {dashboardType === "PDC" ? (
@@ -414,11 +420,11 @@ const Dashboard = () => {
                 <div className="w-full p-5 bg-white rounded-md min-h-40">
                   <p className="text-black font-black text-2xl mb-2 flex items-center">
                     Chassis Rail{" "}
-                    <span className="text-xs text-white bg-blue-400 py-1 px-2.5 font-black rounded-full ml-1">
-                      Left
-                    </span>
                     <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
                       Primary
+                    </span>
+                    <span className="text-xs text-white bg-blue-400 py-1 px-2.5 font-black rounded-full ml-1">
+                      L
                     </span>
                   </p>
                   {dashboardType === "PDC" ? (
@@ -471,11 +477,11 @@ const Dashboard = () => {
                 <div className="w-full p-5 bg-white rounded-md min-h-40">
                   <p className="text-black font-black text-2xl mb-2 flex items-center">
                     Chassis Rail{" "}
-                    <span className="text-xs text-white bg-blue-400 py-1 px-2.5 font-black rounded-full ml-1">
-                      Right
-                    </span>
                     <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
                       Primary
+                    </span>
+                    <span className="text-xs text-white bg-blue-400 py-1 px-2.5 font-black rounded-full ml-1">
+                      R
                     </span>
                   </p>
                   {dashboardType === "PDC" ? (
@@ -528,11 +534,11 @@ const Dashboard = () => {
                 <div className="w-full p-5 bg-white rounded-md min-h-40">
                   <p className="text-black font-black text-2xl mb-2 flex items-center">
                     Chassis Rail{" "}
-                    <span className="text-xs text-white bg-blue-400 py-1 px-2.5 font-black rounded-full ml-1">
-                      Left
-                    </span>
                     <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
                       Catcher
+                    </span>
+                    <span className="text-xs text-white bg-blue-400 py-1 px-2.5 font-black rounded-full ml-1">
+                      L
                     </span>
                   </p>
                   {dashboardType === "PDC" ? (
@@ -585,11 +591,11 @@ const Dashboard = () => {
                 <div className="w-full p-5 bg-white rounded-md min-h-40">
                   <p className="text-black font-black text-2xl mb-2 flex items-center">
                     Chassis Rail{" "}
-                    <span className="text-xs text-white bg-blue-400 py-1 px-2.5 font-black rounded-full ml-1">
-                      Right
-                    </span>
                     <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
                       Catcher
+                    </span>
+                    <span className="text-xs text-white bg-blue-400 py-1 px-2.5 font-black rounded-full ml-1">
+                      R
                     </span>
                   </p>
                   {dashboardType === "PDC" ? (

@@ -442,32 +442,32 @@ const NavBar = () => {
 
                 <DropdownMenuItem
                   to="/CTInterfaceLeft"
-                  primary="CT Interface (Left)"
+                  primary="CT Interface (Primary) (Left)"
                 />
 
                 <DropdownMenuItem
                   to="/CTInterfaceRight"
-                  primary="CT Interface (Right)"
+                  primary="CT Interface (Primary) (Right)"
                 />
 
                 <DropdownMenuItem
                   to="/ChassisRailLeftPrimary"
-                  primary="Chassis Rail (Left) (Primary)"
+                  primary="Chassis Rail (Primary) (Left) "
                 />
 
                 <DropdownMenuItem
                   to="/ChassisRailRightPrimary"
-                  primary="Chassis Rail (Right) (Primary)"
+                  primary="Chassis Rail (Primary) (Right)"
                 />
 
                 <DropdownMenuItem
                   to="/ChassisRailLeftCatcher"
-                  primary="Chassis Rail (Left) (Catcher)"
+                  primary="Chassis Rail (Catcher) (Left)"
                 />
 
                 <DropdownMenuItem
                   to="/ChassisRailRightCatcher"
-                  primary="Chassis Rail (Right) (Catcher)"
+                  primary="Chassis Rail (Catcher) (Right)"
                 />
 
                 <DropdownMenuItem to="/RoofPrimary" primary="Roof (Primary)" />
@@ -576,7 +576,7 @@ const NavBar = () => {
               />
               <Route path="/Dashboard/PDC/:pdcId" element={<DashboardPDC />} />
               <Route
-                path="/Dashboard/CPAN/:panelId"
+                path="/Dashboard/ControlPanel/:panelId"
                 element={<DashboardPanel />}
               />
               <Route
