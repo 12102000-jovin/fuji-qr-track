@@ -814,6 +814,7 @@ router.post("/AllocateSubAssembly", async (req, res) => {
   }
 });
 
+// ======================== C O N T R O L  P A N E L ========================
 router.post("/AllocatePanelComponent", async (req, res) => {
   try {
     const {
@@ -875,6 +876,7 @@ router.post("/AllocatePanelComponent", async (req, res) => {
   }
 });
 
+// ======================== L O A D B A N K (P R I M A R Y) ========================
 router.post("/AllocateLoadbankComponent", async (req, res) => {
   try {
     const {
@@ -937,6 +939,7 @@ router.post("/AllocateLoadbankComponent", async (req, res) => {
   }
 });
 
+// ======================== L O A D B A N K (C A T C H E R) ========================
 router.post("/AllocateLoadbankCatcherComponent", async (req, res) => {
   try {
     const {
@@ -999,6 +1002,7 @@ router.post("/AllocateLoadbankCatcherComponent", async (req, res) => {
   }
 });
 
+// ======================== M C C B  P A N E L (P R I M A R Y) ========================
 router.post("/AllocateMCCBPrimaryComponent", async (req, res) => {
   try {
     const {
@@ -1061,6 +1065,7 @@ router.post("/AllocateMCCBPrimaryComponent", async (req, res) => {
   }
 });
 
+// ======================== M C C B  P A N E L (C A T C H E R) ========================
 router.post("/AllocateMCCBCatcherComponent", async (req, res) => {
   try {
     const {
@@ -1123,6 +1128,7 @@ router.post("/AllocateMCCBCatcherComponent", async (req, res) => {
   }
 });
 
+// ======================== C T  I N T E R F A C E (L E F T) ========================
 router.post("/AllocateLeftCTInterfaceComponent", async (req, res) => {
   try {
     const { componentSerialNumber, componentType, componentDescription, CTId } =
@@ -1181,6 +1187,7 @@ router.post("/AllocateLeftCTInterfaceComponent", async (req, res) => {
   }
 });
 
+// ======================== C T  I N T E R F A C E (R I G H T) ========================
 router.post("/AllocateRightCTInterfaceComponent", async (req, res) => {
   try {
     const { componentSerialNumber, componentType, componentDescription, CTId } =
@@ -1239,6 +1246,7 @@ router.post("/AllocateRightCTInterfaceComponent", async (req, res) => {
   }
 });
 
+// ======================== C T  I N T E R F A C E (L E F T) (P R I M A R Y) ========================
 router.post("/AllocateLeftPrimaryChassisRailComponent", async (req, res) => {
   try {
     const {
@@ -1301,6 +1309,7 @@ router.post("/AllocateLeftPrimaryChassisRailComponent", async (req, res) => {
   }
 });
 
+// ======================== C T  I N T E R F A C E (R I G H T) (P R I M A R Y) ========================
 router.post("/AllocateRightPrimaryChassisRailComponent", async (req, res) => {
   try {
     const {
@@ -1363,6 +1372,7 @@ router.post("/AllocateRightPrimaryChassisRailComponent", async (req, res) => {
   }
 });
 
+// ======================== C T  I N T E R F A C E (L E F T) (C A T C H E R) ========================
 router.post("/AllocateLeftCatcherChassisRailComponent", async (req, res) => {
   try {
     const {
@@ -1425,6 +1435,7 @@ router.post("/AllocateLeftCatcherChassisRailComponent", async (req, res) => {
   }
 });
 
+// ======================== C T  I N T E R F A C E (R I G H T) (C A T C H E R) ========================
 router.post("/AllocateRightCatcherChassisRailComponent", async (req, res) => {
   try {
     const {
@@ -1487,6 +1498,7 @@ router.post("/AllocateRightCatcherChassisRailComponent", async (req, res) => {
   }
 });
 
+// ======================== R O O F (P R I M A R Y) ========================
 router.post("/AllocatePrimaryRoofComponent", async (req, res) => {
   try {
     const {
@@ -1549,6 +1561,7 @@ router.post("/AllocatePrimaryRoofComponent", async (req, res) => {
   }
 });
 
+// ======================== R O O F (C A T C H E R) ========================
 router.post("/AllocateCatcherRoofComponent", async (req, res) => {
   try {
     const {

@@ -72,8 +72,14 @@ const Home = () => {
   };
 
   const handleComponentDashboard = (componentSerialNumber) => {
+    const encodedSerialNumber = encodeURIComponent(componentSerialNumber);
+    const decodedSerialNumber = decodeURIComponent(componentSerialNumber);
+    console.log(encodedSerialNumber);
+    console.log(decodedSerialNumber);
+
     window.open(
-      `http://localhost:3000/Dashboard/Component/${componentSerialNumber}`
+      `http://localhost:3000/Dashboard/Component/${encodedSerialNumber}`,
+      "_blank"
     );
   };
 

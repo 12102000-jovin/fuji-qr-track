@@ -285,9 +285,12 @@ const NavBar = () => {
               >
                 <MenuIcon />
               </IconButton>
-              <img src={logo} alt="Logo" height="40" width="40" />
-              <p className="ml-2 text-2xl font-black">Dashboard</p>
-
+              <div className="flex items-center">
+                <img src={logo} alt="Logo" height="40" width="40" />
+                <p className="ml-2 text-base lg:text-2xl font-black">
+                  Dashboard
+                </p>
+              </div>
               <div className="flex items-center ml-auto">
                 {" "}
                 {/* Use ml-auto for floating right */}
@@ -296,12 +299,12 @@ const NavBar = () => {
                   ref={openScanQRModal}
                   onClick={handleQRScanner}
                 >
-                  <span className="font-black text-base sm:text-sm">
+                  <span className="font-black text-sm lg:text-base">
                     Scan QR Code
                   </span>
 
                   <QrCodeScannerRoundedIcon
-                    style={{ fontSize: 28, marginLeft: 8 }}
+                    style={{ fontSize: 24, marginLeft: 8 }}
                   />
                 </button>
               </div>

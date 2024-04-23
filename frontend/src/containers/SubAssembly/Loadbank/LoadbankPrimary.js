@@ -207,37 +207,23 @@ const LoadBank = () => {
   };
 
   const handleDownload = (loadbankID) => {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
+    const captureOptions = {
+      width: 512,
+      height: 565,
+    };
 
-    // Set canvas dimensions
-    canvas.width = 512;
-    canvas.height = 565;
-
-    // Draw your QR code and other content here
-    // For simplicity, let's assume qrCodeData is already drawn
-
-    // Draw the text
-    ctx.fillStyle = "#043f9d";
-    ctx.font = "bold 20px Avenir, sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Loadbank ID: " + modalLoadbankID, canvas.width / 2, 20);
-
-    // Draw the badge
-    ctx.fillStyle = "#ff0000"; // Red background color
-    ctx.fillRect(canvas.width / 2 - 50, 40, 100, 25); // Adjust dimensions as needed
-    ctx.fillStyle = "#ffffff"; // White text color
-    ctx.font = "bold 12px Avenir, sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Primary", canvas.width / 2, 55);
-
-    // Convert the canvas to a data URL and initiate download
-    const imgData = canvas.toDataURL("image/png");
-    const fileName = `${loadbankID}.png`;
-    const a = document.createElement("a");
-    a.href = imgData;
-    a.download = fileName;
-    a.click();
+    html2canvas(captureRef.current, captureOptions)
+      .then((canvas) => {
+        const imgData = canvas.toDataURL("image/png");
+        const fileName = `${loadbankID}.png`;
+        const a = document.createElement("a");
+        a.href = imgData;
+        a.download = fileName;
+        a.click();
+      })
+      .catch((error) => {
+        console.error("Error capturing image:", error);
+      });
   };
 
   const handleAddLoadbankModal = () => {
@@ -598,6 +584,7 @@ const LoadBank = () => {
                         width: 60,
                         height: 35,
                       }}
+                      className="mb-0 pb-0"
                     />
                     <p
                       style={{
@@ -610,9 +597,13 @@ const LoadBank = () => {
                       }}
                     >
                       Loadbank ID: {modalLoadbankID}
-                      <span className="bg-red-500 text-white px-2 rounded-full ml-1 mr-1 font-black">
-                        Primary
+                      <span className="text-red-500 font-black">
+                        {" "}
+                        (Primary){" "}
                       </span>
+                      {/* <div className="flex justify-center">
+                        <img src={FujiPrimary} width="100" className="mt-2" />
+                      </div> */}
                     </p>
                   </div>
                 </DialogContent>

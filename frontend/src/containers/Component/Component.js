@@ -41,7 +41,7 @@ const Component = () => {
 
   // Pagination
   const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
     fetchComponentData();
@@ -142,8 +142,13 @@ const Component = () => {
   };
 
   const handleComponentDashboard = (componentSerialNumber) => {
+    const encodedSerialNumber = encodeURIComponent(componentSerialNumber);
+    const decodedSerialNumber = decodeURIComponent(componentSerialNumber);
+    console.log(encodedSerialNumber);
+    console.log(decodedSerialNumber);
+
     window.open(
-      `http://localhost:3000/Dashboard/Component/${componentSerialNumber}`,
+      `http://localhost:3000/Dashboard/Component/${encodedSerialNumber}`,
       "_blank"
     );
   };
@@ -159,8 +164,10 @@ const Component = () => {
 
   const handleDeletePDC = async (componentSerialNumber) => {
     try {
+      const encodedSerialNumber = encodeURIComponent(componentSerialNumber);
+
       const response = await axios.delete(
-        `${deleteComponent_API}${componentSerialNumber}`
+        `${deleteComponent_API}${encodedSerialNumber}`
       );
 
       if (response.status === 200) {
@@ -219,12 +226,11 @@ const Component = () => {
                 className="bg-gray-50 h-12 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 onChange={(e) => setRowsPerPage(Number(e.target.value))}
               >
-                <option value="5" defaultValue>
-                  {" "}
-                  5
+                <option value="10" defaultValue>
+                  10
                 </option>
-                <option value="10">10</option>
-                <option value="15">15</option>
+                <option value="20">20</option>
+                <option value="30">30</option>
               </select>
             </form>
           </div>
@@ -349,7 +355,7 @@ const Component = () => {
               count={Math.ceil(filteredComponent.length / rowsPerPage)}
               page={page}
               onChange={handleChangePage}
-              rowsPerPageOptions={[5, 10, 15]}
+              rowsPerPageOptions={[10, 20, 30]}
               rowsPerPage={rowsPerPage}
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}

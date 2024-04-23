@@ -7,12 +7,15 @@ const Dashboard = () => {
   const { componentSerialNumber } = useParams();
   const [dashboardData, setDashboardData] = useState([]);
 
-  const fetchDashboardComponentData_API = `http://localhost:3001/Dashboard/${componentSerialNumber}/showComponentDashboard`;
+  const encodedSerialNumber = encodeURIComponent(componentSerialNumber);
+
+  const fetchDashboardComponentData_API = `http://localhost:3001/Dashboard/${encodedSerialNumber}/showComponentDashboard`;
 
   useEffect(() => {
     if (componentSerialNumber) {
       fetchDashboardComponentData();
     }
+    console.log(componentSerialNumber);
   }, []);
 
   const fetchDashboardComponentData = () => {
@@ -67,7 +70,6 @@ const Dashboard = () => {
                 {dashboardData && dashboardData.panelId && (
                   <p className="font-semibold">{dashboardData.panelId}</p>
                 )}
-
                 {dashboardData && dashboardData.loadbankId && (
                   <p className="font-semibold">{dashboardData.loadbankId}</p>
                 )}

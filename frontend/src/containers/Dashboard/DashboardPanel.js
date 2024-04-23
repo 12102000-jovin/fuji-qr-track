@@ -4,6 +4,16 @@ import axios from "axios";
 import "animate.css";
 import moment from "moment";
 
+import {
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  Paper,
+} from "@mui/material";
+
 const Dashboard = () => {
   const { panelId } = useParams();
   const [dashboardData, setDashboardData] = useState([]);
@@ -77,7 +87,82 @@ const Dashboard = () => {
             <div className="text-2xl text-start font-black text-white">
               Components
             </div>
-            <div className="text-start mt-4">
+
+            <TableContainer component={Paper} className="rounded-md mt-5">
+              <Table>
+                <TableHead className="bg-black">
+                  <TableRow>
+                    <TableCell
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "1.10rem",
+                        color: "white",
+                      }}
+                    >
+                      Component Serial Number
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "1.10rem",
+                        color: "white",
+                      }}
+                    >
+                      Component Type
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "1.10rem",
+                        color: "white",
+                      }}
+                    >
+                      Stock Code
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "1.10rem",
+                        color: "white",
+                      }}
+                    >
+                      Allocated Date
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {dashboardData.componentData &&
+                  dashboardData.componentData.length > 0 ? (
+                    dashboardData.componentData.map((component, index) => (
+                      <TableRow
+                        key={index}
+                        sx={{
+                          "&:last-child td, &:last-child th": { border: 0 },
+                        }}
+                        className="hover:bg-gray-100"
+                      >
+                        <TableCell>{component.componentSerialNumber}</TableCell>
+                        <TableCell>{component.componentType}</TableCell>
+                        <TableCell>{component.componentDescription}</TableCell>
+                        <TableCell>
+                          {moment(component.allocatedDate).format(
+                            "DD MMMM YYYY HH:mm:ss"
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={4} align="center">
+                        No Component
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            {/* <div className="mt-4">
               {dashboardData.componentData &&
               dashboardData.componentData.length > 0 ? (
                 dashboardData.componentData.map((component, index) => (
@@ -115,7 +200,7 @@ const Dashboard = () => {
                   </p>
                 </div>
               )}
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

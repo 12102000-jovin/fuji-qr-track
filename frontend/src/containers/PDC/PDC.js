@@ -22,6 +22,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import QrCodeIcon from "@mui/icons-material/QrCode";
 import LaunchIcon from "@mui/icons-material/Launch";
 import CloseIcon from "@mui/icons-material/Close";
+import CircularProgress from "@mui/material/CircularProgress";
 import axios from "axios";
 import ReactQRCode from "qrcode.react";
 import html2canvas from "html2canvas";
@@ -48,6 +49,8 @@ const PDC = () => {
   const [selectedRowsCount, setSelectedRowsCount] = useState("");
   const [selectedRowsQRCodes, setSelectedRowsQRCodes] = useState([]);
   const [openSelectedQRModal, setOpenSelectedQRModal] = useState(false);
+
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
   const [sortOrder, setSortOrder] = useState("DESC");
 
@@ -249,6 +252,7 @@ const PDC = () => {
 
   const handleDeletePDC = async (pdcId) => {
     try {
+      setIsDeleteLoading(true);
       const response = await axios.delete(`${deletePDC_API}${pdcId}`);
 
       if (response.status === 200) {
@@ -258,8 +262,10 @@ const PDC = () => {
       } else {
         console.log("Error deleting pdc:", response.data.message);
       }
+      setIsDeleteLoading(false);
     } catch (error) {
       console.error("Error deleting pdc:", error);
+      setIsDeleteLoading(false);
     }
   };
 
@@ -681,13 +687,26 @@ const PDC = () => {
                 >
                   Close
                 </button>
+
                 <button
                   className="bg-red-500 text-white rounded font-semibold py-1 px-2 m-1 focus:outline-none hover:bg-red-600"
                   onClick={() => {
                     handleDeletePDC(modalPdcID);
                   }}
                 >
-                  Delete
+                  <div className="flex justify-center items-center">
+                    {isDeleteLoading && (
+                      <CircularProgress
+                        color="inherit"
+                        style={{
+                          width: "20px",
+                          height: "20px",
+                          marginRight: "8px",
+                        }}
+                      />
+                    )}
+                    {isDeleteLoading ? "Deleting..." : "Delete"}
+                  </div>
                 </button>
               </div>
             </DialogActions>

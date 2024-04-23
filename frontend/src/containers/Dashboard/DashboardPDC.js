@@ -217,7 +217,7 @@ const Dashboard = () => {
               <div className="text-start mt-4 p-2 w-full md:w-1/2">
                 <div className="w-full p-5 bg-white rounded-md min-h-40">
                   <p className="text-black font-black text-2xl mb-2 flex items-center">
-                    MCCB{" "}
+                    MCCB Panel{" "}
                     <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
                       Primary
                     </span>
@@ -265,7 +265,7 @@ const Dashboard = () => {
               <div className="text-start mt-4 p-2 w-full md:w-1/2">
                 <div className="w-full p-5 bg-white rounded-md min-h-40">
                   <p className="text-black font-black text-2xl mb-2 flex items-center">
-                    MCCB{" "}
+                    MCCB Panel{" "}
                     <span className="text-xs text-white bg-red-500 py-1 px-2.5 font-black rounded-full ml-1">
                       Catcher
                     </span>

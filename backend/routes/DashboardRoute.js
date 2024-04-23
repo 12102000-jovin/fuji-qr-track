@@ -219,6 +219,7 @@ router.get("/:loadbankId/showLoadbankDashboard", async (req, res) => {
     const componentData = components.map((component) => ({
       componentType: component.componentType,
       componentSerialNumber: component.componentSerialNumber,
+      componentDescription: component.componentDescription,
       allocatedDate: component.allocatedDate,
     }));
 
@@ -273,6 +274,7 @@ router.get("/:loadbankId/showLoadbankCatcherDashboard", async (req, res) => {
     const componentData = components.map((component) => ({
       componentType: component.componentType,
       componentSerialNumber: component.componentSerialNumber,
+      componentDescription: component.componentDescription,
       allocatedDate: component.allocatedDate,
     }));
 
@@ -329,6 +331,7 @@ router.get("/:MCCBId/showMCCBPrimaryDashboard", async (req, res) => {
     const componentData = components.map((component) => ({
       componentType: component.componentType,
       componentSerialNumber: component.componentSerialNumber,
+      componentDescription: component.componentDescription,
       allocatedDate: component.allocatedDate,
     }));
 
@@ -385,6 +388,7 @@ router.get("/:MCCBId/showMCCBCatcherDashboard", async (req, res) => {
     const componentData = components.map((component) => ({
       componentType: component.componentType,
       componentSerialNumber: component.componentSerialNumber,
+      componentDescription: component.componentDescription,
       allocatedDate: component.allocatedDate,
     }));
 
@@ -443,6 +447,7 @@ router.get("/:CTId/showLeftCTInterfaceDashboard", async (req, res) => {
     const componentData = components.map((component) => ({
       componentType: component.componentType,
       componentSerialNumber: component.componentSerialNumber,
+      componentDescription: component.componentDescription,
       allocatedDate: component.allocatedDate,
     }));
 
@@ -501,6 +506,7 @@ router.get("/:CTId/showRightCTInterfaceDashboard", async (req, res) => {
     const componentData = components.map((component) => ({
       componentType: component.componentType,
       componentSerialNumber: component.componentSerialNumber,
+      componentDescription: component.componentDescription,
       allocatedDate: component.allocatedDate,
     }));
 
@@ -563,6 +569,7 @@ router.get(
       const componentData = components.map((component) => ({
         componentType: component.componentType,
         componentSerialNumber: component.componentSerialNumber,
+        componentDescription: component.componentDescription,
         allocatedDate: component.allocatedDate,
       }));
 
@@ -628,6 +635,7 @@ router.get(
       const componentData = components.map((component) => ({
         componentType: component.componentType,
         componentSerialNumber: component.componentSerialNumber,
+        componentDescription: component.componentDescription,
         allocatedDate: component.allocatedDate,
       }));
 
@@ -693,6 +701,7 @@ router.get(
       const componentData = components.map((component) => ({
         componentType: component.componentType,
         componentSerialNumber: component.componentSerialNumber,
+        componentDescription: component.componentDescription,
         allocatedDate: component.allocatedDate,
       }));
 
@@ -758,6 +767,7 @@ router.get(
       const componentData = components.map((component) => ({
         componentType: component.componentType,
         componentSerialNumber: component.componentSerialNumber,
+        componentDescription: component.componentDescription,
         allocatedDate: component.allocatedDate,
       }));
 
@@ -819,6 +829,7 @@ router.get("/:roofId/showPrimaryRoofDashboard", async (req, res) => {
     const componentData = components.map((component) => ({
       componentType: component.componentType,
       componentSerialNumber: component.componentSerialNumber,
+      componentDescription: component.componentDescription,
       allocatedDate: component.allocatedDate,
     }));
 
@@ -877,6 +888,7 @@ router.get("/:roofId/showCatcherRoofDashboard", async (req, res) => {
     const componentData = components.map((component) => ({
       componentType: component.componentType,
       componentSerialNumber: component.componentSerialNumber,
+      componentDescription: component.componentDescription,
       allocatedDate: component.allocatedDate,
     }));
 
