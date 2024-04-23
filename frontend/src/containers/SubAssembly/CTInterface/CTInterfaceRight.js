@@ -6,6 +6,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import QrCodeIcon from "@mui/icons-material/QrCode";
 import LaunchIcon from "@mui/icons-material/Launch";
 import CloseIcon from "@mui/icons-material/Close";
+import CircularProgress from "@mui/material/CircularProgress";
 import AddIcon from "@mui/icons-material/Add";
 import { FaSort } from "react-icons/fa6";
 import logo from "../../../Images/FE-logo.png";
@@ -78,6 +79,8 @@ const CTInterfaceRight = () => {
   const [qrCodeData, setQrCodeData] = useState(null);
   const [openQRModal, setOpenQRModal] = useState(false);
   const [modalCTID, setModalCTID] = useState(null);
+
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
   const [openAddCTInterfaceModal, setOpenCTInterfaceModal] = useState(false);
   const [
@@ -284,6 +287,7 @@ const CTInterfaceRight = () => {
   const handleDeleteCTInterface = async (CTId) => {
     console.log(CTId);
     try {
+      setIsDeleteLoading(true);
       const response = await axios.delete(`${deleteCTInterface_API}${CTId}`);
 
       if (response.status === 200) {
@@ -293,8 +297,11 @@ const CTInterfaceRight = () => {
       } else {
         console.log("Error deleting CT Interface:", response.data.message);
       }
+
+      setIsDeleteLoading(false);
     } catch (error) {
       console.error("Error deleting CT Interface", error);
+      setIsDeleteLoading(false);
     }
   };
 
@@ -726,7 +733,19 @@ const CTInterfaceRight = () => {
                     handleDeleteCTInterface(modalCTID);
                   }}
                 >
-                  Delete
+                  <div className="flex justify-center items-center">
+                    {isDeleteLoading && (
+                      <CircularProgress
+                        color="inherit"
+                        style={{
+                          width: "20px",
+                          height: "20px",
+                          marginRight: "8px",
+                        }}
+                      />
+                    )}
+                    {isDeleteLoading ? "Deleting..." : "Delete"}
+                  </div>
                 </button>
               </div>
             </DialogActions>

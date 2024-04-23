@@ -6,6 +6,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import QrCodeIcon from "@mui/icons-material/QrCode";
 import LaunchIcon from "@mui/icons-material/Launch";
 import CloseIcon from "@mui/icons-material/Close";
+import CircularProgress from "@mui/material/CircularProgress";
 import AddIcon from "@mui/icons-material/Add";
 import { FaSort } from "react-icons/fa6";
 import logo from "../../../Images/FE-logo.png";
@@ -46,6 +47,8 @@ const LoadBank = () => {
   const [selectedRowsCount, setSelectedRowsCount] = useState("");
   const [selectedRowsQRCodes, setSelectedRowsQRCodes] = useState([]);
   const [openSelectedQRModal, setOpenSelectedQRModal] = useState(false);
+
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
   const [sortOrder, setSortOrder] = useState("DESC");
 
@@ -248,8 +251,8 @@ const LoadBank = () => {
   };
 
   const handleDeleteLoadbank = async (loadbankId) => {
-    console.log(loadbankId);
     try {
+      setIsDeleteLoading(true);
       const response = await axios.delete(`${deleteLoadbank_API}${loadbankId}`);
 
       if (response.status === 200) {
@@ -259,8 +262,10 @@ const LoadBank = () => {
       } else {
         console.log("Error deleting loadbank:", response.data.message);
       }
+      setIsDeleteLoading(false);
     } catch (error) {
       console.error("Error deleting loadbank", error);
+      setIsDeleteLoading(false);
     }
   };
 
@@ -727,7 +732,19 @@ const LoadBank = () => {
                     handleDeleteLoadbank(modalLoadbankID);
                   }}
                 >
-                  Delete
+                  <div className="flex justify-center items-center">
+                    {isDeleteLoading && (
+                      <CircularProgress
+                        color="inherit"
+                        style={{
+                          width: "20px",
+                          height: "20px",
+                          marginRight: "8px",
+                        }}
+                      />
+                    )}
+                    {isDeleteLoading ? "Deleting..." : "Delete"}
+                  </div>
                 </button>
               </div>
             </DialogActions>

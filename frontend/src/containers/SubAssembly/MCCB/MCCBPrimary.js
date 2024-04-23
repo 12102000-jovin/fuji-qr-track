@@ -7,6 +7,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import QrCodeIcon from "@mui/icons-material/QrCode";
 import LaunchIcon from "@mui/icons-material/Launch";
 import CloseIcon from "@mui/icons-material/Close";
+import CircularProgress from "@mui/material/CircularProgress";
 import AddIcon from "@mui/icons-material/Add";
 import { FaSort } from "react-icons/fa6";
 import logo from "../../../Images/FE-logo.png";
@@ -42,27 +43,20 @@ const MCCBPrimary = () => {
   const [selectedRowsCount, setSelectedRowsCount] = useState("");
   const [selectedRowsQRCodes, setSelectedRowsQRCodes] = useState([]);
   const [openSelectedQRModal, setOpenSelectedQRModal] = useState(false);
-
   const [MCCBData, setMCCBData] = useState([]);
-
   const [filteredMCCBs, setFilteredMCCBs] = useState([]);
-
   const [qrCodeData, setQrCodeData] = useState(null);
   const [openQRModal, setOpenQRModal] = useState(false);
-
   const [modalMCCBID, setModalMCCBID] = useState(null);
-
   const [sortOrder, setSortOrder] = useState("DESC");
-
   const [deleteMCCBModalState, setDeleteMCCBModalState] = useState(false);
-
   const [editMCCBModalState, setEditMCCBModalState] = useState(false);
   const [MCCBIdToEdit, setMCCBIdToEdit] = useState("");
-
   const [openAddMCCBModal, setOpenMCCBModal] = useState(false);
-
   const [showMCCBCustomQRGenerator, setShowMCCBCustomQRGenerator] =
     useState(false);
+
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
   // Pagination
   const [page, setPage] = useState(1);
@@ -275,6 +269,7 @@ const MCCBPrimary = () => {
   const handleDeleteMCCB = async (MCCBId) => {
     console.log(MCCBId);
     try {
+      setIsDeleteLoading(true);
       const response = await axios.delete(`${deleteMCCB_API}${MCCBId}`);
 
       if (response.status === 200) {
@@ -284,8 +279,10 @@ const MCCBPrimary = () => {
       } else {
         console.log("Error deleting MCCB Panel:", response.data.message);
       }
+      setIsDeleteLoading(false);
     } catch (error) {
       console.error("Error deleting MCCB Panel", error);
+      setIsDeleteLoading(false);
     }
   };
 
@@ -713,7 +710,19 @@ const MCCBPrimary = () => {
                     handleDeleteMCCB(modalMCCBID);
                   }}
                 >
-                  Delete
+                  <div className="flex justify-center items-center">
+                    {isDeleteLoading && (
+                      <CircularProgress
+                        color="inherit"
+                        style={{
+                          width: "20px",
+                          height: "20px",
+                          marginRight: "8px",
+                        }}
+                      />
+                    )}
+                    {isDeleteLoading ? "Deleting..." : "Delete"}
+                  </div>
                 </button>
               </div>
             </DialogActions>

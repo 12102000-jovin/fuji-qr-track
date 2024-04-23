@@ -6,6 +6,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import QrCodeIcon from "@mui/icons-material/QrCode";
 import LaunchIcon from "@mui/icons-material/Launch";
 import CloseIcon from "@mui/icons-material/Close";
+import CircularProgress from "@mui/material/CircularProgress";
 import AddIcon from "@mui/icons-material/Add";
 import { FaSort } from "react-icons/fa6";
 import logo from "../../../Images/FE-logo.png";
@@ -72,6 +73,8 @@ const RightPrimaryChassisRail = () => {
     showChassisRailCustomQRGenerator,
     setShowChassisRailCustomQRGenerator,
   ] = useState(false);
+
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
   const handleCloseDeleteChassisRailModal = () => {
     setDeleteChassisRailModalState(false);
@@ -273,6 +276,7 @@ const RightPrimaryChassisRail = () => {
   const handleDeleteChassisRail = async (ChassisId) => {
     console.log(ChassisId);
     try {
+      setIsDeleteLoading(true);
       const response = await axios.delete(
         `${deleteChassisRail_API}${ChassisId}`
       );
@@ -284,8 +288,11 @@ const RightPrimaryChassisRail = () => {
       } else {
         console.log("Error deleting Chassis Rail:", response.data.message);
       }
+
+      setIsDeleteLoading(false);
     } catch (error) {
       console.error("Error deleting Chassis Rail", error);
+      setIsDeleteLoading(false);
     }
   };
 
@@ -719,7 +726,19 @@ const RightPrimaryChassisRail = () => {
                     handleDeleteChassisRail(modalChassisID);
                   }}
                 >
-                  Delete
+                  <div className="flex justify-center items-center">
+                    {isDeleteLoading && (
+                      <CircularProgress
+                        color="inherit"
+                        style={{
+                          width: "20px",
+                          height: "20px",
+                          marginRight: "8px",
+                        }}
+                      />
+                    )}
+                    {isDeleteLoading ? "Deleting..." : "Delete"}
+                  </div>
                 </button>
               </div>
             </DialogActions>

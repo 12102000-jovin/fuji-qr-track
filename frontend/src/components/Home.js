@@ -276,7 +276,7 @@ const Home = () => {
               <div className="flex flex-grow" style={{ overflowY: "auto" }}>
                 <a
                   href="/Allocate"
-                  className="card-link border px-4 py-4 text-sm text-white font-black rounded-md shadow-sm bg-black flex-grow mr-1"
+                  className="card-link border px-4 py-4 text-sm text-white font-black rounded-md shadow-sm bg-black flex-grow mr-1 hover:bg-gray-800"
                 >
                   <div className="flex items-center justify-center flex-wrap">
                     Allocate Sub-Assembly
@@ -285,7 +285,7 @@ const Home = () => {
 
                 <a
                   href="/AllocateComponents"
-                  className="card-link border px-4 py-4 text-sm text-white font-black rounded-md shadow-sm bg-black flex-grow ml-1"
+                  className="card-link border px-4 py-4 text-sm text-white font-black rounded-md shadow-sm bg-black flex-grow ml-1 hover:bg-gray-800"
                 >
                   <div className="flex items-center justify-center flex-wrap">
                     Allocate Component
@@ -295,7 +295,7 @@ const Home = () => {
             </div>
           </div>
           <div
-            className="bg-white rounded-lg shadow-md mt-10"
+            className="bg-white rounded-lg shadow-md mt-10 hover:cursor-pointer"
             style={{ overflowY: "auto" }}
           >
             <h2
@@ -329,7 +329,7 @@ const Home = () => {
             )}
           </div>
           <div
-            className="bg-white rounded-lg shadow-md mt-5"
+            className="bg-white rounded-lg shadow-md mt-5 hover:cursor-pointer"
             style={{ overflowY: "auto" }}
           >
             <h2
@@ -367,7 +367,7 @@ const Home = () => {
             )}
           </div>
           <div
-            className="bg-white rounded-lg shadow-md mt-5 mb-10"
+            className="bg-white rounded-lg shadow-md mt-5 mb-10 hover:cursor-pointer"
             style={{ overflowY: "auto" }}
           >
             <h2

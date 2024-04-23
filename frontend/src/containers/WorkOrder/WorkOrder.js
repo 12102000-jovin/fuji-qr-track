@@ -22,6 +22,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import QrCodeIcon from "@mui/icons-material/QrCode";
 import LaunchIcon from "@mui/icons-material/Launch";
 import CloseIcon from "@mui/icons-material/Close";
+import CircularProgress from "@mui/material/CircularProgress";
 import axios from "axios";
 import ReactQRCode from "qrcode.react";
 import html2canvas from "html2canvas";
@@ -51,6 +52,8 @@ const WorkOrder = () => {
   const [openSelectedQRModal, setOpenSelectedQRModal] = useState(false);
 
   const [sortOrder, setSortOrder] = useState("DESC");
+
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredWorkOrders, setFilteredWorkOrders] = useState([]);
@@ -259,6 +262,7 @@ const WorkOrder = () => {
 
   const handleDeleteWorkOrder = async (workOrderId) => {
     try {
+      setIsDeleteLoading(true);
       // Delete request tot the API
       const response = await axios.delete(
         `${deleteWorkOrder_API}${workOrderId}`
@@ -272,8 +276,10 @@ const WorkOrder = () => {
         console.log("Error deleting work order:", response.data.message);
         // Optionally, handle the case where deletion was not successful
       }
+      setIsDeleteLoading(false);
     } catch (error) {
       console.error("Error deleting work order:", error);
+      setIsDeleteLoading(false);
     }
   };
 
@@ -710,7 +716,19 @@ const WorkOrder = () => {
                     handleDeleteWorkOrder(modalWorkOrderID);
                   }}
                 >
-                  Delete
+                  <div className="flex justify-center items-center">
+                    {isDeleteLoading && (
+                      <CircularProgress
+                        color="inherit"
+                        style={{
+                          width: "20px",
+                          height: "20px",
+                          marginRight: "8px",
+                        }}
+                      />
+                    )}
+                    {isDeleteLoading ? "Deleting..." : "Delete"}
+                  </div>
                 </button>
               </div>
             </DialogActions>

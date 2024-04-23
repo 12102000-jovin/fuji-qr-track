@@ -125,6 +125,10 @@ const PanelComponentForm = (panelId) => {
     setComponentImageModalType("");
   };
 
+  const handleComponentDashboard = () => {
+    console.log("test");
+  };
+
   const fetchControlPanelData_API = `http://localhost:3001/Dashboard/${panelId.panelId}/showPanelDashboard`;
 
   const fetchControlPanelData = async () => {
@@ -487,7 +491,10 @@ const PanelComponentForm = (panelId) => {
                     )}
 
                     {meter1Exist && (
-                      <p className="bg-signature font-medium px-2 rounded-full">
+                      <p
+                        className="bg-signature font-medium px-2 rounded-full"
+                        onClick={handleComponentDashboard()}
+                      >
                         {" "}
                         {meter1Exist}
                       </p>

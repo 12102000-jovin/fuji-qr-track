@@ -20,7 +20,7 @@ import axios from "axios";
 
 import moment from "moment-timezone";
 import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
+import CircularProgress from "@mui/material/CircularProgress";
 import LaunchIcon from "@mui/icons-material/Launch";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -38,6 +38,8 @@ const Component = () => {
     "http://localhost:3001/Component/getAllComponents";
 
   const deleteComponent_API = `http://localhost:3001/Component/deleteComponent/`;
+
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
   // Pagination
   const [page, setPage] = useState(1);
@@ -164,6 +166,7 @@ const Component = () => {
 
   const handleDeletePDC = async (componentSerialNumber) => {
     try {
+      setIsDeleteLoading(true);
       const encodedSerialNumber = encodeURIComponent(componentSerialNumber);
 
       const response = await axios.delete(
@@ -177,8 +180,10 @@ const Component = () => {
       } else {
         console.log("Error deleting component:", response.data.message);
       }
+      setIsDeleteLoading(false);
     } catch (error) {
       console.error("Error deleting component:", error);
+      setIsDeleteLoading(false);
     }
   };
 
@@ -400,7 +405,19 @@ const Component = () => {
                     handleDeletePDC(modalComponentSerialNumber);
                   }}
                 >
-                  Delete
+                  <div className="flex justify-center items-center">
+                    {isDeleteLoading && (
+                      <CircularProgress
+                        color="inherit"
+                        style={{
+                          width: "20px",
+                          height: "20px",
+                          marginRight: "8px",
+                        }}
+                      />
+                    )}
+                    {isDeleteLoading ? "Deleting..." : "Delete"}
+                  </div>
                 </button>
               </div>
             </DialogActions>
